@@ -1,0 +1,16 @@
+# Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
+# DB & Environment
+db.sqlite3
+.env
+
+# Static & Media
+/staticfiles/
+/media/
+
+# VSCode or PyCharm settings
+.idea/
+*.log
