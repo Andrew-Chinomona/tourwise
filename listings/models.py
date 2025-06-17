@@ -31,3 +31,15 @@ class Property(models.Model):
 
     def __str__(self):
         return self.title
+
+class PropertyImage(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
+
+    # Actual image file
+    image = models.ImageField(upload_to='property_images/')
+
+    # Optional caption or label
+    caption = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"Image for {self.property.title}"
