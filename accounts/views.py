@@ -50,3 +50,9 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('home')
+
+
+from django.http import HttpResponse
+
+def home_view(request):
+    return HttpResponse("<h1>Welcome to Tourwsie</h1><p>This is the homepage placeholder.</p>")
