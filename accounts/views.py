@@ -24,16 +24,3 @@ def signup_view(request):
 
     # Render the signup page with the form (both GET and POST cases)
     return render(request, 'accounts/signup.html', {'form': form})
-
-
-
-#this will be deleted
-from django.http import HttpResponse
-
-def home_view(request):
-    return HttpResponse("<h1>Welcome to Tourwsie!</h1><p>This is the homepage placeholder.</p>")
-
-from django.http import HttpResponse
-
-def login_view(request):
-    return HttpResponse("<h2>Login page placeholder</h2><p>Login form coming soon.</p>")
