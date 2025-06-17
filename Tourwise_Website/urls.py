@@ -30,5 +30,8 @@ urlpatterns = [
     # Include accounts app URLs
     path('', include('accounts.urls')),  # This means /signup/ will work
 
+    path('listings/', include('listings.urls')),
     # (later you'll include listings and payments too)
 ]
+
+
