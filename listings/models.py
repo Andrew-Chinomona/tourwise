@@ -35,9 +35,11 @@ class Property(models.Model):
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
 
-    # Actual image file
-    image = models.ImageField(upload_to='property_images/')
-
+    main_image = models.ImageField(
+        upload_to='property_images/',
+        blank=True,
+        null=True
+    )
     # Optional caption or label
     caption = models.CharField(max_length=100, blank=True)
 

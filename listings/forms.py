@@ -35,3 +35,11 @@ class PropertyStep3Form(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         label="Select facilities available at the property"
     )
+
+# Step 4: Prompt host to upload the main image only
+class PropertyStep4Form(forms.Form):
+    # One required image upload
+    main_image = forms.ImageField(
+        required=True,
+        label="Upload the MAIN image for your listing (e.g., front of house)"
+    )

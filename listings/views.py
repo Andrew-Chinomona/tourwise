@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import  PropertyStep1Form, PropertyStep2Form, PropertyStep3Form
+from .forms import  PropertyStep1Form, PropertyStep2Form, PropertyStep3Form, PropertyStep4Form
 
 def add_property_step1(request):
     if request.method == 'POST':
@@ -46,3 +46,24 @@ def add_property_step3(request):
         form = PropertyStep3Form()
 
     return render(request, 'listings/add_property_step3.html', {'form': form})
+
+def add_property_step4(request):
+    if request.method == 'POST':
+        # Include both form data and file uploads
+        form = PropertyStep4Form(request.POST, request.FILES)
+
+        if form.is_valid():
+            # Save image temporarily in session (we’ll store to DB in final step)
+            image = form.cleaned_data['main_image']
+            request.session['main_image_name'] = image.name
+
+            # Optional: Store marker for later file handling
+            request.session['main_image_uploaded'] = True
+
+            # Redirect to Step 5
+            return redirect('add_property_step5')
+    else:
+        # Display empty form
+        form = PropertyStep4Form()
+
+    return render(request, 'listings/add_property_step4.html', {'form': form})
