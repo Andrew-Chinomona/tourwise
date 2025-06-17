@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Step 6: Final Notes</h2>
+    <p>You're almost done! Add any last notes, then submit your listing.</p>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-success">Submit Listing</button>
+    </form>
+  </div>
+{% endblock %}

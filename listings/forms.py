@@ -1,5 +1,9 @@
 from django import forms
 from listings.models import Property
+from django.forms.widgets import FileInput, ClearableFileInput
+
+class MultiFileInput(ClearableFileInput):
+    allow_multiple_selected = True
 
 class PropertyStep1Form(forms.Form):
     property_type = forms.ChoiceField(
@@ -42,4 +46,20 @@ class PropertyStep4Form(forms.Form):
     main_image = forms.ImageField(
         required=True,
         label="Upload the MAIN image for your listing (e.g., front of house)"
+    )
+
+class PropertyStep5Form(forms.Form):
+    # Multiple file input for additional photos
+    images = forms.FileField(
+        widget=MultiFileInput(attrs={'multiple': True}),
+        required=False,
+        label="Upload interior photos (e.g. lounge, kitchen, bedrooms)"
+    )
+
+
+class PropertyStep6Form(forms.Form):
+    additional_notes = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 4}),
+        required=False,
+        label="Any final notes or extra details?"
     )
