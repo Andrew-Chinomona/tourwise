@@ -20,3 +20,15 @@ from django.urls import path
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
+
+from django.contrib import admin
+from django.urls import path, include  # ← import include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+
+    # Include accounts app URLs
+    path('', include('accounts.urls')),  # This means /signup/ will work
+
+    # (later you'll include listings and payments too)
+]
