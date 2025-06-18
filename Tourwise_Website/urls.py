@@ -31,7 +31,7 @@ urlpatterns = [
     path('', include('accounts.urls')),  # This means /signup/ will work
 
     path('listings/', include('listings.urls')),
-    # (later you'll include listings and payments too)
-]
+path('accounts/', include('accounts.urls')),  # or 'listings/'
 
+]
 

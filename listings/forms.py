@@ -49,13 +49,11 @@ class PropertyStep4Form(forms.Form):
     )
 
 class PropertyStep5Form(forms.Form):
-    # Multiple file input for additional photos
-    images = forms.FileField(
+    images = forms.ImageField(
         widget=MultiFileInput(attrs={'multiple': True}),
         required=False,
         label="Upload interior photos (e.g. lounge, kitchen, bedrooms)"
     )
-
 
 class PropertyStep6Form(forms.Form):
     additional_notes = forms.CharField(

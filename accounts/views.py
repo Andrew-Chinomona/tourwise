@@ -56,3 +56,6 @@ from django.http import HttpResponse
 
 def home_view(request):
     return HttpResponse("<h1>Welcome to Tourwsie</h1><p>This is the homepage placeholder.</p>")
+
+def host_dashboard(request):
+    return HttpResponse("Welcome to the Host Dashboard!")

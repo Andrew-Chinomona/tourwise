@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .forms import PropertyStep1Form, PropertyStep2Form, PropertyStep3Form, PropertyStep4Form, PropertyStep5Form, \
     PropertyStep6Form, PropertyStep7Form, PropertyStep8Form
@@ -5,6 +6,7 @@ from .models import Property, PropertyImage
 from payments.models import Payment
 
 def add_property_step1(request):
+    form = PropertyStep1Form(request.POST or None)
     if request.method == 'POST':
         form = PropertyStep1Form(request.POST)
         if form.is_valid():
@@ -13,7 +15,7 @@ def add_property_step1(request):
     else:
         form = PropertyStep1Form()
 
-    return render(request, 'listings/add_property_step1.html',{'form':'Form'})
+    return render(request, 'listings/add_property_step1.html',{'form':form})
 
 # Step 2: Property description view
 def add_property_step2(request):
@@ -73,10 +75,11 @@ def add_property_step4(request):
 
 
 def add_property_step5(request):
+    form = PropertyStep5Form()
     if request.method == 'POST':
+        print(request.FILES)
         # Bind POST and FILES to the form
-        form = PropertyStep5Form(request.POST, request.FILES)
-
+        form = PropertyStep5Form(request.FILES)
         if form.is_valid():
             # Store list of uploaded file names in session
             request.session['interior_image_names'] = [
@@ -97,52 +100,53 @@ def add_property_step5(request):
 from .models import Property, PropertyImage
 
 # Step 6: Final confirmation and save
+
 def add_property_step6(request):
     if request.method == 'POST':
         form = PropertyStep6Form(request.POST)
 
         if form.is_valid():
             # Collect all data from session
-            user = request.user
-            title = "Listing by " + user.username  # Default title, can improve later
-            property_type = request.session.get('property_type')
-            description = request.session.get('description')
-            facilities = request.session.get('facilities')
-            services = request.session.get('services', '')
-            notes = form.cleaned_data['additional_notes']
-            price = 0  # default or update in dashboard later
-            location = "Unknown"  # placeholder, refine later
-            contact_info = user.phone_number if hasattr(user, 'phone_number') else "Not provided"
-
-            # Create the Property
-            property_obj = Property.objects.create(
-                owner=user,
-                title=title,
-                property_type=property_type,
-                description=description,
-                facilities=facilities,
-                services=services,
-                additional_notes=notes,
-                price=price,
-                location=location,
-                contact_info=contact_info,
-            )
-
-            # Attach the main image
-            if 'main_image_name' in request.session:
-                main_img = request.FILES.get('main_image')
-                if main_img:
-                    property_obj.main_image = main_img
-                    property_obj.save()
-
-            # Save interior photos
-            for img in request.FILES.getlist('images'):
-                PropertyImage.objects.create(
-                    property=property_obj,
-                    image=img
-                )
-
-            # ✅ Redirect to a confirmation or dashboard page
+            # user = request.user
+            # title = "Listing by " + user.username  # Default title, can improve later
+            # property_type = request.session.get('property_type')
+            # description = request.session.get('description')
+            # facilities = request.session.get('facilities')
+            # services = request.session.get('services', '')
+            # notes = form.cleaned_data['additional_notes']
+            # price = 0  # default or update in dashboard later
+            # location = "Unknown"  # placeholder, refine later
+            # contact_info = user.phone_number if hasattr(user, 'phone_number') else "Not provided"
+            #
+            # # Create the Property
+            # property_obj = Property.objects.create(
+            #     owner=user,
+            #     title=title,
+            #     property_type=property_type,
+            #     description=description,
+            #     facilities=facilities,
+            #     services=services,
+            #     additional_notes=notes,
+            #     price=price,
+            #     location=location,
+            #     contact_info=contact_info,
+            # )
+            #
+            # # Attach the main image
+            # if 'main_image_name' in request.session:
+            #     main_img = request.FILES.get('main_image')
+            #     if main_img:
+            #         property_obj.main_image = main_img
+            #         property_obj.save()
+            #
+            # # Save interior photos
+            # for img in request.FILES.getlist('images'):
+            #     PropertyImage.objects.create(
+            #         property=property_obj,
+            #         image=img
+            #     )
+            #
+            # dashboard page
             return redirect('host_dashboard')  # update route if needed
 
     else:
@@ -219,3 +223,8 @@ def choose_payment(request):
 
         return redirect('host_dashboard')
     return render(request, 'listings/choose_payment.html')
+
+from django.http import HttpResponse
+
+def host_dashboard(request):
+    return HttpResponse("Welcome to the Host Dashboard")
