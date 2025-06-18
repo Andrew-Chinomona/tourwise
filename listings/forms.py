@@ -63,3 +63,29 @@ class PropertyStep6Form(forms.Form):
         required=False,
         label="Any final notes or extra details?"
     )
+
+class PropertyStep7Form(forms.Form):
+    price = forms.DecimalField(
+        label="Monthly Rent (USD)",
+        min_value= 1.00,
+        max_digits=10,
+        decimal_places=2,
+        widget= forms.NumberInput(attrs={'placeholder': 'e.g. 350'}),
+    )
+
+class PropertyStep8Form(forms.Form):
+    street_address = forms.CharField(
+        label="Street Address",
+        max_length=100,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g. 123 Causeway'}),
+    )
+    suburb=forms.CharField(
+        label="Suburb/Area",
+        max_length=100,
+        widget= forms.TextInput(attrs={'placeholder': 'e.g. Chisipite'}),
+    )
+    city=forms.CharField(
+        label="City/Town",
+        max_length=100,
+        widget= forms.TextInput(attrs={'placeholder': 'e.g. Harare'}),
+    )

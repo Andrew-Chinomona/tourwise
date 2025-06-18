@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container mt-5">
+    <h2>Choose Your Listing Type</h2>
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+      {% csrf_token %}
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="radio" name="listing_type" value="normal" id="normal">
+        <label class="form-check-label" for="normal">
+          Normal Listing – <strong>$10 USD</strong> for 30 days
+        </label>
+      </div>
+      <div class="form-check mb-4">
+        <input class="form-check-input" type="radio" name="listing_type" value="priority" id="priority">
+        <label class="form-check-label" for="priority">
+          Priority Listing – <strong>$20 USD</strong> for 30 days (featured on homepage)
+        </label>
+      </div>
+      <button type="submit" class="btn btn-success">Confirm & Publish</button>
+    </form>
+  </div>
+{% endblock %}

@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
-from .forms import  PropertyStep1Form, PropertyStep2Form, PropertyStep3Form, PropertyStep4Form, PropertyStep5Form, PropertyStep6Form
+from .forms import PropertyStep1Form, PropertyStep2Form, PropertyStep3Form, PropertyStep4Form, PropertyStep5Form, \
+    PropertyStep6Form, PropertyStep7Form, PropertyStep8Form
+from .models import Property, PropertyImage
+from payments.models import Payment
 
 def add_property_step1(request):
     if request.method == 'POST':
@@ -146,3 +149,73 @@ def add_property_step6(request):
         form = PropertyStep6Form()
 
     return render(request, 'listings/add_property_step6.html', {'form': form})
+
+
+def add_property_step7(request):
+    if request.method == 'POST':
+        form = PropertyStep7Form(request.POST)
+        if form.is_valid():
+            request.session['price'] = str(form.cleaned_data['price'])
+            return redirect('add_property_step8')
+    else:
+        form = PropertyStep7Form()
+
+    return render(request, 'listings/add_property_step7.html', {'form': form})
+
+def add_property_step8(request):
+    if request.method == 'POST':
+        form = PropertyStep8Form(request.POST)
+        if form.is_valid():
+            full_location = f"{form.cleaned_data['street_address']},{form.cleaned_data['suburb']}, {form.cleaned_data['city']}"
+            request.session['location'] = full_location
+            return redirect('choose_payment')
+    else:
+        form = PropertyStep8Form()
+
+    return render(request, 'listings/add_property_step8.html', {'form': form})
+
+def choose_payment(request):
+    if request.method == 'POST':
+        listing_type = request.POST.get('listing_type')
+        if listing_type not in ['normal', 'priority']:
+            return render(request, 'listings/choose_payment.html',{'error':'Please choose a valid listing type'})
+
+        user = request.user
+        property_type = request.session.get('property_type')
+        description = request.session.get('description')
+        facilities = request.session.get('facilities')
+        services = request.session.get('services', '')
+        notes = request.session.get('additional_notes')
+        price = request.session.get('price')
+        location = request.session.get('location')
+        contact_info = user.phone_number if hasattr(user, 'phone_number') else "Not provided"
+
+        property_obj = Property.objects.create(
+            owner=user,
+            title=f"Listing by {user.username}",
+            property_type=property_type,
+            description=description,
+            facilities=facilities,
+            services=services,
+            additional_notes=notes,
+            price=price,
+            location=location,
+            contact_info=contact_info,
+            listing_type=listing_type,
+            is_paid=True
+        )
+
+        for img in request.FILES.getlist('images'):
+            PropertyImage.objects.create(property=property_obj, main_image=img)
+
+        amount = 10.00 if listing_type == 'normal' else 20.00
+        Payment.objects.create(
+            property=property_obj,
+            user=user,
+            listing_type=listing_type,
+            amount=amount,
+            is_complete=True
+        )
+
+        return redirect('host_dashboard')
+    return render(request, 'listings/choose_payment.html')
