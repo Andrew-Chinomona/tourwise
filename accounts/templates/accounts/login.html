@@ -9,7 +9,6 @@
     <form method="POST">
       {% csrf_token %}
 
-      <!-- Loop through the form fields (username, password) -->
       {% for field in form %}
         <div class="mb-3">
           <label>{{ field.label_tag }}</label>
@@ -24,7 +23,3 @@
     </form>
   </div>
 {% endblock %}+
-
-<script>
-    console.log("andrew")
-</script>
