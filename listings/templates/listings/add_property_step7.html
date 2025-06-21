@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
   <div class="container mt-5">
-    <h2>Step 7: Enter Monthly Rent</h2>
+    <h2>Step 7: Monthly Rent</h2>
+      <p></p>
     <form method="POST">
       {% csrf_token %}
       {{ form.as_p }}

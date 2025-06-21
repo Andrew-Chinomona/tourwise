@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import PropertyStep1Form, PropertyStep2Form, PropertyStep3Form, PropertyStep4Form, PropertyStep5Form, \
-    PropertyStep6Form, PropertyStep7Form, PropertyStep8Form
+    PropertyStep6Form, PropertyStep7Form, PropertyStep8Form, EditPropertyForm
 from .models import Property, PropertyImage
 from payments.models import Payment
 
@@ -23,7 +24,7 @@ def add_property_step2(request):
         form = PropertyStep2Form(request.POST)
 
         if form.is_valid():
-            request.session['description'] = form.cleaned_data['description']
+            request.session['title'] = form.cleaned_data['title']
 
             return redirect('add_property_step3')
     else:
@@ -99,61 +100,17 @@ def add_property_step5(request):
 
 from .models import Property, PropertyImage
 
-# Step 6: Final confirmation and save
-
 def add_property_step6(request):
     if request.method == 'POST':
         form = PropertyStep6Form(request.POST)
 
         if form.is_valid():
-            # Collect all data from session
-            # user = request.user
-            # title = "Listing by " + user.username  # Default title, can improve later
-            # property_type = request.session.get('property_type')
-            # description = request.session.get('description')
-            # facilities = request.session.get('facilities')
-            # services = request.session.get('services', '')
-            # notes = form.cleaned_data['additional_notes']
-            # price = 0  # default or update in dashboard later
-            # location = "Unknown"  # placeholder, refine later
-            # contact_info = user.phone_number if hasattr(user, 'phone_number') else "Not provided"
-            #
-            # # Create the Property
-            # property_obj = Property.objects.create(
-            #     owner=user,
-            #     title=title,
-            #     property_type=property_type,
-            #     description=description,
-            #     facilities=facilities,
-            #     services=services,
-            #     additional_notes=notes,
-            #     price=price,
-            #     location=location,
-            #     contact_info=contact_info,
-            # )
-            #
-            # # Attach the main image
-            # if 'main_image_name' in request.session:
-            #     main_img = request.FILES.get('main_image')
-            #     if main_img:
-            #         property_obj.main_image = main_img
-            #         property_obj.save()
-            #
-            # # Save interior photos
-            # for img in request.FILES.getlist('images'):
-            #     PropertyImage.objects.create(
-            #         property=property_obj,
-            #         image=img
-            #     )
-            #
-            # dashboard page
-            return redirect('host_dashboard')  # update route if needed
-
+            request.session['description'] = form.cleaned_data['description']
+            return redirect('add_property_step7')
     else:
         form = PropertyStep6Form()
 
     return render(request, 'listings/add_property_step6.html', {'form': form})
-
 
 def add_property_step7(request):
     if request.method == 'POST':
@@ -188,8 +145,8 @@ def choose_payment(request):
         property_type = request.session.get('property_type')
         description = request.session.get('description')
         facilities = request.session.get('facilities')
-        services = request.session.get('services', '')
-        notes = request.session.get('additional_notes')
+        #services = request.session.get('services', '')
+        #notes = request.session.get('additional_notes')
         price = request.session.get('price')
         location = request.session.get('location')
         contact_info = user.phone_number if hasattr(user, 'phone_number') else "Not provided"
@@ -200,8 +157,8 @@ def choose_payment(request):
             property_type=property_type,
             description=description,
             facilities=facilities,
-            services=services,
-            additional_notes=notes,
+            #services=services,
+            #additional_notes=notes,
             price=price,
             location=location,
             contact_info=contact_info,
@@ -222,9 +179,32 @@ def choose_payment(request):
         )
 
         return redirect('host_dashboard')
+
     return render(request, 'listings/choose_payment.html')
 
-from django.http import HttpResponse
+@login_required()
+def edit_listing(request, property_id):
+    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
 
-def host_dashboard(request):
-    return HttpResponse("Welcome to the Host Dashboard")
+    if request.method == 'POST':
+        form = EditPropertyForm(request.POST, request.FILES,instance=property_obj)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Listing updated successfully.")
+            return redirect('host_dashboard')
+    else:
+        form = EditPropertyForm(instance=property_obj)
+
+    return render(request, 'listings/edit_listing.html', {'form': form, 'property': property_obj})
+
+@login_required()
+def delete_listing(request, property_id):
+    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
+
+    if request.method == 'POST':
+        property_obj.delete()
+        messages.success(request, "Listing deleted successfully.")
+        return redirect('host_dashboard')
+
+    return render(request, 'listings/delete_listing.html', {'property': property_obj})

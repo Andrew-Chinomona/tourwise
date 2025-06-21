@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <!-- Welcome message -->
+  <div class="text-center mb-4">
+    <h3>Welcome back, {{ user.username|upper }}</h3>
+  </div>
+
+  <h2>My Dashboard</h2>
+
+  <!-- Add Listing button -->
+  <a href="{% url 'add_property_step1' %}" class="btn btn-success mb-4">+ Add Listing</a>
+
+  {% if properties %}
+    <div class="row">
+      {% for prop in properties %}
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="row g-0">
+              <!-- Left: Text Info -->
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">{{ prop.title }}</h5>
+                  <p class="card-text">
+                    Type: {{ prop.property_type }}<br>
+                    Status: {{ prop.listing_type|title }}<br>
+                    Price: ${{ prop.price }}
+                  </p>
+                  <a href="{% url 'edit_listing' prop.id %}" class="btn btn-primary btn-sm">Edit</a>
+                  <a href="{% url 'delete_listing' prop.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+              </div>
+
+              <!-- Right: Image -->
+              <div class="col-md-4">
+                {% if prop.main_image %}
+                  <img src="{{ prop.main_image.url }}" alt="{{ prop.title }}" class="img-fluid h-100 w-100" style="object-fit: cover;">
+                {% else %}
+                  <div class="text-center p-3">No image</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>You have no listings yet. Click "Add Listing" to create one.</p>
+  {% endif %}
+</div>
+{% endblock %}

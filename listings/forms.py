@@ -13,12 +13,13 @@ class PropertyStep1Form(forms.Form):
     )
 
 
-# Step 2: Property description form
+# Step 2: Add Title
 class PropertyStep2Form(forms.Form):
-        description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 5}),
-        label="Describe the property in detail"
-    )
+        title = forms.CharField(
+                                help_text='e.g 7 Roomed House',
+                                widget=forms.TextInput(attrs={'class': 'form-control'})
+                               )
+
 
 
 # Step 3: Facilities form (checkboxes for common amenities)
@@ -56,10 +57,9 @@ class PropertyStep5Form(forms.Form):
     )
 
 class PropertyStep6Form(forms.Form):
-    additional_notes = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4}),
-        required=False,
-        label="Any final notes or extra details?"
+    description = forms.CharField(
+        #help_text='e.g 7 Roomed House',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
 class PropertyStep7Form(forms.Form):
@@ -87,3 +87,33 @@ class PropertyStep8Form(forms.Form):
         max_length=100,
         widget= forms.TextInput(attrs={'placeholder': 'e.g. Harare'}),
     )
+
+class EditPropertyForm(forms.ModelForm):
+    class Meta:
+        model = Property
+        fields = [
+            'title',
+            'property_type',
+            'description',
+            'facilities',
+            'services',
+            'price',
+            'location',
+            'contact_info',
+            'listing_type',
+            #'main_image',
+        ]
+
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'facilities': forms.TextInput(attrs={'class': 'form-control'}),
+            'services': forms.TextInput(attrs={'class': 'form-control'}),
+            'location': forms.TextInput(attrs={'class': 'form-control'}),
+            'contact_info': forms.TextInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'property_type': forms.Select(attrs={'class': 'form-control'}),
+            'listing_type': forms.Select(attrs={'class': 'form-control'}),
+        }
+
