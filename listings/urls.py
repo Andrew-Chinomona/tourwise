@@ -13,7 +13,7 @@ urlpatterns = [
     path('add-property/choose-payment/', choose_payment, name='choose_payment'),
     path('edit-listing/<int:property_id>/', edit_listing, name='edit_listing'),
     path('delete-listing/<int:property_id>/', delete_listing, name='delete_listing'),
-path('delete-image/<int:image_id>/', delete_property_image, name='delete_property_image'),
-path('upload-images/<int:property_id>/', upload_property_images, name='upload_property_images'),
+    path('delete-image/<int:image_id>/', delete_property_image, name='delete_property_image'),
+    path('upload-images/<int:property_id>/', upload_property_images, name='upload_property_images'),
 
 ]
