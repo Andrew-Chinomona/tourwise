@@ -211,3 +211,16 @@ def delete_listing(request, property_id):
         return redirect('host_dashboard')
 
     return render(request, 'listings/delete_listing.html', {'property': property_obj})
+@login_required
+def delete_property_image(request, image_id):
+    image = get_object_or_404(PropertyImage, id=image_id, property__owner=request.user)
+    image.delete()
+    return redirect('edit_listing', property_id=image.property.id)
+
+@login_required
+def upload_property_images(request, property_id):
+    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
+    if request.method == 'POST':
+        for img in request.FILES.getlist('images'):
+            PropertyImage.objects.create(property=property_obj, image=img)
+    return redirect('edit_listing', property_id=property_id)

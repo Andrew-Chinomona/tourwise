@@ -1,13 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
-
   <h2>Edit Listing</h2>
+  <div class="row">
 
-
-  <div class="row justify-content-center">
-    <div class="col-md-6">  <!-- 6/12 columns = 50% width -->
-
+    <!-- LEFT COLUMN: Edit form -->
+    <div class="col-md-6">
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
@@ -15,9 +13,48 @@
         <button type="submit" class="btn btn-primary">Save Changes</button>
         <a href="{% url 'host_dashboard' %}" class="btn btn-secondary">Cancel</a>
       </form>
-
     </div>
-  </div>
 
+    <!-- RIGHT COLUMN: Main and Interior Images -->
+    <div class="col-md-6">
+      <!-- Main Image -->
+      <h5>Main Image</h5>
+      {% if property.main_image %}
+        <img src="{{ property.main_image.url }}" alt="Main Image" class="img-fluid mb-3" style="max-height: 250px;">
+      {% else %}
+        <p>No main image uploaded.</p>
+      {% endif %}
+
+      <!-- Interior Images -->
+      <h5>Interior Images</h5>
+      {% if property.images.all %}
+        <div class="row">
+          {% for img in property.images.all %}
+            <div class="col-6 mb-3">
+              <img src="{{ img.image.url }}" class="img-thumbnail w-100">
+              <form method="post" action="{% url 'delete_property_image' img.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger mt-1 w-100">Remove</button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No interior images uploaded.</p>
+      {% endif %}
+
+      <!-- Upload More -->
+      <hr>
+      <form method="post" enctype="multipart/form-data" action="{% url 'upload_property_images' property.id %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="more_images" class="form-label">Upload More Images</label>
+          <input type="file" name="images" multiple class="form-control" id="more_images">
+        </div>
+        <button type="submit" class="btn btn-success btn-sm">Upload</button>
+      </form>
+    </div>
+
+  </div>
 </div>
 {% endblock %}
