@@ -141,7 +141,9 @@ def choose_payment(request):
         if listing_type not in ['normal', 'priority']:
             return render(request, 'listings/choose_payment.html',{'error':'Please choose a valid listing type'})
 
+
         user = request.user
+        title = request.session.get('title')
         property_type = request.session.get('property_type')
         description = request.session.get('description')
         facilities = request.session.get('facilities')
@@ -153,7 +155,8 @@ def choose_payment(request):
 
         property_obj = Property.objects.create(
             owner=user,
-            title=f"Listing by {user.username}",
+            #title=f"Listing by {user.username}",
+            title = title,
             property_type=property_type,
             description=description,
             facilities=facilities,
