@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h2>Step 2: Add Title</h2>
+<div class="container mt-5">
+  <h2 class="mb-4">Step 2: Property Description</h2>
 
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-primary">Next</button>
-    </form>
-  </div>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Next</button>
+  </form>
+</div>
 {% endblock %}

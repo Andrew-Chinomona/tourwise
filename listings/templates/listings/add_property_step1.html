@@ -1,13 +1,37 @@
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block content %}#}
+{#  <div class="container mt-5">#}
+{#    <h2>Step 1: Choose Property Type</h2>#}
+{##}
+{#    <form method="post">#}
+{#      {% csrf_token %}#}
+{#      {{ form.as_p }}#}
+{#      <button type="submit" class="btn btn-primary">Next</button>#}
+{#    </form>#}
+{#  </div>#}
+{#{% endblock %}#}
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h2>Step 1: Choose Property Type</h2>
+<div class="container mt-5">
+  <h2 class="mb-4">Step 1: Choose Property Type</h2>
 
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-primary">Next</button>
-    </form>
-  </div>
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      {{ form.property_type.label_tag }}
+      <div class="form-check">
+        {% for radio in form.property_type %}
+          <div class="form-check mb-2">
+            {{ radio.tag }} {{ radio.choice_label }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Next</button>
+  </form>
+</div>
 {% endblock %}

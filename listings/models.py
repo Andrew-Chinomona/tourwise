@@ -1,6 +1,15 @@
 from django.db import models
 from django.conf import settings
 
+
+# Amenity options
+class Amenity(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class Property(models.Model):
     LISTING_TYPE_CHOICES = [
         ('normal', 'Normal'),
@@ -11,34 +20,63 @@ class Property(models.Model):
         ('house', 'House'),
         ('apartment', 'Apartment'),
         ('airbnb', 'Airbnb'),
+        ('room', 'Room'),
+        ('guesthouse', 'Guesthouse'),
     ]
 
+    #Ownership and classification
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='properties')
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, blank=True, null=True)
-    title = models.CharField(max_length=200)
-    #description = models.TextField()
-    facilities = models.CharField(max_length=255, default='Not specified')
-    image = models.ImageField(upload_to='property_images/', blank=True, null=True)
-    services = models.CharField(max_length=255,  default='Not specified')
+    title = models.CharField(max_length=200, default='Untitled')
     description = models.TextField(blank=True, null=True)
-    location = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    contact_info = models.CharField(max_length=100)
+
+    #Location
+    street_address = models.CharField(max_length=255, blank=True)
+    suburb = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+
+    #Media
+    main_image = models.ImageField(upload_to='property_main_images/', null=True, blank=True)
+    profile_photo = models.ImageField(upload_to='host_photos/', null=True, blank=True)
+
+    #Features
+    bedrooms = models.PositiveIntegerField(default=0)
+    bathrooms = models.PositiveIntegerField(default=0)
+    area = models.PositiveIntegerField(default=0)
+
+    #Amenities
+    amenities = models.ManyToManyField(Amenity, blank=True)
+
+    #Pricing
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    #Contact info
+    contact_phone = models.CharField(max_length=20, blank=True)
+    contact_email = models.EmailField(blank=True)
+
+    # Listing type & status
     listing_type = models.CharField(max_length=10, choices=LISTING_TYPE_CHOICES, default='normal')
     is_paid = models.BooleanField(default=False)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='properties')
+
+    #Metadata
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.city})"
 
+    def generate_title(self):
+        if self.property_type and self.suburb:
+            title = f"{self.property_type.title()} in {self.suburb.title()}"
+            if hasattr(self, 'city') and self.city:
+                title += f" ({self.city.title()})"
+            self.title = title
+            self.save()
+
+
+#Interior Images (related to Property)
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
-
-    image = models.ImageField(
-        upload_to='property_images/',
-        blank=True,
-        null=True
-    )
+    image = models.ImageField(upload_to='property_images/',blank = True, null = True)
 
     def __str__(self):
         return f"Image for {self.property.title}"

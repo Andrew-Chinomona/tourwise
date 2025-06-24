@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h2>Step 6: Description</h2>
-    <p>describe your property in detail.</p>
+<div class="container mt-5">
+  <h2 class="mb-4">Step 6: Set Property Price</h2>
 
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-success">Next</button>
-    </form>
-  </div>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Next</button>
+  </form>
+</div>
 {% endblock %}

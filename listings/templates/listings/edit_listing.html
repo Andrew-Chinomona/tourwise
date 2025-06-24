@@ -21,13 +21,13 @@
       {% endif %}
 
       <h4>Interior Images</h4>
-      {% if property.interior_images.all %}
-        {% for image in property.interior_images.all %}
-          <img src="{{ image.image.url }}" alt="Interior Image {{ forloop.counter }}" style="max-width: 200px; height: auto; margin: 10px;">
-        {% empty %}
-          <p>No interior images uploaded.</p>
-        {% endfor %}
-      {% endif %}
+{% if property.images.all %}
+  {% for image in property.images.all %}
+    <img src="{{ image.image.url }}" alt="Interior Image {{ forloop.counter }}" style="max-width: 200px; height: auto; margin: 10px;">
+  {% endfor %}
+{% else %}
+  <p>No interior images uploaded.</p>
+{% endif %}
 
       <hr>
       <form method="post" enctype="multipart/form-data" action="{% url 'upload_property_images' property.id %}">
