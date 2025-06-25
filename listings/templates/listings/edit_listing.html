@@ -6,7 +6,14 @@
     <div class="col-md-6">
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
+        {% for field in form %}
+          <div class="mb-3">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+          </div>
+        {% endfor %}
         <button type="submit" class="btn btn-primary">Save Changes</button>
         <a href="{% url 'host_dashboard' %}" class="btn btn-secondary">Cancel</a>
       </form>
@@ -20,20 +27,51 @@
         <p>No main image uploaded.</p>
       {% endif %}
 
-      <h4>Interior Images</h4>
-{% if property.images.all %}
-  {% for image in property.images.all %}
-    <img src="{{ image.image.url }}" alt="Interior Image {{ forloop.counter }}" style="max-width: 200px; height: auto; margin: 10px;">
-  {% endfor %}
-{% else %}
-  <p>No interior images uploaded.</p>
-{% endif %}
-
-      <hr>
-      <form method="post" enctype="multipart/form-data" action="{% url 'upload_property_images' property.id %}">
+      <form method="post" enctype="multipart/form-data" action="{% url 'upload_main_image' property.id %}" class="mt-3">
         {% csrf_token %}
         <div class="mb-3">
-          <label for="more_images" class="form-label">Upload More Images</label>
+          <label for="main_image_upload" class="form-label">Replace Main Image</label>
+          <input type="file" name="main_image" class="form-control" id="main_image_upload">
+        </div>
+        <button type="submit" class="btn btn-outline-primary btn-sm">Upload Main Image</button>
+      </form>
+
+      <h4 class="mt-5">Profile Photo</h4>
+      {% if property.profile_photo %}
+        <img src="{{ property.profile_photo.url }}" alt="Profile Photo" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+      {% else %}
+        <p>No profile photo uploaded.</p>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" action="{% url 'upload_profile_photo' property.id %}" class="mt-3">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="profile_photo_upload" class="form-label">Upload Profile Photo</label>
+          <input type="file" name="profile_photo" class="form-control" id="profile_photo_upload">
+        </div>
+        <button type="submit" class="btn btn-outline-primary btn-sm">Upload Profile Photo</button>
+      </form>
+
+      <h4 class="mt-5">Interior Images</h4>
+      {% if property.images.all %}
+<div class="row">
+  {% for image in property.images.all %}
+    <div class="col-6 mb-4">
+      <img src="{{ image.image.url }}" alt="Interior Image {{ forloop.counter }}"
+           class="img-fluid rounded"
+           style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px;">
+    </div>
+  {% endfor %}
+</div>
+
+      {% else %}
+        <p>No interior images uploaded.</p>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" action="{% url 'upload_property_images' property.id %}" class="mt-3">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="more_images" class="form-label">Upload More Interior Images</label>
           <input type="file" name="images" multiple class="form-control" id="more_images">
         </div>
         <button type="submit" class="btn btn-success btn-sm">Upload</button>
@@ -41,4 +79,16 @@
     </div>
   </div>
 </div>
+
+{#    This block is to move the save chnagwes and cancel butotn to the bottom#}
+{#    <div class="mt-4">#}
+{#  <form method="post" enctype="multipart/form-data">#}
+{#    {% csrf_token %}#}
+{#    <button type="submit" class="btn btn-primary">Save Changes</button>#}
+{#    <a href="{% url 'host_dashboard' %}" class="btn btn-secondary ms-2">Cancel</a>#}
+{#  </form>#}
+{#</div>#}
+
 {% endblock %}
+
+
