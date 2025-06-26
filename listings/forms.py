@@ -86,7 +86,7 @@ class PropertyStep6Form(forms.Form):
 
 class PropertyStep7Form(forms.Form):
     amenities = forms.ModelMultipleChoiceField(
-        queryset=Amenity.objects.none(),
+        queryset=Amenity.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="Select Amenities"
@@ -94,8 +94,8 @@ class PropertyStep7Form(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Dynamically load all amenities in case they change
         self.fields['amenities'].queryset = Amenity.objects.all()
-
 
 class PropertyStep8Form(forms.Form):
         contact_name = forms.CharField(
