@@ -80,7 +80,7 @@ class PropertyStep6Form(forms.Form):
     price = forms.DecimalField(
         max_digits=10,
         decimal_places=2,
-        label="Set Property Price (USD)",
+        label="Set Property Price",
         widget=forms.NumberInput(attrs={'placeholder': 'e.g. 450.00'})
     )
 
@@ -98,24 +98,34 @@ class PropertyStep7Form(forms.Form):
         self.fields['amenities'].queryset = Amenity.objects.all()
 
 class PropertyStep8Form(forms.Form):
-        contact_name = forms.CharField(
-            label="Contact Name",
-            max_length=100,
-            widget=forms.TextInput(attrs={'placeholder': 'e.g. John Doe'})
-        )
-        contact_phone = forms.CharField(
-            label="Phone Number",
-            max_length=20,
-            widget=forms.TextInput(attrs={'placeholder': 'e.g. +263 777 123 456'})
-        )
-        contact_email = forms.EmailField(
-            label="Email Address",
-            widget=forms.EmailInput(attrs={'placeholder': 'e.g. john@example.com'})
-        )
-        profile_photo = forms.ImageField(
-            label="Host Profile Photo (optional)",
-            required=False
-        )
+    contact_name = forms.CharField(
+        label="Contact Name",
+        max_length=100,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g. John Doe'})
+    )
+    contact_phone = forms.CharField(
+        label="Phone Number",
+        max_length=20,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g. +263 777 123 456'})
+    )
+    contact_email = forms.EmailField(
+        label="Email Address",
+        widget=forms.EmailInput(attrs={'placeholder': 'e.g. john@example.com'})
+    )
+    profile_photo = forms.ImageField(
+        label="Host Profile Photo (optional)",
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+        if self.user and self.user.is_authenticated:
+            self.fields['contact_email'].initial = self.user.email
+            self.fields['contact_phone'].initial = self.user.phone_number
+            self.fields['contact_name'].initial = f"{self.user.first_name} {self.user.last_name}".strip()
 
 class PropertyStep9Form(forms.Form):
     bedrooms = forms.IntegerField(

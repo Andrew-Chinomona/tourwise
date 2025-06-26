@@ -2,173 +2,99 @@
 {% load static %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h1>Welcome to Tourwise</h1>
-    <p>This is your homepage placeholder.</p>
+<div class="container mt-5">
 
-    {% if user.is_authenticated %}
-      <p>Hello, {{ user.username }}!</p>
+  <!-- ✅ Unified Curved Search Bar (No Guests) -->
+  <form method="get" action="#" class="bg-white shadow-sm rounded-pill px-3 py-2 mb-5">
+    <div class="row align-items-center g-0 text-center text-md-start">
 
-      {% if user.user_type == 'host' %}
-        <a href="{% url 'host_dashboard' %}" class="btn btn-primary mt-2">Go to Host Dashboard</a>
-      {% else %}
-        <p>You are logged in as a tenant.</p>
-      {% endif %}
+      <!-- Location -->
+      <div class="col-md-4 px-3 border-end">
+        <label class="form-label mb-0 fw-semibold small text-muted">Location</label>
+        <select name="location" class="form-select border-0 p-0 bg-transparent">
+          <option value="">Any Location</option>
+          {% for loc in locations %}
+            <option value="{{ loc.city }}|{{ loc.suburb }}">
+              {{ loc.city }} - {{ loc.suburb }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-    {% else %}
-      <p>
-        <a href="{% url 'signup' %}">Sign Up</a> |
-        <a href="{% url 'login' %}">Log In</a>
-      </p>
-    {% endif %}
+      <!-- Property Type -->
+      <div class="col-md-4 px-3 border-end">
+        <label class="form-label mb-0 fw-semibold small text-muted">Type</label>
+        <select name="property_type" class="form-select border-0 p-0 bg-transparent">
+          <option value="">All Types</option>
+          <option value="house">House</option>
+          <option value="apartment">Apartment</option>
+          <option value="airbnb">Airbnb</option>
+        </select>
+      </div>
+
+      <!-- Max Price -->
+      <div class="col-md-3 px-3 border-end">
+        <label class="form-label mb-0 fw-semibold small text-muted">Max Price</label>
+        <input type="number" name="max_price" class="form-control border-0 p-0 bg-transparent" placeholder="e.g. 500">
+      </div>
+
+      <!-- Search Button -->
+      <div class="col-md-1 text-end">
+        <button type="submit" class="btn btn-dark rounded-circle">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+
+    </div>
+  </form>
+
+  <!--  Recent Listings -->
+  <h3>Recent Listings</h3>
+  <div class="row">
+    {% for property in recent_listings %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm">
+          <div style="height: 180px; background-size: cover; background-position: center; background-image: url('{{ property.main_image.url }}');"></div>
+          <div class="card-body">
+            <h5 class="card-title">{{ property.title }}</h5>
+            <p class="card-text">
+              {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
+              <strong>${{ property.price }}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No recent listings available.</p>
+    {% endfor %}
   </div>
+  <div class="text-center mb-5">
+    <a href="#" class="btn btn-outline-primary">Show More</a>
+  </div>
+
+  <!-- Featured Listings -->
+  <h3>Featured Listings</h3>
+  <div class="row">
+    {% for property in featured_listings %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 border-warning shadow-sm">
+          <div style="height: 180px; background-size: cover; background-position: center; background-image: url('{{ property.main_image.url }}');"></div>
+          <div class="card-body">
+            <h5 class="card-title">{{ property.title }}</h5>
+            <p class="card-text">
+              {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
+              <strong>${{ property.price }}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No featured listings yet.</p>
+    {% endfor %}
+  </div>
+  <div class="text-center mb-5">
+    <a href="#" class="btn btn-outline-warning">Show More</a>
+  </div>
+
+</div>
 {% endblock %}
-{##}
-{#{% extends 'base.html' %}#}
-{#{% load static %}#}
-{##}
-{#{% block content %}#}
-{#<div class="container mt-4">#}
-{##}
-{#    <!-- Search Bar -->#}
-{#    <form method="get" action="#" class="mb-5">#}
-{#        <div class="row g-2">#}
-{#            <div class="col-md-3">#}
-{#                <input type="text" name="city" class="form-control" placeholder="Enter city">#}
-{#            </div>#}
-{#            <div class="col-md-3">#}
-{#                <select name="property_type" class="form-select">#}
-{#                    <option value="">Property Type</option>#}
-{#                    <option value="house">House</option>#}
-{#                    <option value="apartment">Apartment</option>#}
-{#                    <option value="airbnb">Airbnb</option>#}
-{#                </select>#}
-{#            </div>#}
-{#            <div class="col-md-2">#}
-{#                <input type="number" name="min_price" class="form-control" placeholder="Min Price">#}
-{#            </div>#}
-{#            <div class="col-md-2">#}
-{#                <input type="number" name="max_price" class="form-control" placeholder="Max Price">#}
-{#            </div>#}
-{#            <div class="col-md-2">#}
-{#                <button type="submit" class="btn btn-primary w-100">Search</button>#}
-{#            </div>#}
-{#        </div>#}
-{#    </form>#}
-{##}
-{#    <!-- Recent Listings -->#}
-{#    <h3>Recent Listings</h3>#}
-{#    <div class="row">#}
-{#        {% for property in recent_listings %}#}
-{#            <div class="col-md-3 mb-4">#}
-{#                <a href="#" class="text-decoration-none text-dark">#}
-{#                    <div class="property-card position-relative">#}
-{#                        <div class="property-image" style="background-image: url('{{ property.main_image.url }}');"></div>#}
-{#                        <div class="property-info">#}
-{#                            <p class="property-title">{{ property.title }}</p>#}
-{#                            <p class="property-location">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>#}
-{#                            <span class="property-price">{{ property.price }} {{ property.currency }}</span>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </a>#}
-{#            </div>#}
-{#        {% empty %}#}
-{#            <p class="text-muted">No recent listings available.</p>#}
-{#        {% endfor %}#}
-{#    </div>#}
-{#    <div class="text-center mb-5">#}
-{#        <a href="#" class="btn btn-outline-primary btn-show-more">Show More</a>#}
-{#    </div>#}
-{##}
-{#    <!-- Featured Listings -->#}
-{#    <h3>Featured Listings</h3>#}
-{#    <div class="row">#}
-{#        {% for property in featured_listings %}#}
-{#            <div class="col-md-3 mb-4">#}
-{#                <a href="#" class="text-decoration-none text-dark">#}
-{#                    <div class="property-card position-relative">#}
-{#                        {% if property.property_type == 'priority' %}#}
-{#                            <div class="badge-featured">Featured</div>#}
-{#                        {% endif %}#}
-{#                        <div class="property-image" style="background-image: url('{{ property.main_image.url }}');"></div>#}
-{#                        <div class="property-info">#}
-{#                            <p class="property-title">{{ property.title }}</p>#}
-{#                            <p class="property-location">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>#}
-{#                            <span class="property-price">{{ property.price }} {{ property.currency }}</span>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </a>#}
-{#            </div>#}
-{#        {% empty %}#}
-{#            <p class="text-muted">No featured listings available.</p>#}
-{#        {% endfor %}#}
-{#    </div>#}
-{#    <div class="text-center mb-5">#}
-{#        <a href="#" class="btn btn-outline-primary btn-show-more">Show More</a>#}
-{#    </div>#}
-{##}
-{#</div>#}
-{#{% endblock %}#}
-{##}
-{#{% block extra_css %}#}
-{#<style>#}
-{#    .property-card {#}
-{#        height: 300px;#}
-{#        border-radius: 8px;#}
-{#        overflow: hidden;#}
-{#        box-shadow: 0 2px 6px rgba(0,0,0,0.1);#}
-{#        transition: transform 0.2s ease;#}
-{#    }#}
-{##}
-{#    .property-card:hover {#}
-{#        transform: scale(1.02);#}
-{#    }#}
-{##}
-{#    .property-image {#}
-{#        height: 75%;#}
-{#        background-size: cover;#}
-{#        background-position: center;#}
-{#    }#}
-{##}
-{#    .property-info {#}
-{#        height: 25%;#}
-{#        padding: 8px 12px;#}
-{#        background-color: #f8f9fa;#}
-{#        position: relative;#}
-{#    }#}
-{##}
-{#    .property-title {#}
-{#        font-weight: bold;#}
-{#        margin: 0;#}
-{#    }#}
-{##}
-{#    .property-location {#}
-{#        font-size: 0.9rem;#}
-{#        color: #666;#}
-{#    }#}
-{##}
-{#    .property-price {#}
-{#        position: absolute;#}
-{#        right: 12px;#}
-{#        top: 8px;#}
-{#        font-weight: bold;#}
-{#        color: #28a745;#}
-{#    }#}
-{##}
-{#    .btn-show-more {#}
-{#        padding: 10px 25px;#}
-{#    }#}
-{##}
-{#    .badge-featured {#}
-{#        position: absolute;#}
-{#        top: 8px;#}
-{#        left: 8px;#}
-{#        background: #ffc107;#}
-{#        color: black;#}
-{#        padding: 4px 6px;#}
-{#        font-size: 0.75rem;#}
-{#        font-weight: bold;#}
-{#        border-radius: 4px;#}
-{#    }#}
-{#</style>#}
-{#{% endblock %}#}

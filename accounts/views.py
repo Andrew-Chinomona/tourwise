@@ -4,6 +4,9 @@ from django.contrib.auth.decorators import login_required
 from listings.models import Property, PropertyImage
 from django.shortcuts import render, redirect
 from .forms import SignupForm, CustomLoginForm
+from django.utils import timezone
+from datetime import timedelta
+
 
 def signup_view(request):
     if request.method == 'POST':
@@ -50,7 +53,25 @@ def logout_view(request):
     return redirect('home')
 
 def home_view(request):
-    return render(request, 'accounts/home.html')
+    two_weeks_ago = timezone.now() - timedelta(days=14)
+
+    # Recent Listings: added within last 14 days
+    recent_listings = Property.objects.filter(created_at__gte=two_weeks_ago).order_by('-created_at')[:8]
+
+    # Featured Listings: priority first, fallback to normal
+    priority_listings = list(Property.objects.filter(property_type='priority').order_by('-created_at')[:8])
+    if len(priority_listings) < 8:
+        normal_fallback = Property.objects.filter(property_type='normal').order_by('-created_at')[:8 - len(priority_listings)]
+        featured_listings = priority_listings + list(normal_fallback)
+    else:
+        featured_listings = priority_listings
+
+    context = {
+        'recent_listings': recent_listings,
+        'featured_listings': featured_listings,
+    }
+
+    return render(request, 'accounts/home.html', context)
 
 #this is the host dashboard and it will show all the of the hosts' lisitings and CRUD operations
 @login_required()

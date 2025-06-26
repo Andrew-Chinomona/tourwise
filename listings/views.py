@@ -167,13 +167,19 @@ def add_property_step7(request):
 
     return render(request, 'listings/add_property_step7.html', {'form': form})
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import PropertyStep8Form
+from .models import Property
+
 @login_required
 def add_property_step8(request):
     property_id = request.session.get('editing_property_id')
     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
 
     if request.method == 'POST':
-        form = PropertyStep8Form(request.POST, request.FILES)
+
+        form = PropertyStep8Form(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             property_obj.contact_info = form.cleaned_data['contact_name']
             property_obj.contact_phone = form.cleaned_data['contact_phone']
@@ -183,15 +189,20 @@ def add_property_step8(request):
                 property_obj.profile_photo = form.cleaned_data['profile_photo']
 
             property_obj.save()
-            return redirect('add_property_step9')  # Step 9: Features (bed/bath/area)
+            return redirect('add_property_step9')
     else:
-        form = PropertyStep8Form(initial={
-            'contact_name': request.user.get_full_name() or request.user.username,
-            'contact_phone': property_obj.contact_phone,
-            'contact_email': property_obj.contact_email
-        })
+
+        form = PropertyStep8Form(
+            initial={
+                'contact_name': request.user.get_full_name() or request.user.username,
+                'contact_phone':  property_obj.contact_phone,
+                'contact_email': property_obj.contact_email
+            },
+            user=request.user
+        )
 
     return render(request, 'listings/add_property_step8.html', {'form': form})
+
 
 @login_required
 def add_property_step9(request):
