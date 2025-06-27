@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from listings.models import Property, PropertyImage
 from django.shortcuts import render, redirect
-from .forms import SignupForm, CustomLoginForm
+from .forms import SignupForm, CustomLoginForm, ProfilePhotoForm
 from django.utils import timezone
 from datetime import timedelta
 
@@ -77,7 +77,20 @@ def home_view(request):
 @login_required()
 def host_dashboard(request):
     if request.user.user_type != 'host':
-        redirect('home')
+        return redirect('home')  # you missed return here
 
-    my_properties = Property.objects.filter(owner=request.user)
-    return render(request, 'accounts/host_dashboard.html', {'properties': my_properties})
+    user = request.user
+    my_properties = Property.objects.filter(owner=user)
+
+    if request.method == 'POST':
+        form = ProfilePhotoForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('host_dashboard')
+    else:
+        form = ProfilePhotoForm(instance=user)
+
+    return render(request, 'accounts/host_dashboard.html', {
+        'properties': my_properties,
+        'form': form
+    })

@@ -34,3 +34,8 @@ class SignupForm(UserCreationForm):
 class CustomLoginForm(forms.Form):
     identifier = forms.CharField(label="Email or Phone Number")
     password = forms.CharField(widget=forms.PasswordInput)
+
+class ProfilePhotoForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['profile_photo']

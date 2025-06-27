@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-5">
 
-  <!-- ✅ Unified Curved Search Bar (No Guests) -->
+  <!--  Unified Curved Search Bar (No Guests) -->
   <form method="get" action="#" class="bg-white shadow-sm rounded-pill px-3 py-2 mb-5">
     <div class="row align-items-center g-0 text-center text-md-start">
 
@@ -54,7 +54,7 @@
     {% for property in recent_listings %}
       <div class="col-md-3 mb-4">
         <div class="card h-100 shadow-sm">
-          <div style="height: 180px; background-size: cover; background-position: center; background-image: url('{{ property.main_image.url }}');"></div>
+          <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
           <div class="card-body">
             <h5 class="card-title">{{ property.title }}</h5>
             <p class="card-text">

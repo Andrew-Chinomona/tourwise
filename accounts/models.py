@@ -10,7 +10,7 @@ class CustomUser(AbstractUser):
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='tenant')
     phone_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
     email = models.EmailField(unique=True)
-
+    profile_photo = models.ImageField(upload_to='host_photos/', null=True, blank=True)
     def save(self, *args, **kwargs):
         if not self.username:
             self.username = f"{self.first_name} {self.last_name}".strip()

@@ -8,31 +8,64 @@
     <h3>Welcome back, {{ user.username|title }}</h3>
   </div>
 
-  <!-- Contact Info Box -->
+  <!-- Contact Info Box with Aligned Headings -->
   <div class="card mb-4 shadow-sm" style="border-radius: 1rem;">
-    <div class="card-body">
-      <h5 class="card-title">Contact Information</h5>
-      <p class="card-text">
-        <strong>Name:</strong> {{ user.get_full_name|default:user.username }}<br>
-        <strong>Email:</strong> {{ user.email }}<br>
-        <strong>Phone:</strong> {{ user.phone_number|default:"Not provided" }}
+    <div class="row g-0">
 
-{#          <strong>Profile Image:</strong> {{ user.email }}<br>#}
-{#              <div class="col-md-4">#}
-{#                {% if prop.main_image %}#}
-{#                  <img src="{{ prop.main_image.url }}" alt="{{ prop.title }}" class="img-fluid h-100 w-100" style="object-fit: cover;">#}
-{#                {% else %}#}
-{#                  <div class="text-center p-3">No image</div>#}
-{#                {% endif %}#}
-{#              </div>#}
-      </p>
+      <!-- Shared Headings Row -->
+      <div class="row m-0 px-4 pt-3">
+        <div class="col-md-8">
+          <h5 class="card-title">Contact Information</h5>
+        </div>
+        <div class="col-md-4 text-md-end text-center">
+          <h5 class="card-title">Profile Picture</h5>
+        </div>
+      </div>
+
+      <!-- Content Row -->
+      <div class="row g-0 align-items-center">
+
+        <!-- Left: Contact Info -->
+        <div class="col-md-8">
+          <div class="card-body">
+            <p class="card-text">
+              <strong>Name:</strong> {{ user.get_full_name|default:user.username|title }}<br>
+              <strong>Email:</strong> {{ user.email }}<br>
+              <strong>Phone:</strong> {{ user.phone_number|default:"Not provided" }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Profile Photo & Upload -->
+        <div class="col-md-4 p-3 text-center">
+          <div class="row align-items-center">
+            <!-- Image -->
+            <div class="col-5">
+              {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" alt="Profile Photo" class="img-fluid rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+              {% else %}
+                <div class="text-muted small">No profile photo</div>
+              {% endif %}
+            </div>
+
+            <!-- Upload controls -->
+            <div class="col-7">
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="profile_photo" class="form-control mb-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Upload</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
+  <!-- Dashboard -->
   <h2>My Dashboard</h2>
-
-  <a href="{% url 'start_property_listing' %}" class="btn btn-success">+ Add New Listing</a>
-  <p> </p>
+  <a href="{% url 'start_property_listing' %}" class="btn btn-success mb-3">+ Add New Listing</a>
 
   {% if properties %}
     <div class="row">
