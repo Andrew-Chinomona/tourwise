@@ -53,7 +53,7 @@
               <h5 class="card-title">{{ property.title }}</h5>
               <p class="card-text">
                 {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
-                <strong>${{ property.price }}</strong>
+                <strong>{{ property.currency }} {{ property.price }}</strong>
               </p>
             </div>
           </div>
@@ -79,7 +79,7 @@
               <h5 class="card-title">{{ property.title }}</h5>
               <p class="card-text">
                 {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
-                <strong>${{ property.price }}</strong>
+                <strong>{{ property.currency }} {{ property.price }}</strong>
               </p>
             </div>
           </div>

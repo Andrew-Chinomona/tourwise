@@ -1,176 +1,137 @@
-{#{% extends 'base.html' %}#}
-{##}
-{#{% block content %}#}
-{#<div class="container mt-5">#}
-{#  <h2 class="mb-4">Confirm Your Listing Details</h2>#}
-{##}
-{#  <!-- Property Preview -->#}
-{#  <div class="mb-4">#}
-{#    <h4>{{ property.title }}</h4>#}
-{#    {% if property.main_image %}#}
-{#      <img src="{{ property.main_image.url }}" alt="Main Image" style="max-width: 300px;" class="mb-3">#}
-{#    {% endif %}#}
-{##}
-{#    <p><strong>Type:</strong> {{ property.get_property_type_display }}</p>#}
-{#    <p><strong>Location:</strong> {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>#}
-{#    <p><strong>Description:</strong> {{ property.description }}</p>#}
-{##}
-{#    <p><strong>Price:</strong> ${{ property.price }}</p>#}
-{#    <p><strong>Bedrooms:</strong> {{ property.bedrooms }}</p>#}
-{#    <p><strong>Bathrooms:</strong> {{ property.bathrooms }}</p>#}
-{#    <p><strong>Area:</strong> {{ property.area }} m²</p>#}
-{##}
-{#    <p><strong>Amenities:</strong>#}
-{#      {% for amenity in property.amenities.all %}#}
-{#        {{ amenity.name }}{% if not forloop.last %}, {% endif %}#}
-{#      {% empty %}#}
-{#        No amenities listed.#}
-{#      {% endfor %}#}
-{#    </p>#}
-{##}
-{#    {% if property.profile_photo %}#}
-{#      <p><strong>Profile Photo:</strong><br>#}
-{#        <img src="{{ property.profile_photo.url }}" style="width:100px; height:100px; border-radius:50%;">#}
-{#      <img src="{{ property.profile_photo.url }}"#}
-{#     style="width: 100px;#}
-{#            height: 100px;#}
-{#            border-radius: 50%;#}
-{#            object-fit: cover;#}
-{#            overflow: hidden;#}
-{#            display: block;">#}
-{##}
-{#      </p>#}
-{#    {% endif %}#}
-{##}
-{#    <p><strong>Contact Name:</strong> {{ user.username }}</p>#}
-{#    <p><strong>Phone:</strong> {{ property.contact_phone }}</p>#}
-{#    <p><strong>Email:</strong> {{ property.contact_email }}</p>#}
-{##}
-{#    <h5>Interior Photos</h5>#}
-{#    <div class="d-flex flex-wrap">#}
-{#      {% for img in property.images.all %}#}
-{#        <img src="{{ img.image.url }}" style="width:150px; margin:5px;" alt="Interior">#}
-{#      {% empty %}#}
-{#        <p>No interior photos uploaded.</p>#}
-{#      {% endfor %}#}
-{#    </div>#}
-{#  </div>#}
-{##}
-{#  <!-- Choose Listing Type -->#}
-{#  <form method="post">#}
-{#    {% csrf_token %}#}
-{#    <div class="mb-3">#}
-{#      <label><strong>Select Listing Type:</strong></label>#}
-{#      {{ form.as_p }}#}
-{#    </div>#}
-{#    <button type="submit" class="btn btn-success">Confirm & Publish</button>#}
-{#  </form>#}
-{#</div>#}
-{#{% endblock %}#}
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Confirm Details</h1>
 <div class="container mt-5">
-  <!-- Top Image Section -->
-  <div class="row mb-5">
-    <!-- Left Side: Main Image & Profile -->
-    <div class="col-md-6 position-relative">
-      {% if property.main_image %}
-        <img src="{{ property.main_image.url }}" alt="Main Image" class="img-fluid rounded" style="width: 100%; height: 400px; object-fit: cover;">
-      {% endif %}
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Confirm Your Listing Details</h2>
 
-      {% if property.profile_photo %}
-        <div class="position-absolute" style="bottom: 20px; left: 20px; display: flex; align-items: center;">
-          <img src="{{ property.profile_photo.url }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
-          <span class="ms-3 text-white bg-dark px-3 py-2 rounded">{{ user.username }}</span>
+          <!-- Property Preview -->
+          <div class="row mb-4">
+            <!-- Main Image -->
+            <div class="col-md-6 position-relative mb-3 mb-md-0">
+              {% if property.main_image %}
+                <img src="{{ property.main_image.url }}" alt="Main Image"
+                     class="img-fluid rounded"
+                     style="width: 100%; height: 300px; object-fit: cover;">
+              {% endif %}
 
+              {% if property.profile_photo %}
+                <div class="position-absolute" style="bottom: 20px; left: 20px; display: flex; align-items: center;">
+                  <img src="{{ property.profile_photo.url }}"
+                       style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                  <span class="ms-2 text-white bg-dark px-2 py-1 rounded">{{ user.username }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Interior Images -->
+            <div class="col-md-6">
+              <div class="row g-2">
+                {% for img in property.images.all|slice:":4" %}
+                  <div class="col-6">
+                    <img src="{{ img.image.url }}" alt="Interior"
+                         class="img-fluid rounded"
+                         style="width: 100%; height: 140px; object-fit: cover;">
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Property Details -->
+          <div class="mb-4">
+            <h4>{{ property.title }}</h4>
+            <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
+
+            <div class="row mb-3">
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Bedrooms</label>
+                <input type="number" value="{{ property.bedrooms }}" class="form-control" readonly>
+              </div>
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Bathrooms</label>
+                <input type="number" value="{{ property.bathrooms }}" class="form-control" readonly>
+              </div>
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Area (m²)</label>
+                <input type="number" value="{{ property.area }}" class="form-control" readonly>
+              </div>
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Price</label>
+                <input type="text" value="{{ property.currency }}{{ property.price }}" class="form-control" readonly>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" rows="3" readonly>{{ property.description }}</textarea>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Contact Phone</label>
+                <input type="text" value="{{ property.contact_phone }}" class="form-control" readonly>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Contact Email</label>
+                <input type="email" value="{{ property.contact_email }}" class="form-control" readonly>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Amenities</label>
+              <div class="d-flex flex-wrap gap-2">
+                {% for amenity in property.amenities.all %}
+                  <span class="badge bg-secondary">{{ amenity.name }}</span>
+                {% empty %}
+                  <span class="text-muted">No amenities listed</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
         </div>
-      {% endif %}
-    </div>
+      </div>
 
-    <!-- Right Side: Interior Images -->
-    <div class="col-md-6 d-flex flex-wrap gap-2">
-      {% for img in property.images.all|slice:":4" %}
-        <img src="{{ img.image.url }}" alt="Interior" style="width: 48%; height: 190px; object-fit: cover;" class="rounded">
-      {% endfor %}
-    </div>
-  </div>
+      <!-- Payment Options -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
 
-  <!-- Title & Location -->
-  <h3>{{ property.title }}</h3>
-  <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
+            <h5 class="mb-3">Select Listing Type</h5>
 
-  <!-- Editable Specs -->
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <label>Bedrooms</label>
-      <input type="number" value="{{ property.bedrooms }}" class="form-control" readonly>
-    </div>
-    <div class="col-md-4">
-      <label>Bathrooms</label>
-      <input type="number" value="{{ property.bathrooms }}" class="form-control" readonly>
-    </div>
-    <div class="col-md-4">
-      <label>Area (m²)</label>
-      <input type="number" value="{{ property.area }}" class="form-control" readonly>
-    </div>
-  </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="listing_type" id="normal"
+                       value="normal" {% if form.initial.listing_type == 'normal' %}checked{% endif %}>
+                <label class="form-check-label" for="normal">
+                  Normal Listing - $10
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="listing_type" id="priority"
+                       value="priority" {% if form.initial.listing_type == 'priority' %}checked{% endif %}>
+                <label class="form-check-label" for="priority">
+                  Priority Listing - $20 (featured on homepage)
+                </label>
+              </div>
+            </div>
 
-  <!-- Description -->
-  <div class="mb-3">
-    <label>Description</label>
-    <textarea class="form-control" rows="3" readonly>{{ property.description }}</textarea>
-  </div>
-
-  <!-- Contact Info -->
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label>Phone</label>
-      <input type="text" value="{{ property.contact_phone }}" class="form-control" readonly>
-    </div>
-    <div class="col-md-6">
-      <label>Email</label>
-      <input type="email" value="{{ property.contact_email }}" class="form-control" readonly>
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'add_property_step9' %}" class="btn btn-secondary">
+                Back
+              </a>
+              <button type="submit" class="btn btn-success">
+                Confirm & Publish
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-
-  <!-- Amenities -->
-  <div class="mb-4">
-    <label>Amenities:</label>
-    <ul class="list-inline">
-      {% for amenity in property.amenities.all %}
-        <li class="list-inline-item badge bg-secondary me-1">{{ amenity.name }}</li>
-      {% empty %}
-        <p>No amenities listed.</p>
-      {% endfor %}
-    </ul>
-  </div>
-
-<form method="post">
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-
-  <!-- Payment Options -->
-  <div class="border p-3 rounded bg-light mb-3">
-    <h5 class="mb-3">Select Listing Type:</h5>
-    <div class="form-check">
-      <input class="form-check-input" type="radio" name="listing_type" id="normal" value="normal" {% if form.initial.listing_type == 'normal' %}checked{% endif %}>
-      <label class="form-check-label" for="normal">
-        Normal Listing - $10
-      </label>
-    </div>
-    <div class="form-check">
-      <input class="form-check-input" type="radio" name="listing_type" id="priority" value="priority" {% if form.initial.listing_type == 'priority' %}checked{% endif %}>
-      <label class="form-check-label" for="priority">
-        Priority Listing - $20 (featured on homepage)
-      </label>
-    </div>
-  </div>
-
-  <button type="submit" class="btn btn-success">Confirm & Publish</button>
-</form>
-
 </div>
 {% endblock %}
-

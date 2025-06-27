@@ -72,11 +72,11 @@
               <!-- Left: Text Info -->
               <div class="col-md-8">
                 <div class="card-body d-flex flex-column h-100"> <!-- Added flex classes -->
-                  <h5 class="card-title">{{ prop.title }}</h5>
+                  <h5 class="card-title">{{ prop.title|title }}</h5>
                   <p class="card-text">
-                    Type: {{ prop.property_type }}<br>
+                    Type: {{ prop.property_type|title }}<br>
                     Status: {{ prop.listing_type|title }}<br>
-                    Price: ${{ prop.price }}
+                    Price: {{ prop.currency }} {{ prop.price }}
                   </p>
                   <div class="mt-auto"> <!-- Push buttons to bottom -->
                     <a href="{% url 'edit_listing' prop.id %}" class="btn btn-primary btn-sm">Edit</a>
