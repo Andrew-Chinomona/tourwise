@@ -4,10 +4,27 @@
 <div class="container mt-5">
   <h2 class="mb-4">Step 6: Set Property Price</h2>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Next</button>
-  </form>
+ <form method="post">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    {{ form.price.label_tag }}
+    {{ form.price }}
+    {% if form.price.errors %}
+      <div class="text-danger small">{{ form.price.errors }}</div>
+    {% endif %}
+  </div>
+
+  <div class="mb-3">
+    {{ form.currency.label_tag }}
+    {{ form.currency }}
+    {% if form.currency.errors %}
+      <div class="text-danger small">{{ form.currency.errors }}</div>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="btn btn-primary">Next</button>
+</form>
+
 </div>
 {% endblock %}

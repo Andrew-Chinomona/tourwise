@@ -1,6 +1,13 @@
 from django.db import models
 from django.conf import settings
 
+class Currency(models.Model):
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=100)
+    symbol = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f"({self.code}) {self.symbol}"
 
 # Amenity options
 class Amenity(models.Model):
@@ -49,10 +56,11 @@ class Property(models.Model):
 
     #Pricing
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-    #Contact info
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, blank=True)
+    # #Contact info
     contact_phone = models.CharField(max_length=20, blank=True)
     contact_email = models.EmailField(blank=True)
+    # contact_name = models.CharField(max_length=100, blank=True)
 
     # Listing type & status
     listing_type = models.CharField(max_length=10, choices=LISTING_TYPE_CHOICES, default='normal')
@@ -80,3 +88,4 @@ class PropertyImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.property.title}"
+

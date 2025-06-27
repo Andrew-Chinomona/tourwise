@@ -17,3 +17,4 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.property.title} - {self.listing_type} - ${self.amount}"
+

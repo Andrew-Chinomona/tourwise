@@ -1,8 +1,7 @@
 from django import forms
-from listings.models import Property
 from django.forms.widgets import FileInput
 from django.forms.widgets import ClearableFileInput
-from .models import Amenity
+from .models import Amenity, Property, Currency
 
 # class MultipleFileInput(forms.ClearableFileInput):
 #     allow_multiple_selected = True
@@ -76,6 +75,9 @@ class PropertyStep5Form(forms.Form):
                 raise forms.ValidationError(f"{f.name} is not an image.")
         return files
 
+from django import forms
+from listings.models import Currency
+
 class PropertyStep6Form(forms.Form):
     price = forms.DecimalField(
         max_digits=10,
@@ -83,6 +85,26 @@ class PropertyStep6Form(forms.Form):
         label="Set Property Price",
         widget=forms.NumberInput(attrs={'placeholder': 'e.g. 450.00'})
     )
+
+    currency = forms.ModelChoiceField(
+        queryset=Currency.objects.all(),
+        empty_label=None,
+        label="Currency",
+        widget=forms.Select()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # If no initial currency is passed, default to USD
+        if not self.initial.get('currency'):
+            try:
+                usd = Currency.objects.get(code='USD')
+                self.initial['currency'] = usd
+                self.fields['currency'].initial = usd
+            except Currency.DoesNotExist:
+                pass
+
 
 class PropertyStep7Form(forms.Form):
     amenities = forms.ModelMultipleChoiceField(
@@ -97,53 +119,77 @@ class PropertyStep7Form(forms.Form):
         # Dynamically load all amenities in case they change
         self.fields['amenities'].queryset = Amenity.objects.all()
 
+
 class PropertyStep8Form(forms.Form):
     contact_name = forms.CharField(
         label="Contact Name",
         max_length=100,
-        widget=forms.TextInput(attrs={'placeholder': 'e.g. John Doe'})
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. John Doe',
+            'class': 'form-control'
+        })
     )
     contact_phone = forms.CharField(
         label="Phone Number",
         max_length=20,
-        widget=forms.TextInput(attrs={'placeholder': 'e.g. +263 777 123 456'})
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. +263 777 123 456',
+            'class': 'form-control'
+        })
     )
     contact_email = forms.EmailField(
         label="Email Address",
-        widget=forms.EmailInput(attrs={'placeholder': 'e.g. john@example.com'})
-    )
-    profile_photo = forms.ImageField(
-        label="Host Profile Photo (optional)",
-        required=False
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'e.g. john@example.com',
+            'class': 'form-control'
+        })
     )
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
-        self.user = user
+        self.user = kwargs.pop('user', None)
+        property_obj = kwargs.pop('property_obj', None)
         super().__init__(*args, **kwargs)
 
+        # Set initial values from user profile if available
         if self.user and self.user.is_authenticated:
+            self.fields['contact_name'].initial = (
+                f"{self.user.first_name} {self.user.last_name}".strip()
+                if (self.user.first_name or self.user.last_name)
+                else self.user.username
+            )
             self.fields['contact_email'].initial = self.user.email
-            self.fields['contact_phone'].initial = self.user.phone_number
-            self.fields['contact_name'].initial = f"{self.user.first_name} {self.user.last_name}".strip()
+
+            # Prefer property's existing contact info if available, otherwise use user's
+            if property_obj and property_obj.contact_phone:
+                self.fields['contact_phone'].initial = property_obj.contact_phone
+            elif hasattr(self.user, 'phone_number') and self.user.phone_number:
+                self.fields['contact_phone'].initial = self.user.phone_number
 
 class PropertyStep9Form(forms.Form):
     bedrooms = forms.IntegerField(
         label="Number of Bedrooms",
         min_value=0,
-        widget=forms.NumberInput(attrs={'placeholder': 'e.g. 3'})
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'e.g. 3',
+            'class': 'form-control'
+        })
     )
     bathrooms = forms.IntegerField(
         label="Number of Bathrooms",
         min_value=0,
-        widget=forms.NumberInput(attrs={'placeholder': 'e.g. 2'})
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'e.g. 2',
+            'class': 'form-control'
+        })
     )
     area = forms.IntegerField(
         label="Total Area (in sq meters)",
         min_value=0,
-        widget=forms.NumberInput(attrs={'placeholder': 'e.g. 120'})
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'e.g. 120',
+            'class': 'form-control'
+        })
     )
-
 class ChoosePaymentForm(forms.Form):
     listing_type = forms.ChoiceField(
         choices=Property.LISTING_TYPE_CHOICES,

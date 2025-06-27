@@ -132,7 +132,9 @@ def add_property_step5(request):
     return render(request, 'listings/add_property_step5.html', {'form': form})
 
 
-@login_required()   #set the price
+from listings.models import Currency  # Make sure you import this
+
+@login_required
 def add_property_step6(request):
     property_id = request.session.get('editing_property_id')
     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
@@ -140,13 +142,20 @@ def add_property_step6(request):
     if request.method == 'POST':
         form = PropertyStep6Form(request.POST)
         if form.is_valid():
+            # Save both price and selected currency
             property_obj.price = form.cleaned_data['price']
+            property_obj.currency = form.cleaned_data['currency']
             property_obj.save()
             return redirect('add_property_step7')
     else:
-        form = PropertyStep6Form(initial={'price': property_obj.price})
+        # Pre-fill form with existing values (if available)
+        form = PropertyStep6Form(initial={
+            'price': property_obj.price,
+            'currency': property_obj.currency
+        })
 
     return render(request, 'listings/add_property_step6.html', {'form': form})
+
 
 
 @login_required
@@ -178,30 +187,20 @@ def add_property_step8(request):
     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
 
     if request.method == 'POST':
-
-        form = PropertyStep8Form(request.POST, request.FILES, user=request.user)
+        form = PropertyStep8Form(request.POST, request.FILES, user=request.user, property_obj=property_obj)
         if form.is_valid():
-            property_obj.contact_info = form.cleaned_data['contact_name']
+            property_obj.contact_name = form.cleaned_data['contact_name']
             property_obj.contact_phone = form.cleaned_data['contact_phone']
             property_obj.contact_email = form.cleaned_data['contact_email']
-
-            if form.cleaned_data.get('profile_photo'):
-                property_obj.profile_photo = form.cleaned_data['profile_photo']
-
             property_obj.save()
             return redirect('add_property_step9')
     else:
+        form = PropertyStep8Form(user=request.user, property_obj=property_obj)
 
-        form = PropertyStep8Form(
-            initial={
-                'contact_name': request.user.get_full_name() or request.user.username,
-                'contact_phone':  property_obj.contact_phone,
-                'contact_email': property_obj.contact_email
-            },
-            user=request.user
-        )
-
-    return render(request, 'listings/add_property_step8.html', {'form': form})
+    return render(request, 'listings/add_property_step8.html', {
+        'form': form,
+        'property': property_obj
+    })
 
 
 @login_required
@@ -224,7 +223,10 @@ def add_property_step9(request):
             'area': property_obj.area
         })
 
-    return render(request, 'listings/add_property_step9.html', {'form': form})
+    return render(request, 'listings/add_property_step9.html', {
+        'form': form,
+        'property': property_obj
+    })
 
 @login_required
 def choose_payment(request):
