@@ -8,57 +8,53 @@
     <h3>Welcome back, {{ user.username|title }}</h3>
   </div>
 
-  <!-- Contact Info Box with Aligned Headings -->
-  <div class="card mb-4 shadow-sm" style="border-radius: 1rem;">
-    <div class="row g-0">
-
-      <!-- Shared Headings Row -->
-      <div class="row m-0 px-4 pt-3">
-        <div class="col-md-8">
-          <h5 class="card-title">Contact Information</h5>
-        </div>
-        <div class="col-md-4 text-md-end text-center">
-          <h5 class="card-title">Profile Picture</h5>
+  <!-- Two Equal Containers -->
+  <div class="row mb-4" style="align-items: stretch;">
+    <!-- Left Container: Contact Information -->
+    <div class="col-md-6 pe-2">
+      <div class="card shadow h-100" style="border-radius: 1rem;"> <!-- Changed shadow-sm to shadow -->
+        <div class="card-body">
+          <h5 class="card-title mb-3">Contact Information</h5>
+          <p class="card-text">
+            <strong>Name:</strong> {{ user.get_full_name|default:user.username|title }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>Phone:</strong> {{ user.phone_number|default:"Not provided" }}
+          </p>
         </div>
       </div>
+    </div>
 
-      <!-- Content Row -->
-      <div class="row g-0 align-items-center">
-
-        <!-- Left: Contact Info -->
-        <div class="col-md-8">
-          <div class="card-body">
-            <p class="card-text">
-              <strong>Name:</strong> {{ user.get_full_name|default:user.username|title }}<br>
-              <strong>Email:</strong> {{ user.email }}<br>
-              <strong>Phone:</strong> {{ user.phone_number|default:"Not provided" }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Right: Profile Photo & Upload -->
-        <div class="col-md-4 p-3 text-center">
-          <div class="row align-items-center">
-            <!-- Image -->
-            <div class="col-5">
+    <!-- Right Container: Profile Picture -->
+    <div class="col-md-6 ps-2">
+      <div class="card shadow h-100" style="border-radius: 1rem;"> <!-- Changed shadow-sm to shadow -->
+        <div class="card-body d-flex flex-column h-100">
+          <div class="row flex-grow-1 align-items-center">
+            <!-- Image Display (Left) -->
+            <div class="col-md-5 d-flex flex-column justify-content-center">
               {% if user.profile_photo %}
-                <img src="{{ user.profile_photo.url }}" alt="Profile Photo" class="img-fluid rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                <div class="text-center">
+                  <img src="{{ user.profile_photo.url }}" alt="Profile Photo"
+                       class="shadow rounded"
+                       style="width: 160px; height: 160px; object-fit: cover;">
+                </div>
               {% else %}
-                <div class="text-muted small">No profile photo</div>
+                <div class="text-muted small text-center">No profile photo</div>
               {% endif %}
             </div>
 
-            <!-- Upload controls -->
-            <div class="col-7">
+            <!-- Upload Form (Right) -->
+            <div class="col-md-7">
+              <h5 class="card-title mb-3 text-center">Profile Picture</h5>
               <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="file" name="profile_photo" class="form-control mb-2">
-                <button type="submit" class="btn btn-sm btn-outline-primary">Upload</button>
+                <div class="mb-2">
+                  <input type="file" name="profile_photo" class="form-control form-control-sm">
+                </div>
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100">Upload</button>
               </form>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -68,31 +64,41 @@
   <a href="{% url 'start_property_listing' %}" class="btn btn-success mb-3">+ Add New Listing</a>
 
   {% if properties %}
-    <div class="row">
+    <div class="row row-cols-1 row-cols-md-2 g-4"> <!-- Added consistent grid layout -->
       {% for prop in properties %}
-        <div class="col-md-6 mb-4">
-          <div class="card">
-            <div class="row g-0">
+        <div class="col">
+          <div class="card shadow h-100"> <!-- Added shadow and h-100 -->
+            <div class="row g-0 h-100"> <!-- Added h-100 -->
               <!-- Left: Text Info -->
               <div class="col-md-8">
-                <div class="card-body">
+                <div class="card-body d-flex flex-column h-100"> <!-- Added flex classes -->
                   <h5 class="card-title">{{ prop.title }}</h5>
                   <p class="card-text">
                     Type: {{ prop.property_type }}<br>
                     Status: {{ prop.listing_type|title }}<br>
                     Price: ${{ prop.price }}
                   </p>
-                  <a href="{% url 'edit_listing' prop.id %}" class="btn btn-primary btn-sm">Edit</a>
-                  <a href="{% url 'delete_listing' prop.id %}" class="btn btn-danger btn-sm">Delete</a>
+                  <div class="mt-auto"> <!-- Push buttons to bottom -->
+                    <a href="{% url 'edit_listing' prop.id %}" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="{% url 'delete_listing' prop.id %}" class="btn btn-danger btn-sm">Delete</a>
+                  </div>
                 </div>
               </div>
 
               <!-- Right: Image -->
-              <div class="col-md-4">
+              <div class="col-md-4 h-100"> <!-- Added h-100 -->
                 {% if prop.main_image %}
-                  <img src="{{ prop.main_image.url }}" alt="{{ prop.title }}" class="img-fluid h-100 w-100" style="object-fit: cover;">
+                  <div class="h-100 w-100 overflow-hidden"> <!-- Constrained container -->
+                    <div class="h-100 w-100 p-2">
+                        <div class="h-100 w-100 overflow-hidden rounded" style="border-radius: 0.75rem;">
+                            <img src="{{ prop.main_image.url }}" alt="{{ prop.title }}"
+                                 class="img-fluid h-100 w-100"
+                                 style="object-fit: cover; border-radius: 0.75rem;">
+                          </div>
+                        </div>
+                  </div>
                 {% else %}
-                  <div class="text-center p-3">No image</div>
+                  <div class="h-100 d-flex align-items-center justify-content-center p-3">No image</div>
                 {% endif %}
               </div>
             </div>

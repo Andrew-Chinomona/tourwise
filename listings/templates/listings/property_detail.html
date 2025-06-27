@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+  <!-- 🖼 Image Gallery - Fixed Height Container -->
+  <div class="row mb-4" style="height: 400px; overflow: hidden;">
+    <!-- Main Image (75%) -->
+    <div class="col-md-8 h-100 pe-1">  <!-- Added pe-1 for small right gap -->
+      <div class="h-100 rounded-start overflow-hidden">  <!-- Added overflow-hidden -->
+        <img src="{{ property.main_image.url }}"
+             alt="Main Image"
+             class="img-fluid w-100 h-100"
+             style="object-fit: cover;">
+      </div>
+    </div>
+
+    <!-- Interior Images Grid (2x2) - Fixed Height -->
+    <div class="col-md-4 h-100">
+      <div class="row g-1 h-100 m-0">  <!-- g-1 for smaller gap, m-0 to remove margin -->
+        {% for image in interior_images|slice:":4" %}
+          <div class="col-6 p-0 h-50">  <!-- h-50 for half height, p-0 no padding -->
+            <div class="h-100 pe-1 pb-1">  <!-- Added pe-1 and pb-1 for spacing -->
+              <a href="{{ image.image.url }}" target="_blank" class="d-block h-100 rounded overflow-hidden">
+                <img src="{{ image.image.url }}"
+                     class="img-fluid w-100 h-100"
+                     style="object-fit: cover;"
+                     alt="Interior Photo">
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+
+        {% if interior_images|length > 4 %}
+          <!-- Show More Overlay -->
+          <div class="col-6 p-0 h-50 position-relative">
+            <div class="h-100 pe-1 pb-1">
+              <a href="#" class="d-block h-100 rounded overflow-hidden position-relative">
+                <img src="{{ interior_images.4.image.url }}"
+                     class="img-fluid w-100 h-100"
+                     style="object-fit: cover;"
+                     alt="More Photos">
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex flex-column align-items-center justify-content-center text-white">
+                  +{{ interior_images|length|add:"-4" }}<br>More Photos
+                </div>
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔽 Property Info & Host Section -->
+  <div class="row">
+    <!-- Left Column -->
+    <div class="col-md-8">
+      <h3>{{ property.title }}</h3>
+      <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
+
+      <!-- Feature Boxes -->
+      <div class="d-flex gap-3 mb-3">
+        <div class="border rounded p-2 text-center w-25">
+          🛏 {{ property.bedrooms }} Bedrooms
+        </div>
+        <div class="border rounded p-2 text-center w-25">
+          🛁 {{ property.bathrooms }} Bathrooms
+        </div>
+        <div class="border rounded p-2 text-center w-25">
+          📐 {{ property.area }} m²
+        </div>
+        <div class="border rounded p-2 text-center w-25">
+          🚗 {{ property.parking_spaces }} Parking
+        </div>
+      </div>
+
+      <!-- Description -->
+      <h5>{{ property.property_type|title }} Description</h5>
+      <p>{{ property.description }}</p>
+
+      <!-- Amenities -->
+      <h5>Offered Amenities</h5>
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        {% for amenity in amenities|slice:":6" %}
+          <span class="border rounded-pill px-3 py-1 bg-light">{{ amenity.name }}</span>
+        {% endfor %}
+      </div>
+      {% if amenities|length > 6 %}
+        <a href="#" class="btn btn-sm btn-outline-secondary">Show All Amenities</a>
+      {% endif %}
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-md-4">
+      <!-- Host Info -->
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body text-center">
+          {% if property.owner.profile_photo and property.owner.profile_photo.url %}
+            <img src="{{ property.owner.profile_photo.url }}" alt="Host" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+          {% else %}
+            <div class="text-muted small">No profile image</div>
+          {% endif %}
+          <p class="mb-1">Listed by:</p>
+          <strong>{{ property.owner.username }}</strong>
+        </div>
+      </div>
+
+      <!-- Price Box -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4>${{ property.price }}</h4>
+          <hr>
+          <a href="#" class="btn btn-dark w-100 mb-2">Contact Details</a>
+          <p class="mb-1"><strong>Contact Email:</strong><br>{{ property.contact_email }}</p>
+          <p class="mb-0"><strong>Phone:</strong><br>{{ property.contact_phone }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

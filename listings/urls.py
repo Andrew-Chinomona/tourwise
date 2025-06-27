@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_property_step1, add_property_step2, add_property_step3, add_property_step4, add_property_step5, add_property_step6,  delete_listing, delete_property_image, edit_listing, upload_property_images, start_property_listing, add_property_step7, add_property_step8, add_property_step9, choose_payment,upload_profile_photo,upload_main_image
+from .views import add_property_step1, add_property_step2, add_property_step3, add_property_step4, add_property_step5, add_property_step6,  delete_listing, delete_property_image, edit_listing, upload_property_images, start_property_listing, add_property_step7, add_property_step8, add_property_step9, choose_payment,upload_profile_photo,upload_main_image, property_detail
 
 urlpatterns = [
     path('add-property/step-1/', add_property_step1, name='add_property_step1'),
@@ -19,5 +19,5 @@ urlpatterns = [
     path('choose_payment/',choose_payment, name='choose_payment'),
     path('property/<int:property_id>/upload-profile-photo/', upload_profile_photo, name='upload_profile_photo'),
     path('upload_main_image/<int:property_id>/upload-main-image/', upload_main_image, name='upload_main_image'),
-
+    path('<int:pk>/', property_detail, name='property_detail'),
 ]

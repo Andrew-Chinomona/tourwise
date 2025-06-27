@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate,get_backends
 from django.contrib.auth.decorators import login_required
 from listings.models import Property, PropertyImage
 from django.shortcuts import render, redirect
@@ -7,17 +7,19 @@ from .forms import SignupForm, CustomLoginForm, ProfilePhotoForm
 from django.utils import timezone
 from datetime import timedelta
 
-
 def signup_view(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)  # Don't save to DB yet
+            user = form.save(commit=False)
             user.username = f"{user.first_name} {user.last_name}"
-            user.save()  # Now save to DB
+            user.save()
+
+            # Set backend explicitly
+            user.backend = 'accounts.backends.EmailOrPhoneBackend'
+
             login(request, user)
 
-            # Redirect based on user type
             if user.user_type == 'host':
                 return redirect('host_dashboard')
             else:
@@ -26,6 +28,7 @@ def signup_view(request):
         form = SignupForm()
 
     return render(request, 'accounts/signup.html', {'form': form})
+
 
 
 def login_view(request):

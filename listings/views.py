@@ -312,3 +312,16 @@ def upload_profile_photo(request, property_id):
         property_obj.profile_photo = request.FILES['profile_photo']
         property_obj.save()
     return redirect('edit_listing', property_id=property_id)
+
+def property_detail(request, pk):
+    property_obj = get_object_or_404(Property, pk=pk)
+
+    interior_images = PropertyImage.objects.filter(property=property_obj)
+    amenities = property_obj.amenities.all() if hasattr(property_obj, 'amenities') else []
+
+    return render(request, 'listings/property_detail.html', {
+        'property': property_obj,
+        'interior_images': interior_images,
+        'amenities': amenities,
+    })
+
