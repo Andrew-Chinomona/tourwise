@@ -76,7 +76,8 @@
       <div class="col-md-3 mb-4">
         <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
           <div class="card h-100 border-warning shadow-sm">
-            <div style="height: 180px; background-size: cover; background-position: center; background-image: url('{{ property.main_image.url }}');"></div>
+              <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
+{#            <div style="height: 180px; background-size: cover; background-position: center; background-image: url('{{ property.main_image.url }}');"></div>#}
             <div class="card-body">
                             <h5 class="card-title text-truncate" style="max-width: 100%;">
                   {{ property.title }}
