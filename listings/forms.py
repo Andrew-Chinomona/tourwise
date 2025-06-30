@@ -2,22 +2,31 @@ from django import forms
 from django.forms.widgets import FileInput
 from django.forms.widgets import ClearableFileInput
 from .models import Amenity, Property, Currency
+from django.utils.safestring import mark_safe
+from listings.models import Currency
 
-# class MultipleFileInput(forms.ClearableFileInput):
-#     allow_multiple_selected = True
-#
-#     def value_from_datadict(self, data, files, name):
-#         if hasattr(files, 'getlist'):
-#             return files.getlist(name)
-#         return None
+
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
 
 class PropertyStep1Form(forms.Form):
     property_type = forms.ChoiceField(
         choices=Property.PROPERTY_TYPE_CHOICES,
         widget=forms.RadioSelect,
-        label = "what type of property are you listing?"
+        label="What type of property are you listing?"
     )
 
 class PropertyStep2Form(forms.Form):
@@ -32,79 +41,115 @@ class PropertyStep2Form(forms.Form):
         required=True
     )
 
-
 class PropertyStep3Form(forms.Form):
     city = forms.CharField(
         max_length=100,
         label="City",
-        widget=forms.TextInput(attrs={'placeholder': 'e.g. Harare'})
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. Harare',
+            'class': 'form-control'
+        })
     )
     suburb = forms.CharField(
         max_length=100,
         label="Suburb",
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'e.g. Avondale'})
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. Avondale',
+            'class': 'form-control'
+        })
     )
     street_address = forms.CharField(
         max_length=255,
         label="Street Address",
-        widget=forms.TextInput(attrs={'placeholder': 'e.g. 123 Smart Street'})
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. 123 Smart Street',
+            'class': 'form-control'
+        })
     )
 
 class PropertyStep4Form(forms.Form):
     main_image = forms.ImageField(
         required=True,
-        label="Upload the MAIN image (e.g., front of house)"
+        label="Upload the MAIN image (e.g., front of house)",
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/*',
+        }),
+        error_messages={
+            'required': 'Please upload a main image for your property',
+            'invalid_image': 'Please upload a valid image file (JPEG, PNG, etc.)'
+        }
     )
 
+    def clean_main_image(self):
+        image = self.cleaned_data.get('main_image')
+        if image:
+            if image.size > 5 * 1024 * 1024:  # 5MB limit
+                raise forms.ValidationError("Image file too large (max 5MB)")
+            if not image.content_type.startswith('image/'):
+                raise forms.ValidationError("File is not an image")
+        return image
+
 class PropertyStep5Form(forms.Form):
-    images = forms.FileField(
-        widget=MultipleFileInput(attrs={'multiple': True}),
+    images = MultipleFileField(
+        label="Upload interior images (e.g. lounge, kitchen, bedrooms)",
         required=False,
-        label="Upload interior images (e.g. lounge, kitchen, bedrooms)"
+        widget=MultipleFileInput(attrs={
+            'class': 'form-control',
+            'multiple': True,
+            'accept': 'image/*'
+        })
     )
 
     def clean_images(self):
         files = self.files.getlist('images')
-
         if not files:
-            return []
+            raise forms.ValidationError("Please upload at least one image.")
 
         for f in files:
             if not f.content_type.startswith('image/'):
-                raise forms.ValidationError(f"{f.name} is not an image.")
+                raise forms.ValidationError(f"{f.name} is not an image file.")
+            if f.size > 5 * 1024 * 1024:  # 5MB limit
+                raise forms.ValidationError(f"{f.name} is too large (max 5MB).")
         return files
 
-from django import forms
-from listings.models import Currency
 
 class PropertyStep6Form(forms.Form):
     price = forms.DecimalField(
         max_digits=10,
         decimal_places=2,
         label="Set Property Price",
-        widget=forms.NumberInput(attrs={'placeholder': 'e.g. 450.00'})
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g. 450.00',
+            'step': '0.01',
+            'min': '0'
+        })
     )
 
     currency = forms.ModelChoiceField(
         queryset=Currency.objects.all(),
         empty_label=None,
         label="Currency",
-        widget=forms.Select()
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        })
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # If no initial currency is passed, default to USD
+        # Order currencies alphabetically
+        self.fields['currency'].queryset = Currency.objects.all().order_by('code')
+
+        # Default to USD if no initial currency
         if not self.initial.get('currency'):
             try:
                 usd = Currency.objects.get(code='USD')
                 self.initial['currency'] = usd
-                self.fields['currency'].initial = usd
             except Currency.DoesNotExist:
                 pass
-
 
 class PropertyStep7Form(forms.Form):
     amenities = forms.ModelMultipleChoiceField(

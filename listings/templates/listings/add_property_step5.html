@@ -2,12 +2,95 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2 class="mb-4">Step 5: Upload Interior Images</h2>
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Step 5: Upload Interior Images</h2>
 
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Next</button>
-  </form>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <label for="{{ form.images.id_for_label }}" class="form-label">
+                {{ form.images.label }}
+              </label>
+              <div class="custom-file">
+                <input type="file"
+                       name="{{ form.images.name }}"
+                       class="form-control"
+                       id="{{ form.images.id_for_label }}"
+                       multiple
+                       accept="image/*">
+              </div>
+              {% if form.images.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.images.errors|first }}
+                </div>
+              {% endif %}
+              <small class="form-text text-muted">
+                Upload multiple images (JPEG, PNG, max 5MB each)
+              </small>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'add_property_step4' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+              </a>
+              <button type="submit" class="btn btn-primary">
+                Next <i class="fas fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  .custom-file {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  .custom-file-input {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: calc(2.25rem + 2px);
+    margin: 0;
+    opacity: 0;
+  }
+  .custom-file-label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1;
+    height: calc(2.25rem + 2px);
+    padding: .375rem .75rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+  }
+  .custom-file-label::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    display: block;
+    height: calc(2.25rem + 2px);
+    padding: .375rem .75rem;
+    line-height: 1.5;
+    color: #495057;
+    content: "Browse";
+    background-color: #e9ecef;
+    border-left: inherit;
+    border-radius: 0 .25rem .25rem 0;
+  }
+</style>
 {% endblock %}

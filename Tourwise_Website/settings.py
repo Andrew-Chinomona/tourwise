@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'payments',
     'behave_django',
     'widget_tweaks',
+
 ]
 
 MIDDLEWARE = [

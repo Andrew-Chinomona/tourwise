@@ -17,7 +17,7 @@ def start_property_listing(request):
 
     return redirect('add_property_step1')
 
-@login_required #select property type
+@login_required
 def add_property_step1(request):
     property_id = request.session.get('editing_property_id')
     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
@@ -31,9 +31,12 @@ def add_property_step1(request):
     else:
         form = PropertyStep1Form(initial={'property_type': property_obj.property_type})
 
-    return render(request, 'listings/add_property_step1.html', {'form': form})
+    return render(request, 'listings/add_property_step1.html', {
+        'form': form,
+        'property': property_obj
+    })
 
-@login_required()   #add description
+@login_required()
 def add_property_step2(request):
     property_id = request.session.get('editing_property_id')
     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
@@ -47,9 +50,12 @@ def add_property_step2(request):
     else:
         form = PropertyStep2Form(initial={'description': property_obj.description})
 
-    return render(request, 'listings/add_property_step2.html', {'form': form})
+    return render(request, 'listings/add_property_step2.html', {
+        'form': form,
+        'property': property_obj
+    })
 
-@login_required()   #create city, suburb, street and call generate-title
+@login_required()
 def add_property_step3(request):
     property_id = request.session.get('editing_property_id')
     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
@@ -62,19 +68,20 @@ def add_property_step3(request):
             property_obj.street_address = form.cleaned_data['street_address']
             property_obj.save()
             property_obj.generate_title()
-
             return redirect('add_property_step4')
     else:
-        #this will allow the user to resume and to see the current data saved in the DB
         form = PropertyStep3Form(initial={
             'city': property_obj.city,
             'suburb': property_obj.suburb,
             'street_address': property_obj.street_address
         })
 
-    return render(request, 'listings/add_property_step3.html', {'form': form})
+    return render(request, 'listings/add_property_step3.html', {
+        'form': form,
+        'property': property_obj
+    })
 
-@login_required() #upload main image
+@login_required()
 def add_property_step4(request):
     property_id = request.session.get('editing_property_id')
     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
@@ -84,30 +91,14 @@ def add_property_step4(request):
         if form.is_valid():
             property_obj.main_image = form.cleaned_data['main_image']
             property_obj.save()
-            return redirect('add_property_step5')  # Next step
+            return redirect('add_property_step5')
     else:
         form = PropertyStep4Form()
 
-    return render(request, 'listings/add_property_step4.html', {'form': form})
-
-# @login_required()   #upload other images
-# def add_property_step5(request):
-#     property_id = request.session.get('editing_property_id')
-#     property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-#
-#     if request.method == 'POST':
-#         form = PropertyStep5Form(request.POST, request.FILES)
-#         if form.is_valid():
-#             images = request.FILES.getlist('images')
-#
-#             for image in images:
-#                 PropertyImage.objects.create(property=property_obj, image=image)
-#
-#             return redirect('add_property_step6')  # Next step
-#     else:
-#         form = PropertyStep5Form()
-#
-#     return render(request, 'listings/add_property_step5.html', {'form': form})
+    return render(request, 'listings/add_property_step4.html', {
+        'form': form,
+        'property': property_obj
+    })
 @login_required()
 def add_property_step5(request):
     property_id = request.session.get('editing_property_id')
@@ -116,21 +107,21 @@ def add_property_step5(request):
     if request.method == 'POST':
         form = PropertyStep5Form(request.POST, request.FILES)
         if form.is_valid():
-            images = form.cleaned_data.get('images') or []
+            images = request.FILES.getlist('images')
 
-            # If images is a single file, wrap it in a list
-            if not isinstance(images, list):
-                images = [images]
-
-            for image in images:
-                PropertyImage.objects.create(property=property_obj, image=image)
-
-            return redirect('add_property_step6')
+            if not images:
+                form.add_error('images', 'Please upload at least one image.')
+            else:
+                for image in images:
+                    PropertyImage.objects.create(property=property_obj, image=image)
+                return redirect('add_property_step6')
     else:
         form = PropertyStep5Form()
 
-    return render(request, 'listings/add_property_step5.html', {'form': form})
-
+    return render(request, 'listings/add_property_step5.html', {
+        'form': form,
+        'property': property_obj
+    })
 
 from listings.models import Currency  # Make sure you import this
 
@@ -142,19 +133,20 @@ def add_property_step6(request):
     if request.method == 'POST':
         form = PropertyStep6Form(request.POST)
         if form.is_valid():
-            # Save both price and selected currency
             property_obj.price = form.cleaned_data['price']
             property_obj.currency = form.cleaned_data['currency']
             property_obj.save()
             return redirect('add_property_step7')
     else:
-        # Pre-fill form with existing values (if available)
         form = PropertyStep6Form(initial={
             'price': property_obj.price,
             'currency': property_obj.currency
         })
 
-    return render(request, 'listings/add_property_step6.html', {'form': form})
+    return render(request, 'listings/add_property_step6.html', {
+        'form': form,
+        'property': property_obj
+    })
 
 
 
