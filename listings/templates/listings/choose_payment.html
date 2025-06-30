@@ -10,41 +10,49 @@
 
           <!-- Property Preview -->
           <div class="row mb-4">
-            <!-- Main Image -->
-            <div class="col-md-6 position-relative mb-3 mb-md-0">
-              {% if property.main_image %}
-                <img src="{{ property.main_image.url }}" alt="Main Image"
-                     class="img-fluid rounded"
-                     style="width: 100%; height: 300px; object-fit: cover;">
-              {% endif %}
+<!-- Main Image -->
+<div class="col-md-6 position-relative mb-3 mb-md-0">
+  {% if property.main_image %}
+    <img src="{{ property.main_image.url }}" alt="Main Image"
+         class="img-fluid rounded"
+         style="width: 100%; height: 300px; object-fit: cover;">
+  {% endif %}
 
-              {% if property.profile_photo %}
-                <div class="position-absolute" style="bottom: 20px; left: 20px; display: flex; align-items: center;">
-                  <img src="{{ property.profile_photo.url }}"
-                       style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-                  <span class="ms-2 text-white bg-dark px-2 py-1 rounded">{{ user.username }}</span>
-                </div>
-              {% endif %}
-            </div>
+  {% if property.profile_photo %}
+    <div class="position-absolute" style="bottom: 20px; left: 20px; display: flex; align-items: center;">
+      <img src="{{ property.profile_photo.url }}"
+           style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+      <span class="ms-2 text-white bg-dark px-2 py-1 rounded">{{ user.username }}</span>
+    </div>
+  {% endif %}
+</div>
 
-            <!-- Interior Images -->
-            <div class="col-md-6">
-              <div class="row g-2">
-                {% for img in property.images.all|slice:":4" %}
-                  <div class="col-6">
-                    <img src="{{ img.image.url }}" alt="Interior"
-                         class="img-fluid rounded"
-                         style="width: 100%; height: 140px; object-fit: cover;">
-                  </div>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
+<!-- Interior Images - Match Main Image Height -->
+<div class="col-md-6 d-flex flex-column justify-content-between" style="height: 300px;">
+  <div class="row g-0 mb-2">
+    {% for img in property.images.all|slice:":2" %}
+      <div class="col-6 pe-1">
+        <img src="{{ img.image.url }}" alt="Interior"
+             class="img-fluid rounded w-100"
+             style="height: 140px; object-fit: cover;">
+      </div>
+    {% endfor %}
+  </div>
+  <div class="row g-0">
+    {% for img in property.images.all|slice:"2:4" %}
+      <div class="col-6 pe-1">
+        <img src="{{ img.image.url }}" alt="Interior"
+             class="img-fluid rounded w-100"
+             style="height: 140px; object-fit: cover;">
+      </div>
+    {% endfor %}
+  </div>
+</div>
 
           <!-- Property Details -->
           <div class="mb-4">
-                 <h4 class="text-truncate" style="max-width: 100%;">
-                {{ property.title }}
+            <h4 class="text-truncate" style="max-width: 100%;">
+              {{ property.title }}
             </h4>
             <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
 
@@ -93,6 +101,11 @@
                 {% endfor %}
               </div>
             </div>
+
+            <!-- Map Section -->
+            <hr class="my-4">
+            <h5>📍 Property Location on Map</h5>
+            <div id="map" style="height: 400px;" class="mb-4"></div>
           </div>
         </div>
       </div>
@@ -136,4 +149,28 @@
     </div>
   </div>
 </div>
+
+<!-- Leaflet.js for Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const lat = {{ latitude|default:"null" }};
+    const lng = {{ longitude|default:"null" }};
+
+    if (lat && lng) {
+      const map = L.map('map').setView([lat, lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      L.marker([lat, lng]).addTo(map)
+        .bindPopup("Property Location")
+        .openPopup();
+    } else {
+      document.getElementById("map").innerHTML = "<p class='text-muted'>No location available for this property.</p>";
+    }
+  });
+</script>
 {% endblock %}

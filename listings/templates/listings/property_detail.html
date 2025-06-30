@@ -4,46 +4,31 @@
 {% block content %}
 <div class="container mt-4">
 
-  <!-- 🖼 Image Gallery - Fixed Height Container -->
+  <!-- 🖼 Image Gallery -->
   <div class="row mb-4" style="height: 400px; overflow: hidden;">
-    <!-- Main Image (75%) -->
     <div class="col-md-8 h-100 pe-1">
       <div class="h-100 rounded-start overflow-hidden">
         <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ property.main_image.url }}">
-          <img src="{{ property.main_image.url }}"
-               alt="Main Image"
-               class="img-fluid w-100 h-100"
-               style="object-fit: cover;">
+          <img src="{{ property.main_image.url }}" alt="Main Image" class="img-fluid w-100 h-100" style="object-fit: cover;">
         </a>
       </div>
     </div>
-
-    <!-- Interior Images Grid (2x2) -->
     <div class="col-md-4 h-100">
       <div class="row g-1 h-100 m-0">
         {% for image in interior_images %}
           {% if forloop.counter <= 3 %}
             <div class="col-6 p-0 h-50">
               <div class="h-100 pe-1 pb-1">
-                <a href="#" class="d-block h-100 rounded overflow-hidden"
-                   data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ image.image.url }}">
-                  <img src="{{ image.image.url }}"
-                       class="img-fluid w-100 h-100"
-                       style="object-fit: cover;"
-                       alt="Interior Photo {{ forloop.counter }}">
+                <a href="#" class="d-block h-100 rounded overflow-hidden" data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ image.image.url }}">
+                  <img src="{{ image.image.url }}" class="img-fluid w-100 h-100" style="object-fit: cover;" alt="Interior Photo {{ forloop.counter }}">
                 </a>
               </div>
             </div>
           {% elif forloop.counter == 4 %}
-            <!-- Bottom-right with overlay -->
             <div class="col-6 p-0 h-50 position-relative">
               <div class="h-100 pe-1 pb-1">
-                <a href="#" class="d-block h-100 rounded overflow-hidden position-relative"
-                   data-bs-toggle="modal" data-bs-target="#imageGalleryModal">
-                  <img src="{{ image.image.url }}"
-                       class="img-fluid w-100 h-100"
-                       style="object-fit: cover;"
-                       alt="More Photos">
+                <a href="#" class="d-block h-100 rounded overflow-hidden position-relative" data-bs-toggle="modal" data-bs-target="#imageGalleryModal">
+                  <img src="{{ image.image.url }}" class="img-fluid w-100 h-100" style="object-fit: cover;" alt="More Photos">
                   <div class="position-absolute bottom-0 end-0 m-2 px-3 py-1 bg-dark bg-opacity-75 text-white rounded">
                     Show More
                   </div>
@@ -60,12 +45,9 @@
   <div class="row">
     <!-- Left Column -->
     <div class="col-md-8">
-        <h3 class="text-truncate" style="max-width: 100%;">
-          {{ property.title }}
-      </h3>
+      <h3 class="text-truncate">{{ property.title }}</h3>
       <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
 
-      <!-- Feature Boxes with Icons -->
       <div class="d-flex gap-3 mb-3 flex-wrap">
         <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
           <i class="fas fa-bed fs-4 mb-1"></i>
@@ -80,14 +62,13 @@
           <span>{{ property.area }} m²</span>
         </div>
         {% if property.parking_spaces %}
-        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
-          <i class="fas fa-car fs-4 mb-1"></i>
-          <span>{{ property.parking_spaces }} Parking</span>
-        </div>
+          <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
+            <i class="fas fa-car fs-4 mb-1"></i>
+            <span>{{ property.parking_spaces }} Parking</span>
+          </div>
         {% endif %}
       </div>
 
-      <!-- Description -->
       <h5>{{ property.property_type|title }} Description</h5>
       <p>{{ property.description }}</p>
 
@@ -107,11 +88,15 @@
           Show All Amenities ({{ amenities|length|add:"-6" }} more)
         </button>
       {% endif %}
+
+      <!-- 🗺️ Map Section -->
+      <h5 class="mt-4">Property Location</h5>
+    <p> </p>
+      <div id="map" style="height: 350px;" class="rounded shadow-sm mb-4"></div>
     </div>
 
     <!-- Right Column -->
     <div class="col-md-4">
-      <!-- Host Info -->
       <div class="card mb-3 shadow-sm">
         <div class="card-body text-center">
           {% if property.owner.profile_photo and property.owner.profile_photo.url %}
@@ -124,7 +109,6 @@
         </div>
       </div>
 
-      <!-- Price Box -->
       <div class="card shadow-sm">
         <div class="card-body">
           <h4>{{ property.currency }} {{ property.price }}</h4>
@@ -138,7 +122,7 @@
   </div>
 </div>
 
-<!-- 🔍 Single Image Preview Modal -->
+<!-- Single Image Modal -->
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
@@ -147,21 +131,19 @@
   </div>
 </div>
 
-<!-- 🖼 Full Image Gallery Modal -->
+<!-- Gallery Modal -->
 <div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-body">
         <div class="row g-2">
-          <!-- Main image -->
           <div class="col-md-4">
             <img src="{{ property.main_image.url }}" class="img-fluid rounded" alt="Main Image">
           </div>
-          <!-- Interior images -->
           {% for image in interior_images %}
-          <div class="col-md-4">
-            <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Interior Image {{ forloop.counter }}">
-          </div>
+            <div class="col-md-4">
+              <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Interior {{ forloop.counter }}">
+            </div>
           {% endfor %}
         </div>
       </div>
@@ -171,14 +153,14 @@
 
 <!-- Scripts -->
 <script>
-  // Set image in single-image modal
+  // Image preview
   document.querySelectorAll('[data-bs-target="#imageModal"]').forEach(img => {
     img.addEventListener('click', () => {
       document.getElementById('modalImage').src = img.getAttribute('data-img');
     });
   });
 
-  // Toggle amenities visibility
+  // Toggle amenities
   document.getElementById('toggleAmenitiesBtn')?.addEventListener('click', function () {
     const amenities = document.querySelectorAll('.amenity-item');
     let showingAll = false;
@@ -196,7 +178,31 @@
   });
 </script>
 
-<!-- Font Awesome for icons -->
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const lat = {{ latitude|default:"null" }};
+    const lng = {{ longitude|default:"null" }};
+
+    if (lat && lng) {
+      const map = L.map('map').setView([lat, lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © OpenStreetMap contributors'
+      }).addTo(map);
+
+      L.marker([lat, lng]).addTo(map)
+        .bindPopup("{{ property.title|escapejs }}")
+        .openPopup();
+    } else {
+      document.getElementById('map').innerHTML = "<p class='text-muted'>Location not available.</p>";
+    }
+  });
+</script>
+
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>

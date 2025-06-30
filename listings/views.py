@@ -256,11 +256,13 @@ def choose_payment(request):
     else:
         form = ChoosePaymentForm(initial={'listing_type': property_obj.listing_type})
 
+    # Add latitude and longitude to the context
     return render(request, 'listings/choose_payment.html', {
         'form': form,
         'property': property_obj,
+        'latitude': property_obj.latitude,
+        'longitude': property_obj.longitude,
     })
-
 
 
 
@@ -326,6 +328,8 @@ def property_detail(request, pk):
         'property': property_obj,
         'interior_images': interior_images,
         'amenities': amenities,
+        'latitude': property_obj.latitude,
+        'longitude': property_obj.longitude,
     })
 
 def recent_listings_view(request):
