@@ -34,7 +34,7 @@ class Property(models.Model):
     #Ownership and classification
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='properties')
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, blank=True, null=True)
-    title = models.CharField(max_length=200, default='Untitled')
+    title = models.CharField(max_length=100, default='Untitled')
     description = models.TextField(blank=True, null=True)
 
     #Location
