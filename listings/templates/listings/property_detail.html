@@ -21,37 +21,37 @@
     <!-- Interior Images Grid (2x2) -->
     <div class="col-md-4 h-100">
       <div class="row g-1 h-100 m-0">
-        {% for image in interior_images|slice:":4" %}
-          <div class="col-6 p-0 h-50">
-            <div class="h-100 pe-1 pb-1">
-              <a href="#" class="d-block h-100 rounded overflow-hidden"
-                 data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ image.image.url }}">
-                <img src="{{ image.image.url }}"
-                     class="img-fluid w-100 h-100"
-                     style="object-fit: cover;"
-                     alt="Interior Photo">
-              </a>
+        {% for image in interior_images %}
+          {% if forloop.counter <= 3 %}
+            <div class="col-6 p-0 h-50">
+              <div class="h-100 pe-1 pb-1">
+                <a href="#" class="d-block h-100 rounded overflow-hidden"
+                   data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ image.image.url }}">
+                  <img src="{{ image.image.url }}"
+                       class="img-fluid w-100 h-100"
+                       style="object-fit: cover;"
+                       alt="Interior Photo {{ forloop.counter }}">
+                </a>
+              </div>
             </div>
-          </div>
+          {% elif forloop.counter == 4 %}
+            <!-- Bottom-right with overlay -->
+            <div class="col-6 p-0 h-50 position-relative">
+              <div class="h-100 pe-1 pb-1">
+                <a href="#" class="d-block h-100 rounded overflow-hidden position-relative"
+                   data-bs-toggle="modal" data-bs-target="#imageGalleryModal">
+                  <img src="{{ image.image.url }}"
+                       class="img-fluid w-100 h-100"
+                       style="object-fit: cover;"
+                       alt="More Photos">
+                  <div class="position-absolute bottom-0 end-0 m-2 px-3 py-1 bg-dark bg-opacity-75 text-white rounded">
+                    Show More
+                  </div>
+                </a>
+              </div>
+            </div>
+          {% endif %}
         {% endfor %}
-
-        {% if interior_images|length > 4 %}
-          <!-- Show More Overlay -->
-          <div class="col-6 p-0 h-50 position-relative">
-            <div class="h-100 pe-1 pb-1">
-              <a href="#" class="d-block h-100 rounded overflow-hidden position-relative"
-                 data-bs-toggle="modal" data-bs-target="#imageGalleryModal">
-                <img src="{{ interior_images.4.image.url }}"
-                     class="img-fluid w-100 h-100"
-                     style="object-fit: cover;"
-                     alt="More Photos">
-                <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex flex-column align-items-center justify-content-center text-white">
-                  +{{ interior_images|length|add:"-4" }}<br>More Photos
-                </div>
-              </a>
-            </div>
-          </div>
-        {% endif %}
       </div>
     </div>
   </div>
@@ -63,12 +63,26 @@
       <h3>{{ property.title }}</h3>
       <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
 
-      <!-- Feature Boxes -->
-      <div class="d-flex gap-3 mb-3">
-        <div class="border rounded p-2 text-center w-25">🛏 {{ property.bedrooms }} Bedrooms</div>
-        <div class="border rounded p-2 text-center w-25">🛁 {{ property.bathrooms }} Bathrooms</div>
-        <div class="border rounded p-2 text-center w-25">📐 {{ property.area }} m²</div>
-        <div class="border rounded p-2 text-center w-25">🚗 {{ property.parking_spaces }} Parking</div>
+      <!-- Feature Boxes with Icons -->
+      <div class="d-flex gap-3 mb-3 flex-wrap">
+        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
+          <i class="fas fa-bed fs-4 mb-1"></i>
+          <span>{{ property.bedrooms }} Bedroom{{ property.bedrooms|pluralize }}</span>
+        </div>
+        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
+          <i class="fas fa-bath fs-4 mb-1"></i>
+          <span>{{ property.bathrooms }} Bathroom{{ property.bathrooms|pluralize }}</span>
+        </div>
+        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
+          <i class="fas fa-ruler-combined fs-4 mb-1"></i>
+          <span>{{ property.area }} m²</span>
+        </div>
+        {% if property.parking_spaces %}
+        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
+          <i class="fas fa-car fs-4 mb-1"></i>
+          <span>{{ property.parking_spaces }} Parking</span>
+        </div>
+        {% endif %}
       </div>
 
       <!-- Description -->
@@ -77,13 +91,19 @@
 
       <!-- Amenities -->
       <h5>Offered Amenities</h5>
-      <div class="d-flex flex-wrap gap-2 mb-2">
-        {% for amenity in amenities|slice:":6" %}
-          <span class="border rounded-pill px-3 py-1 bg-light">{{ amenity.name }}</span>
+      <div class="amenities-container">
+        {% for amenity in amenities %}
+          <span class="amenity-item border rounded-pill px-3 py-1 bg-light d-flex align-items-center gap-1 {% if forloop.counter > 6 %}d-none{% endif %}">
+            <i class="fas fa-{{ amenity.icon|default:'check' }} text-primary"></i>
+            {{ amenity.name }}
+          </span>
         {% endfor %}
       </div>
+
       {% if amenities|length > 6 %}
-        <a href="#" class="btn btn-sm btn-outline-secondary">Show All Amenities</a>
+        <button id="toggleAmenitiesBtn" class="btn btn-sm btn-outline-secondary mt-2">
+          Show All Amenities ({{ amenities|length|add:"-6" }} more)
+        </button>
       {% endif %}
     </div>
 
@@ -131,9 +151,14 @@
     <div class="modal-content">
       <div class="modal-body">
         <div class="row g-2">
+          <!-- Main image -->
+          <div class="col-md-4">
+            <img src="{{ property.main_image.url }}" class="img-fluid rounded" alt="Main Image">
+          </div>
+          <!-- Interior images -->
           {% for image in interior_images %}
           <div class="col-md-4">
-            <img src="{{ image.image.url }}" class="img-fluid rounded">
+            <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Interior Image {{ forloop.counter }}">
           </div>
           {% endfor %}
         </div>
@@ -142,12 +167,42 @@
   </div>
 </div>
 
-<!-- 🔧 Modal Script -->
+<!-- Scripts -->
 <script>
+  // Set image in single-image modal
   document.querySelectorAll('[data-bs-target="#imageModal"]').forEach(img => {
     img.addEventListener('click', () => {
       document.getElementById('modalImage').src = img.getAttribute('data-img');
     });
   });
+
+  // Toggle amenities visibility
+  document.getElementById('toggleAmenitiesBtn')?.addEventListener('click', function () {
+    const amenities = document.querySelectorAll('.amenity-item');
+    let showingAll = false;
+
+    amenities.forEach((item, index) => {
+      if (index >= 6) {
+        item.classList.toggle('d-none');
+        showingAll = !item.classList.contains('d-none');
+      }
+    });
+
+    this.textContent = showingAll
+      ? 'Show Fewer Amenities'
+      : 'Show All Amenities ({{ amenities|length|add:"-6" }} more)';
+  });
 </script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+  .amenities-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+</style>
 {% endblock %}

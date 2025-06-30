@@ -9,9 +9,11 @@ class Currency(models.Model):
     def __str__(self):
         return f"({self.code}) {self.symbol}"
 
-# Amenity options
+
 class Amenity(models.Model):
     name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=50, default='check',
+                            help_text="Font Awesome icon name (e.g. 'wifi', 'tv', 'swimming-pool')")
 
     def __str__(self):
         return self.name
