@@ -1,25 +1,65 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="container mt-5">
-  <h2>Step 7: Choose Property Amenities</h2>
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Step 7: Choose Property Amenities</h2>
 
-  <form method="post">
-    {% csrf_token %}
-    <div class="form-group">
-      {{ form.amenities.label_tag }}
-      <div class="row">
-        {% for checkbox in form.amenities %}
-          <div class="col-md-4 mb-2">
-            <label class="form-check-label">
-              {{ checkbox.tag }}
-              {{ checkbox.choice_label }}
-            </label>
-          </div>
-        {% endfor %}
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <label class="form-label mb-3">{{ form.amenities.label }}</label>
+
+              {% if form.amenities.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.amenities.errors|first }}
+                </div>
+              {% endif %}
+
+              <!-- Grid layout for 3-column checkboxes -->
+              <div class="row">
+                {% for checkbox in form.amenities %}
+                  <div class="col-md-4 mb-2">
+                    <div class="form-check">
+                      {{ checkbox.tag }}
+                      <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                        {{ checkbox.choice_label }}
+                      </label>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <small class="form-text text-muted">
+                Select all amenities that apply to your property
+              </small>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'add_property_step6' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+              </a>
+              <button type="submit" class="btn btn-primary">
+                Next <i class="fas fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-
-    <button type="submit" class="btn btn-primary mt-3">Next</button>
-  </form>
+  </div>
 </div>
+
+<style>
+  .form-check input[type="checkbox"] {
+    margin-right: 8px;
+  }
+  .form-check-label {
+    cursor: pointer;
+  }
+</style>
 {% endblock %}

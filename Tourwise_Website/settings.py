@@ -137,3 +137,8 @@ AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailOrPhoneBackend',  # 👈 custom
     'django.contrib.auth.backends.ModelBackend',  # fallback
 ]
+
+from dotenv import load_dotenv
+load_dotenv()
+
+OPENCAGE_API_KEY = os.getenv('OPENCAGE_API_KEY')

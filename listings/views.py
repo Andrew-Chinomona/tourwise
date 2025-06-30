@@ -6,6 +6,7 @@ from payments.models import Payment
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
 
 @login_required()   #create a blank property object and store ID in session
 def start_property_listing(request):
@@ -68,6 +69,8 @@ def add_property_step3(request):
             property_obj.city = form.cleaned_data['city']
             property_obj.suburb = form.cleaned_data['suburb']
             property_obj.street_address = form.cleaned_data['street_address']
+            property_obj.latitude = form.cleaned_data.get('latitude')
+            property_obj.longitude = form.cleaned_data.get('longitude')
             property_obj.save()
             property_obj.generate_title()
             return redirect('add_property_step4')
@@ -75,13 +78,17 @@ def add_property_step3(request):
         form = PropertyStep3Form(initial={
             'city': property_obj.city,
             'suburb': property_obj.suburb,
-            'street_address': property_obj.street_address
+            'street_address': property_obj.street_address,
+            'latitude': property_obj.latitude,
+            'longitude': property_obj.longitude,
         })
 
     return render(request, 'listings/add_property_step3.html', {
         'form': form,
-        'property': property_obj
+        'property': property_obj,
+        'OPEN_CAGE_API_KEY': settings.OPENCAGE_API_KEY
     })
+
 
 @login_required()
 def add_property_step4(request):

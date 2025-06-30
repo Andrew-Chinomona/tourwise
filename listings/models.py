@@ -43,6 +43,8 @@ class Property(models.Model):
     street_address = models.CharField(max_length=255, blank=True)
     suburb = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
 
     #Media
     main_image = models.ImageField(upload_to='property_main_images/', null=True, blank=True)

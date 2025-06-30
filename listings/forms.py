@@ -5,7 +5,6 @@ from .models import Amenity, Property, Currency
 from django.utils.safestring import mark_safe
 from listings.models import Currency
 
-
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
@@ -67,6 +66,11 @@ class PropertyStep3Form(forms.Form):
             'class': 'form-control'
         })
     )
+
+    # Hidden fields for coordinates (populated by JS)
+    latitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
+    longitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
+
 
 class PropertyStep4Form(forms.Form):
     main_image = forms.ImageField(

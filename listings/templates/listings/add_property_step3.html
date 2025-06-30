@@ -1,3 +1,83 @@
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block content %}#}
+{#<div class="container mt-5">#}
+{#  <div class="row justify-content-center">#}
+{#    <div class="col-md-8">#}
+{#      <div class="card shadow-sm">#}
+{#        <div class="card-body">#}
+{#          <h2 class="card-title mb-4">Step 3: Property Location</h2>#}
+{##}
+{#          <form method="post">#}
+{#            {% csrf_token %}#}
+{##}
+{#            <div class="mb-3">#}
+{#              <label for="{{ form.city.id_for_label }}" class="form-label">#}
+{#                {{ form.city.label }}#}
+{#              </label>#}
+{#              {{ form.city }}#}
+{#              {% if form.city.errors %}#}
+{#                <div class="invalid-feedback d-block">#}
+{#                  {{ form.city.errors|first }}#}
+{#                </div>#}
+{#              {% endif %}#}
+{#            </div>#}
+{##}
+{#            <div class="mb-3">#}
+{#              <label for="{{ form.suburb.id_for_label }}" class="form-label">#}
+{#                {{ form.suburb.label }} (optional)#}
+{#              </label>#}
+{#              {{ form.suburb }}#}
+{#              {% if form.suburb.errors %}#}
+{#                <div class="invalid-feedback d-block">#}
+{#                  {{ form.suburb.errors|first }}#}
+{#                </div>#}
+{#              {% endif %}#}
+{#            </div>#}
+{##}
+{#            <div class="mb-4">#}
+{#              <label for="{{ form.street_address.id_for_label }}" class="form-label">#}
+{#                {{ form.street_address.label }}#}
+{#              </label>#}
+{#              {{ form.street_address }}#}
+{#              {% if form.street_address.errors %}#}
+{#                <div class="invalid-feedback d-block">#}
+{#                  {{ form.street_address.errors|first }}#}
+{#                </div>#}
+{#              {% endif %}#}
+{#            </div>#}
+{##}
+{#            <div class="d-flex justify-content-between">#}
+{#              <a href="{% url 'add_property_step2' %}" class="btn btn-secondary">#}
+{#                <i class="fas fa-arrow-left me-1"></i> Back#}
+{#              </a>#}
+{#              <button type="submit" class="btn btn-primary">#}
+{#                Next <i class="fas fa-arrow-right ms-1"></i>#}
+{#              </button>#}
+{#            </div>#}
+{#          </form>#}
+{#        </div>#}
+{#      </div>#}
+{#    </div>#}
+{#  </div>#}
+{#</div>#}
+{##}
+{#<style>#}
+{#  /* Add custom styling for form controls */#}
+{#  input[type="text"] {#}
+{#    padding: 10px;#}
+{#    border-radius: 5px;#}
+{#    border: 1px solid #ced4da;#}
+{#    width: 100%;#}
+{#  }#}
+{#  .form-label {#}
+{#    font-weight: 500;#}
+{#    margin-bottom: 5px;#}
+{#  }#}
+{#</style>#}
+{#{% endblock %}#}
+
+
 {% extends 'base.html' %}
 
 {% block content %}
@@ -17,9 +97,7 @@
               </label>
               {{ form.city }}
               {% if form.city.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.city.errors|first }}
-                </div>
+                <div class="invalid-feedback d-block">{{ form.city.errors|first }}</div>
               {% endif %}
             </div>
 
@@ -29,23 +107,33 @@
               </label>
               {{ form.suburb }}
               {% if form.suburb.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.suburb.errors|first }}
-                </div>
+                <div class="invalid-feedback d-block">{{ form.suburb.errors|first }}</div>
               {% endif %}
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3">
               <label for="{{ form.street_address.id_for_label }}" class="form-label">
                 {{ form.street_address.label }}
               </label>
               {{ form.street_address }}
               {% if form.street_address.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.street_address.errors|first }}
-                </div>
+                <div class="invalid-feedback d-block">{{ form.street_address.errors|first }}</div>
               {% endif %}
             </div>
+
+            <!-- Show on Map Button -->
+            <div class="mb-3">
+              <button type="button" class="btn btn-outline-success" onclick="showOnMap()">
+                📍 Show on Map
+              </button>
+            </div>
+
+            <!-- Hidden Lat/Lng Fields -->
+            {{ form.latitude }}
+            {{ form.longitude }}
+
+            <!-- Map Container -->
+            <div id="map" style="height: 400px;" class="mb-4"></div>
 
             <div class="d-flex justify-content-between">
               <a href="{% url 'add_property_step2' %}" class="btn btn-secondary">
@@ -62,17 +150,58 @@
   </div>
 </div>
 
-<style>
-  /* Add custom styling for form controls */
-  input[type="text"] {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ced4da;
-    width: 100%;
+<!-- Leaflet.js -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- JS Logic -->
+<script>
+  let map = L.map('map').setView([-17.8252, 31.0335], 13); // Harare default
+  let marker;
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  function showOnMap() {
+    const street = document.getElementById("id_street_address").value;
+    const suburb = document.getElementById("id_suburb").value;
+    const city = document.getElementById("id_city").value;
+    const fullAddress = `${street}, ${suburb}, ${city}, Zimbabwe`;
+
+    const apiKey = "{{ OPEN_CAGE_API_KEY|default:'' }}";  // inject this via context in views.py
+    const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data.results.length > 0) {
+          const lat = data.results[0].geometry.lat;
+          const lng = data.results[0].geometry.lng;
+
+          // Move marker
+          if (marker) {
+            marker.setLatLng([lat, lng]);
+          } else {
+            marker = L.marker([lat, lng], {draggable:true}).addTo(map);
+            marker.on("dragend", function() {
+              const pos = marker.getLatLng();
+              document.getElementById("id_latitude").value = pos.lat;
+              document.getElementById("id_longitude").value = pos.lng;
+            });
+          }
+
+          map.setView([lat, lng], 15);
+          document.getElementById("id_latitude").value = lat;
+          document.getElementById("id_longitude").value = lng;
+        } else {
+          alert("Location not found. Try being more specific.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Something went wrong while fetching the location.");
+      });
   }
-  .form-label {
-    font-weight: 500;
-    margin-bottom: 5px;
-  }
-</style>
+</script>
 {% endblock %}
