@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>{{ title }}</h2>
+  <div class="row">
+    {% for property in properties %}
+      <div class="col-md-3 mb-4">
+        <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
+          <div class="card h-100 shadow-sm">
+            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top" style="height: 180px; object-fit: cover;">
+            <div class="card-body">
+              <h5 class="card-title text-truncate">{{ property.title }}</h5>
+              <p class="card-text">
+                {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
+                <strong>{{ property.currency }} {{ property.price }}</strong>
+              </p>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% empty %}
+      <p>No listings found.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

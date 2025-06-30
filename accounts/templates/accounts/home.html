@@ -65,9 +65,9 @@
       <p>No recent listings available.</p>
     {% endfor %}
   </div>
-  <div class="text-center mb-5">
-    <a href="#" class="btn btn-outline-primary">Show More</a>
-  </div>
+<div class="text-center mb-5">
+  <a href="{% url 'recent_listings' %}" class="btn btn-outline-primary">Show More</a>
+</div>
 
   <!-- ⭐ Featured Listings -->
   <h3>Featured Listings</h3>
@@ -94,9 +94,9 @@
       <p>No featured listings yet.</p>
     {% endfor %}
   </div>
-  <div class="text-center mb-5">
-    <a href="#" class="btn btn-outline-warning">Show More</a>
-  </div>
+<div class="text-center mb-5">
+  <a href="{% url 'featured_listings' %}" class="btn btn-outline-warning">Show More</a>
+</div>
 
 </div>
 {% endblock %}

@@ -4,6 +4,8 @@ from .forms import PropertyStep1Form, PropertyStep2Form, PropertyStep3Form, Prop
 from .models import Property, PropertyImage
 from payments.models import Payment
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from datetime import timedelta
 
 @login_required()   #create a blank property object and store ID in session
 def start_property_listing(request):
@@ -319,3 +321,17 @@ def property_detail(request, pk):
         'amenities': amenities,
     })
 
+def recent_listings_view(request):
+    two_weeks_ago = timezone.now() - timedelta(weeks=2)
+    recent_properties =  Property.objects.filter(created_at__gte=two_weeks_ago).order_by('-created_at')
+    return render(request, 'listings/recent_listings.html', {'properties': recent_properties, 'title': 'Recent Listings'})
+
+
+def featured_listings_view(request):
+    featured_properties =list(Property.objects.filter(listing_type = 'priority').order_by('-created_at'))
+
+    if len(featured_properties) < 10:
+        fallback = Property.objects.filter(listing_type = 'normal').order_by('-created_at')[:10 - len(featured_properties)]
+        featured_properties += list(fallback)
+
+    return render(request, 'listings/featured_listings.html', {'properties': featured_properties, 'title': 'Featured Listings'})
