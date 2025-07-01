@@ -266,6 +266,7 @@ class EditPropertyForm(forms.ModelForm):
                 'contact_email',
                 'listing_type',
                 'amenities',
+                'currency',
             ]
             widgets = {
                 'description': forms.Textarea(attrs={'class': 'form-control','rows': 4}),

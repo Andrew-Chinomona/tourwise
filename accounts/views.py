@@ -140,3 +140,38 @@ def search_results_view(request):
         'property_type': property_type,
         'max_price': max_price
     })
+
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from .forms import SignupForm
+from .models import CustomUser
+
+def become_host_view(request):
+    if request.user.is_authenticated:
+        # Prefill for existing user
+        initial_data = {
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email,
+            'phone_number': request.user.phone_number,
+            'user_type': 'host'
+        }
+        form = SignupForm(initial=initial_data)
+        return render(request, 'accounts/become_host.html', {'form': form, 'is_editing': True})
+
+    else:
+        if request.method == 'POST':
+            form = SignupForm(request.POST)
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.username = f"{user.first_name} {user.last_name}"
+                user.save()
+
+                user.backend = 'accounts.backends.EmailOrPhoneBackend'
+                login(request, user)
+
+                return redirect('host_dashboard')
+        else:
+            form = SignupForm(initial={'user_type': 'host'})
+
+        return render(request, 'accounts/become_host.html', {'form': form, 'is_editing': False})
