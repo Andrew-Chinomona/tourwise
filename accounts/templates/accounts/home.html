@@ -1,3 +1,106 @@
+{#{% extends 'base.html' %}#}
+{#{% load static %}#}
+{##}
+{#{% block content %}#}
+{#<div class="container mt-5">#}
+{##}
+{#  <!-- 🔍 Search Bar -->#}
+{#  <form method="get" action="#" class="bg-white shadow-sm rounded-pill px-3 py-2 mb-5">#}
+{#    <div class="row align-items-center g-0 text-center text-md-start">#}
+{#      <!-- Location -->#}
+{#      <div class="col-md-4 px-3 border-end">#}
+{#        <label class="form-label mb-0 fw-semibold small text-muted">Location</label>#}
+{#        <select name="location" class="form-select border-0 p-0 bg-transparent">#}
+{#          <option value="">Any Location</option>#}
+{#          {% for loc in locations %}#}
+{#            <option value="{{ loc.city }}|{{ loc.suburb }}">{{ loc.city }} - {{ loc.suburb }}</option>#}
+{#          {% endfor %}#}
+{#        </select>#}
+{#      </div>#}
+{#      <!-- Property Type -->#}
+{#      <div class="col-md-4 px-3 border-end">#}
+{#        <label class="form-label mb-0 fw-semibold small text-muted">Type</label>#}
+{#        <select name="property_type" class="form-select border-0 p-0 bg-transparent">#}
+{#          <option value="">All Types</option>#}
+{#          <option value="house">House</option>#}
+{#          <option value="apartment">Apartment</option>#}
+{#          <option value="airbnb">Airbnb</option>#}
+{#        </select>#}
+{#      </div>#}
+{#      <!-- Max Price -->#}
+{#      <div class="col-md-3 px-3 border-end">#}
+{#        <label class="form-label mb-0 fw-semibold small text-muted">Max Price</label>#}
+{#        <input type="number" name="max_price" class="form-control border-0 p-0 bg-transparent" placeholder="e.g. 500">#}
+{#      </div>#}
+{#      <!-- Button -->#}
+{#      <div class="col-md-1 text-end">#}
+{#        <button type="submit" class="btn btn-dark rounded-circle">#}
+{#          <i class="bi bi-search"></i>#}
+{#        </button>#}
+{#      </div>#}
+{#    </div>#}
+{#  </form>#}
+{##}
+{#  <!-- 📌 Recent Listings -->#}
+{#  <h3>Recent Listings</h3>#}
+{#  <div class="row">#}
+{#    {% for property in recent_listings %}#}
+{#      <div class="col-md-3 mb-4">#}
+{#        <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">#}
+{#          <div class="card h-100 shadow-sm">#}
+{#            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">#}
+{#            <div class="card-body">#}
+{#              <h5 class="card-title text-truncate" style="max-width: 100%;">#}
+{#                  {{ property.title }}#}
+{#              </h5>#}
+{#              <p class="card-text">#}
+{#                {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>#}
+{#                <strong>{{ property.currency }} {{ property.price }}</strong>#}
+{#              </p>#}
+{#            </div>#}
+{#          </div>#}
+{#        </a>#}
+{#      </div>#}
+{#    {% empty %}#}
+{#      <p>No recent listings available.</p>#}
+{#    {% endfor %}#}
+{#  </div>#}
+{#<div class="text-center mb-5">#}
+{#  <a href="{% url 'recent_listings' %}" class="btn btn-outline-primary">Show More</a>#}
+{#</div>#}
+{##}
+{#  <!-- ⭐ Featured Listings -->#}
+{#  <h3>Featured Listings</h3>#}
+{#  <div class="row">#}
+{#    {% for property in featured_listings %}#}
+{#      <div class="col-md-3 mb-4">#}
+{#        <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">#}
+{#          <div class="card h-100 border-warning shadow-sm">#}
+{#              <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">#}
+{#            <div style="height: 180px; background-size: cover; background-position: center; background-image: url('{{ property.main_image.url }}');"></div>#}
+{#            <div class="card-body">#}
+{#                            <h5 class="card-title text-truncate" style="max-width: 100%;">#}
+{#                  {{ property.title }}#}
+{#              </h5>#}
+{#              <p class="card-text">#}
+{#                {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>#}
+{#                <strong>{{ property.currency }} {{ property.price }}</strong>#}
+{#              </p>#}
+{#            </div>#}
+{#          </div>#}
+{#        </a>#}
+{#      </div>#}
+{#    {% empty %}#}
+{#      <p>No featured listings yet.</p>#}
+{#    {% endfor %}#}
+{#  </div>#}
+{#<div class="text-center mb-5">#}
+{#  <a href="{% url 'featured_listings' %}" class="btn btn-outline-warning">Show More</a>#}
+{#</div>#}
+{##}
+{#</div>#}
+{#{% endblock %}#}
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -5,18 +108,23 @@
 <div class="container mt-5">
 
   <!-- 🔍 Search Bar -->
-  <form method="get" action="#" class="bg-white shadow-sm rounded-pill px-3 py-2 mb-5">
+  <form method="get" action="{% url 'search_results' %}" class="bg-white shadow-sm rounded-pill px-3 py-2 mb-5">
     <div class="row align-items-center g-0 text-center text-md-start">
-      <!-- Location -->
-      <div class="col-md-4 px-3 border-end">
+
+      <!-- Location Input with Suggestions -->
+      <div class="col-md-4 px-3 border-end position-relative">
         <label class="form-label mb-0 fw-semibold small text-muted">Location</label>
-        <select name="location" class="form-select border-0 p-0 bg-transparent">
-          <option value="">Any Location</option>
-          {% for loc in locations %}
-            <option value="{{ loc.city }}|{{ loc.suburb }}">{{ loc.city }} - {{ loc.suburb }}</option>
-          {% endfor %}
-        </select>
+        <input type="text"
+               name="location"
+               id="location-input"
+               autocomplete="off"
+               class="form-control border-0 p-0 bg-transparent"
+               placeholder="Start typing a city or suburb...">
+        <ul id="location-suggestions"
+            class="list-group position-absolute w-100 bg-white shadow-sm"
+            style="z-index: 1000;"></ul>
       </div>
+
       <!-- Property Type -->
       <div class="col-md-4 px-3 border-end">
         <label class="form-label mb-0 fw-semibold small text-muted">Type</label>
@@ -27,12 +135,14 @@
           <option value="airbnb">Airbnb</option>
         </select>
       </div>
+
       <!-- Max Price -->
       <div class="col-md-3 px-3 border-end">
         <label class="form-label mb-0 fw-semibold small text-muted">Max Price</label>
         <input type="number" name="max_price" class="form-control border-0 p-0 bg-transparent" placeholder="e.g. 500">
       </div>
-      <!-- Button -->
+
+      <!-- Submit Button -->
       <div class="col-md-1 text-end">
         <button type="submit" class="btn btn-dark rounded-circle">
           <i class="bi bi-search"></i>
@@ -50,9 +160,7 @@
           <div class="card h-100 shadow-sm">
             <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
             <div class="card-body">
-              <h5 class="card-title text-truncate" style="max-width: 100%;">
-                  {{ property.title }}
-              </h5>
+              <h5 class="card-title text-truncate">{{ property.title }}</h5>
               <p class="card-text">
                 {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
                 <strong>{{ property.currency }} {{ property.price }}</strong>
@@ -65,9 +173,10 @@
       <p>No recent listings available.</p>
     {% endfor %}
   </div>
-<div class="text-center mb-5">
-  <a href="{% url 'recent_listings' %}" class="btn btn-outline-primary">Show More</a>
-</div>
+
+  <div class="text-center mb-5">
+    <a href="{% url 'recent_listings' %}" class="btn btn-outline-primary">Show More</a>
+  </div>
 
   <!-- ⭐ Featured Listings -->
   <h3>Featured Listings</h3>
@@ -76,12 +185,9 @@
       <div class="col-md-3 mb-4">
         <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
           <div class="card h-100 border-warning shadow-sm">
-              <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
-{#            <div style="height: 180px; background-size: cover; background-position: center; background-image: url('{{ property.main_image.url }}');"></div>#}
+            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
             <div class="card-body">
-                            <h5 class="card-title text-truncate" style="max-width: 100%;">
-                  {{ property.title }}
-              </h5>
+              <h5 class="card-title text-truncate">{{ property.title }}</h5>
               <p class="card-text">
                 {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
                 <strong>{{ property.currency }} {{ property.price }}</strong>
@@ -94,9 +200,44 @@
       <p>No featured listings yet.</p>
     {% endfor %}
   </div>
-<div class="text-center mb-5">
-  <a href="{% url 'featured_listings' %}" class="btn btn-outline-warning">Show More</a>
-</div>
+
+  <div class="text-center mb-5">
+    <a href="{% url 'featured_listings' %}" class="btn btn-outline-warning">Show More</a>
+  </div>
 
 </div>
+
+<!-- JavaScript for dynamic location suggestions -->
+<script>
+  const input = document.getElementById('location-input');
+  const suggestionsBox = document.getElementById('location-suggestions');
+
+  input.addEventListener('input', function () {
+    const query = input.value.trim();
+    suggestionsBox.innerHTML = '';
+    if (query.length < 2) return;
+
+    fetch(`/api/locations/?q=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(location => {
+          const item = document.createElement('li');
+          item.classList.add('list-group-item', 'list-group-item-action');
+          item.textContent = location;
+          item.style.cursor = 'pointer';
+
+          item.addEventListener('click', () => {
+            input.value = location;
+            suggestionsBox.innerHTML = '';
+          });
+
+          suggestionsBox.appendChild(item);
+        });
+      });
+  });
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => suggestionsBox.innerHTML = '', 150);
+  });
+</script>
 {% endblock %}

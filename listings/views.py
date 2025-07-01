@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
+from django.http import JsonResponse
+from django.db.models import Q
 
 @login_required()   #create a blank property object and store ID in session
 def start_property_listing(request):
@@ -346,3 +348,23 @@ def featured_listings_view(request):
         featured_properties += list(fallback)
 
     return render(request, 'listings/featured_listings.html', {'properties': featured_properties, 'title': 'Featured Listings'})
+
+def location_suggestions(request):
+    query = request.GET.get('q', '').strip()
+
+    if not query:
+        return JsonResponse([], safe=False)
+
+    matches = Property.objects.filter(
+        Q(city__icontains=query) | Q(suburb__icontains=query)
+    ).values_list('city', 'suburb')
+
+    # Use a set to avoid duplicate strings
+    suggestions = set()
+    for city, suburb in matches:
+        if query.lower() in city.lower():
+            suggestions.add(city.strip())
+        if suburb and query.lower() in suburb.lower():
+            suggestions.add(suburb.strip())
+
+    return JsonResponse(sorted(suggestions), safe=False)

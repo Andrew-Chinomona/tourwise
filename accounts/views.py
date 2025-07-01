@@ -6,6 +6,9 @@ from django.shortcuts import render, redirect
 from .forms import SignupForm, CustomLoginForm, ProfilePhotoForm
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import F, Value, CharField, Q
+from django.db.models.functions import Concat
+
 
 def signup_view(request):
     if request.method == 'POST':
@@ -58,23 +61,30 @@ def logout_view(request):
 def home_view(request):
     two_weeks_ago = timezone.now() - timedelta(days=14)
 
-    # Recent Listings: added within last 14 days
+    # Get recent listings
     recent_listings = Property.objects.filter(created_at__gte=two_weeks_ago).order_by('-created_at')[:8]
 
-    # Featured Listings: priority first, fallback to normal
+    # Get featured listings
     priority_listings = list(Property.objects.filter(listing_type='priority').order_by('-created_at')[:8])
     if len(priority_listings) < 8:
-        normal_fallback = Property.objects.filter(listing_type='normal').order_by('-created_at')[:8 - len(priority_listings)]
-        featured_listings = priority_listings + list(normal_fallback)
+        fallback = Property.objects.filter(listing_type='normal').order_by('-created_at')[:8 - len(priority_listings)]
+        featured_listings = priority_listings + list(fallback)
     else:
         featured_listings = priority_listings
+
+    # Prepare list of unique city-suburb combinations
+    locations = Property.objects.annotate(
+        loc_string=Concat('city', Value(' - '), 'suburb', output_field=CharField())
+    ).values('city', 'suburb').distinct()
 
     context = {
         'recent_listings': recent_listings,
         'featured_listings': featured_listings,
+        'locations': locations
     }
 
     return render(request, 'accounts/home.html', context)
+
 
 #this is the host dashboard and it will show all the of the hosts' lisitings and CRUD operations
 @login_required()
@@ -96,4 +106,37 @@ def host_dashboard(request):
     return render(request, 'accounts/host_dashboard.html', {
         'properties': my_properties,
         'form': form
+    })
+
+def search_results_view(request):
+    query = request.GET.get('location')
+    property_type = request.GET.get('property_type')
+    max_price = request.GET.get('max_price')
+
+    properties = Property.objects.all()
+
+    # Filter by location (city or suburb)
+    if query:
+        if '|' in query:
+            city, suburb = query.split('|')
+            properties = properties.filter(city__iexact=city.strip(), suburb__iexact=suburb.strip())
+        else:
+            properties = properties.filter(Q(city__icontains=query) | Q(suburb__icontains=query))
+
+    # Filter by type
+    if property_type:
+        properties = properties.filter(property_type__iexact=property_type)
+
+    # Filter by price
+    if max_price:
+        try:
+            properties = properties.filter(price__lte=int(max_price))
+        except ValueError:
+            pass  # ignore invalid price input
+
+    return render(request, 'accounts/search_results.html', {
+        'properties': properties,
+        'query': query,
+        'property_type': property_type,
+        'max_price': max_price
     })
