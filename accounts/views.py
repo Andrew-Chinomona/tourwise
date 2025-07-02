@@ -62,10 +62,10 @@ def home_view(request):
     two_weeks_ago = timezone.now() - timedelta(days=14)
 
     # Get recent listings
-    recent_listings = Property.objects.filter(created_at__gte=two_weeks_ago).order_by('-created_at')[:8]
+    recent_listings = Property.objects.filter(is_paid=True ,created_at__gte=two_weeks_ago).order_by('-created_at')[:8]
 
     # Get featured listings
-    priority_listings = list(Property.objects.filter(listing_type='priority').order_by('-created_at')[:8])
+    priority_listings = list(Property.objects.filter(listing_type='priority', is_paid =True).order_by('-created_at')[:8])
     if len(priority_listings) < 8:
         fallback = Property.objects.filter(listing_type='normal').order_by('-created_at')[:8 - len(priority_listings)]
         featured_listings = priority_listings + list(fallback)
@@ -93,7 +93,8 @@ def host_dashboard(request):
         return redirect('home')  # you missed return here
 
     user = request.user
-    my_properties = Property.objects.filter(owner=user)
+    my_properties = Property.objects.filter(owner=user, is_paid =True)
+    drafts = Property.objects.filter(owner=user, is_paid=False)
 
     if request.method == 'POST':
         form = ProfilePhotoForm(request.POST, request.FILES, instance=user)
@@ -105,6 +106,7 @@ def host_dashboard(request):
 
     return render(request, 'accounts/host_dashboard.html', {
         'properties': my_properties,
+        'drafts' : drafts,
         'form': form
     })
 

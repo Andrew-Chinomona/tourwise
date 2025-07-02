@@ -62,6 +62,35 @@
   <!-- Dashboard -->
   <h2>My Dashboard</h2>
   <a href="{% url 'start_property_listing' %}" class="btn btn-success mb-3">+ Add New Listing</a>
+{% if drafts %}
+  <h5 class="text-muted">In Progress</h5>
+  <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+    {% for draft in drafts %}
+      <div class="col">
+        <div class="card shadow-sm h-100 border border-warning">
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <h5 class="card-title text-truncate">{{ draft.title|default:"Untitled Listing" }}</h5>
+              <p class="card-text">
+                {% if draft.property_type %}Type: {{ draft.property_type|title }}<br>{% endif %}
+                {% if draft.city %}Location: {{ draft.street_address }}, {{ draft.suburb }}, {{ draft.city }}<br>{% endif %}
+              </p>
+            </div>
+{#            <a href="{% url 'add_property_step1' %}" class="btn btn-warning btn-sm">Continue Creating</a>#}
+                <div class="d-flex justify-content-between gap-2">
+  <a href="{% url 'resume_listing' draft.id %}" class="btn btn-warning btn-sm w-50">Continue Editing</a>
+  <form action="{% url 'delete_draft_listing' draft.id %}" method="post" class="w-50">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-danger btn-sm w-100">Delete</button>
+  </form>
+</div>
+
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
   {% if properties %}
     <div class="row row-cols-1 row-cols-md-2 g-4">

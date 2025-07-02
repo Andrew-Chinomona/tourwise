@@ -10,17 +10,20 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.db.models import Q
 
-@login_required()   #create a blank property object and store ID in session
+@login_required()
 def start_property_listing(request):
+    # Always start fresh
     property_obj = Property.objects.create(
         owner=request.user,
         title='Untitled',
-        is_paid=False
+        is_paid=False,
+        current_step=1
     )
 
     request.session['editing_property_id'] = property_obj.id
-
     return redirect('add_property_step1')
+
+
 
 @login_required
 def add_property_step1(request):
@@ -31,6 +34,7 @@ def add_property_step1(request):
         form = PropertyStep1Form(request.POST)
         if form.is_valid():
             property_obj.property_type = form.cleaned_data['property_type']
+            property_obj.current_step = 1
             property_obj.save()
             return redirect('add_property_step2')
     else:
@@ -50,6 +54,7 @@ def add_property_step2(request):
         form = PropertyStep2Form(request.POST)
         if form.is_valid():
             property_obj.description = form.cleaned_data['description']
+            property_obj.current_step = 2
             property_obj.save()
             return redirect('add_property_step3')
     else:
@@ -73,8 +78,10 @@ def add_property_step3(request):
             property_obj.street_address = form.cleaned_data['street_address']
             property_obj.latitude = form.cleaned_data.get('latitude')
             property_obj.longitude = form.cleaned_data.get('longitude')
-            property_obj.save()
+            # property_obj.save()
             property_obj.generate_title()
+            property_obj.current_step = 3
+            property_obj.save()
             return redirect('add_property_step4')
     else:
         form = PropertyStep3Form(initial={
@@ -101,6 +108,7 @@ def add_property_step4(request):
         form = PropertyStep4Form(request.POST, request.FILES)
         if form.is_valid():
             property_obj.main_image = form.cleaned_data['main_image']
+            property_obj.current_step = 4
             property_obj.save()
             return redirect('add_property_step5')
     else:
@@ -125,6 +133,7 @@ def add_property_step5(request):
             else:
                 for image in images:
                     PropertyImage.objects.create(property=property_obj, image=image)
+                    property_obj.current_step = 5
                 return redirect('add_property_step6')
     else:
         form = PropertyStep5Form()
@@ -146,6 +155,7 @@ def add_property_step6(request):
         if form.is_valid():
             property_obj.price = form.cleaned_data['price']
             property_obj.currency = form.cleaned_data['currency']
+            property_obj.current_step = 6
             property_obj.save()
             return redirect('add_property_step7')
     else:
@@ -171,6 +181,7 @@ def add_property_step7(request):
         if form.is_valid():
             amenities = form.cleaned_data['amenities']
             property_obj.amenities.set(amenities)
+            property_obj.current_step = 7
             return redirect('add_property_step8')
     else:
         form = PropertyStep7Form(initial={
@@ -195,6 +206,7 @@ def add_property_step8(request):
             property_obj.contact_name = form.cleaned_data['contact_name']
             property_obj.contact_phone = form.cleaned_data['contact_phone']
             property_obj.contact_email = form.cleaned_data['contact_email']
+            property_obj.current_step = 8
             property_obj.save()
             return redirect('add_property_step9')
     else:
@@ -217,6 +229,7 @@ def add_property_step9(request):
             property_obj.bedrooms = form.cleaned_data['bedrooms']
             property_obj.bathrooms = form.cleaned_data['bathrooms']
             property_obj.area = form.cleaned_data['area']
+            property_obj.current_step = 9
             property_obj.save()
             return redirect('choose_payment')
     else:
@@ -257,6 +270,8 @@ def choose_payment(request):
 
     else:
         form = ChoosePaymentForm(initial={'listing_type': property_obj.listing_type})
+        property_obj.current_step = 10
+        property_obj.save()
 
     # Add latitude and longitude to the context
     return render(request, 'listings/choose_payment.html', {
@@ -368,3 +383,39 @@ def location_suggestions(request):
             suggestions.add(suburb.strip())
 
     return JsonResponse(sorted(suggestions), safe=False)
+
+
+@login_required
+def resume_listing(request, property_id):
+    property_obj = get_object_or_404(Property, id=property_id, owner=request.user, is_paid=False)
+
+    request.session['editing_property_id'] = property_id
+    step = property_obj.current_step
+
+    step_redirects = {
+        1: 'add_property_step1',
+        2: 'add_property_step2',
+        3: 'add_property_step3',
+        4: 'add_property_step4',
+        5: 'add_property_step5',
+        6: 'add_property_step6',
+        7: 'add_property_step7',
+        8: 'add_property_step8',
+        9: 'add_property_step9',
+        10: 'choose_payment',
+    }
+
+    return redirect(step_redirects.get(step, 'add_property_step1'))
+
+@login_required
+def delete_draft_listing(request, property_id):
+    property_obj = get_object_or_404(Property, id=property_id, owner=request.user, is_paid=False)
+
+    if request.method == 'POST':
+        property_obj.delete()
+        messages.success(request, "Draft listing deleted.")
+        return redirect('host_dashboard')
+
+    return render(request, 'listings/delete_draft_confirm.html', {'property': property_obj})
+
+

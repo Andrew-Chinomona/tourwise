@@ -1,143 +1,340 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+  <style>
+    .hero-section {
+      position: relative;
+      height: 90vh;
+      min-height: 600px;
+      background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 1)),
+                  url('{% static "images/zim-property-hero.png" %}') no-repeat center center;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      color: white;
+      padding: 2rem;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        color: white;
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      margin-bottom: 2.5rem;
+      font-weight: 550;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        color: black;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .search-container {
+      background-color: white;
+      border-radius: 50px;
+      padding: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      margin-top: 3rem;
+    }
+
+    .search-container .form-control {
+      border: none;
+      padding: 0;
+      background: transparent;
+      color: var(--charcoal-text);
+    }
+
+    .search-container .form-control:focus {
+      box-shadow: none;
+      border: none;
+    }
+
+    .search-container .form-select {
+      border: none;
+      padding: 0;
+      background: transparent;
+      color: var(--charcoal-text);
+    }
+
+    .search-container .form-select:focus {
+      box-shadow: none;
+      border: none;
+    }
+
+    .search-container .form-label {
+      color: #6c757d;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .search-btn {
+      background-color: var(--brick-orange);
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .search-btn:hover {
+      background-color: #a14825;
+      transform: scale(1.05);
+    }
+
+    /* Location suggestions styling */
+    #location-suggestions {
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .list-group-item-action:hover {
+      background-color: var(--soft-beige);
+    }
+
+    /* Listings section */
+    .listings-section {
+      background-color: var(--muted-cream);
+      padding: 3rem 0;
+    }
+
+    .section-title {
+      color: var(--charcoal-text);
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    .featured-card {
+      border: 2px solid #ffc107 !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .search-container {
+        border-radius: 20px;
+        padding: 1.5rem;
+      }
+
+      .search-container .row > div {
+        margin-bottom: 1rem;
+      }
+
+      .search-container .border-end {
+        border-end: none !important;
+      }
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Find Your Perfect Home in Zimbabwe</h1>
+      <p class="hero-subtitle">Trustworthy, hassle-free property search and listing experience</p>
 
-  <!-- 🔍 Search Bar -->
-  <form method="get" action="{% url 'search_results' %}"
-      class="bg-white shadow-sm rounded-pill px-3 py-2 mb-5 mx-auto"
-      style="max-width: 60%;">
+      <div class="hero-buttons">
+        <a href="#search-section" class="btn btn-primary-custom">Discover Properties</a>
+        <a href="{% url 'become_host' %}" class="btn btn-primary-custom">Become a Host</a>
 
-    <div class="row align-items-center g-0 text-center text-md-start">
-
-      <!-- Location Input with Suggestions -->
-      <div class="col-md-4 px-3 border-end position-relative">
-        <label class="form-label mb-0 fw-semibold small text-muted">Location</label>
-        <input type="text"
-               name="location"
-               id="location-input"
-               autocomplete="off"
-               class="form-control border-0 p-0 bg-transparent"
-               placeholder="Start typing a city or suburb...">
-        <ul id="location-suggestions"
-            class="list-group position-absolute w-100 bg-white shadow-sm"
-            style="z-index: 1000;"></ul>
       </div>
 
-      <!-- Property Type -->
-      <div class="col-md-4 px-3 border-end">
-        <label class="form-label mb-0 fw-semibold small text-muted">Type</label>
-        <select name="property_type" class="form-select border-0 p-0 bg-transparent">
-          <option value="">All Types</option>
-          <option value="house">House</option>
-          <option value="apartment">Apartment</option>
-          <option value="airbnb">Airbnb</option>
-        </select>
-      </div>
+      <!-- Search Bar -->
+      <div class="search-container" id="search-section">
+        <form method="get" action="{% url 'search_results' %}">
+          <div class="row align-items-center g-0 text-center text-md-start">
+            <!-- Location Input with Suggestions -->
+            <div class="col-md-4 px-3 border-end position-relative">
+              <label class="form-label mb-0 fw-semibold small">Location</label>
+              <input type="text"
+                     name="location"
+                     id="location-input"
+                     autocomplete="off"
+                     class="form-control"
+                     placeholder="Start typing a city or suburb...">
+              <ul id="location-suggestions"
+                  class="list-group position-absolute w-100 bg-white shadow-sm"></ul>
+            </div>
 
-      <!-- Max Price -->
-      <div class="col-md-3 px-3 border-end">
-        <label class="form-label mb-0 fw-semibold small text-muted">Max Price</label>
-        <input type="number" name="max_price" class="form-control border-0 p-0 bg-transparent" placeholder="e.g. 500">
-      </div>
+            <!-- Property Type -->
+            <div class="col-md-4 px-3 border-end">
+              <label class="form-label mb-0 fw-semibold small">Type</label>
+              <select name="property_type" class="form-select">
+                <option value="">All Types</option>
+                <option value="house">House</option>
+                <option value="apartment">Apartment</option>
+                <option value="airbnb">Airbnb</option>
+              </select>
+            </div>
 
-      <!-- Submit Button -->
-      <div class="col-md-1 text-end">
-        <button type="submit" class="btn btn-dark rounded-circle">
-          <i class="bi bi-search"></i>
-        </button>
+            <!-- Max Price -->
+            <div class="col-md-3 px-3 border-end">
+              <label class="form-label mb-0 fw-semibold small">Max Price</label>
+              <input type="number" name="max_price" class="form-control" placeholder="e.g. 500">
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-md-1 ms-0">
+              <button type="submit" class="search-btn">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
-  </form>
+  </section>
 
-  <!-- 📌 Recent Listings -->
-  <h3>Recent Listings</h3>
-  <div class="row">
-    {% for property in recent_listings %}
-      <div class="col-md-3 mb-4">
-        <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
-          <div class="card h-100 shadow-sm">
-            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
-            <div class="card-body">
-              <h5 class="card-title text-truncate">{{ property.title }}</h5>
-              <p class="card-text">
-                {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
-                <strong>{{ property.currency }} {{ property.price }}</strong>
-              </p>
-            </div>
+  <!-- Listings Section -->
+  <div class="listings-section">
+    <div class="container">
+      <!-- Recent Listings -->
+      <h3 class="section-title">Recent Listings</h3>
+      <div class="row">
+        {% for property in recent_listings %}
+          <div class="col-md-3 mb-4">
+            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
+              <div class="card card-custom h-100">
+                {% if property.main_image %}
+                  <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title text-truncate">{{ property.title }}</h5>
+                  <p class="card-text text-muted">
+                    {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                  </p>
+                  <p class="price-text">
+                    {{ property.currency }} {{ property.price }}
+                  </p>
+                </div>
+              </div>
+            </a>
           </div>
-        </a>
-      </div>
-    {% empty %}
-      <p>No recent listings available.</p>
-    {% endfor %}
-  </div>
-
-  <div class="text-center mb-5">
-    <a href="{% url 'recent_listings' %}" class="btn btn-outline-primary">Show More</a>
-  </div>
-
-  <!-- ⭐ Featured Listings -->
-  <h3>Featured Listings</h3>
-  <div class="row">
-    {% for property in featured_listings %}
-      <div class="col-md-3 mb-4">
-        <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
-          <div class="card h-100 border-warning shadow-sm">
-            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
-            <div class="card-body">
-              <h5 class="card-title text-truncate">{{ property.title }}</h5>
-              <p class="card-text">
-                {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}<br>
-                <strong>{{ property.currency }} {{ property.price }}</strong>
-              </p>
-            </div>
+        {% empty %}
+          <div class="col-12">
+            <p class="text-center text-muted">No recent listings available.</p>
           </div>
-        </a>
+        {% endfor %}
       </div>
-    {% empty %}
-      <p>No featured listings yet.</p>
-    {% endfor %}
+
+      <div class="text-center mb-5">
+        <a href="{% url 'recent_listings' %}" class="btn btn-outline-custom">Show More</a>
+      </div>
+
+      <!-- Featured Listings -->
+      <h3 class="section-title">Featured Listings</h3>
+      <div class="row">
+        {% for property in featured_listings %}
+          <div class="col-md-3 mb-4">
+            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
+              <div class="card card-custom featured-card h-100">
+                {% if property.main_image %}
+                  <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title text-truncate">{{ property.title }}</h5>
+                  <p class="card-text text-muted">
+                    {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                  </p>
+                  <p class="price-text">
+                    {{ property.currency }} {{ property.price }}
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <p class="text-center text-muted">No featured listings yet.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="text-center mb-5">
+        <a href="{% url 'featured_listings' %}" class="btn btn-outline-custom">Show More</a>
+      </div>
+    </div>
   </div>
 
-  <div class="text-center mb-5">
-    <a href="{% url 'featured_listings' %}" class="btn btn-outline-warning">Show More</a>
-  </div>
+  <script>
+    const input = document.getElementById('location-input');
+    const suggestionsBox = document.getElementById('location-suggestions');
 
-</div>
+    input.addEventListener('input', function () {
+      const query = input.value.trim();
+      suggestionsBox.innerHTML = '';
+      suggestionsBox.style.display = 'none';
 
-<!-- JavaScript for dynamic location suggestions -->
-<script>
-  const input = document.getElementById('location-input');
-  const suggestionsBox = document.getElementById('location-suggestions');
+      if (query.length < 2) return;
 
-  input.addEventListener('input', function () {
-    const query = input.value.trim();
-    suggestionsBox.innerHTML = '';
-    if (query.length < 2) return;
-
-    fetch(`/api/locations/?q=${encodeURIComponent(query)}`)
-      .then(response => response.json())
-      .then(data => {
-        data.forEach(location => {
-          const item = document.createElement('li');
-          item.classList.add('list-group-item', 'list-group-item-action');
-          item.textContent = location;
-          item.style.cursor = 'pointer';
-
-          item.addEventListener('click', () => {
-            input.value = location;
-            suggestionsBox.innerHTML = '';
-          });
-
-          suggestionsBox.appendChild(item);
+      fetch(`/api/locations/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.length > 0) {
+            suggestionsBox.style.display = 'block';
+            data.forEach(location => {
+              const item = document.createElement('li');
+              item.classList.add('list-group-item', 'list-group-item-action');
+              item.textContent = location;
+              item.style.cursor = 'pointer';
+              item.addEventListener('click', () => {
+                input.value = location;
+                suggestionsBox.style.display = 'none';
+              });
+              suggestionsBox.appendChild(item);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching locations:', error);
         });
-      });
-  });
+    });
 
-  input.addEventListener('blur', () => {
-    setTimeout(() => suggestionsBox.innerHTML = '', 150);
-  });
-</script>
+    input.addEventListener('blur', () => {
+      setTimeout(() => {
+        suggestionsBox.style.display = 'none';
+      }, 150);
+    });
+  </script>
 {% endblock %}

@@ -1,83 +1,3 @@
-{#{% extends 'base.html' %}#}
-{##}
-{#{% block content %}#}
-{#<div class="container mt-5">#}
-{#  <div class="row justify-content-center">#}
-{#    <div class="col-md-8">#}
-{#      <div class="card shadow-sm">#}
-{#        <div class="card-body">#}
-{#          <h2 class="card-title mb-4">Step 3: Property Location</h2>#}
-{##}
-{#          <form method="post">#}
-{#            {% csrf_token %}#}
-{##}
-{#            <div class="mb-3">#}
-{#              <label for="{{ form.city.id_for_label }}" class="form-label">#}
-{#                {{ form.city.label }}#}
-{#              </label>#}
-{#              {{ form.city }}#}
-{#              {% if form.city.errors %}#}
-{#                <div class="invalid-feedback d-block">#}
-{#                  {{ form.city.errors|first }}#}
-{#                </div>#}
-{#              {% endif %}#}
-{#            </div>#}
-{##}
-{#            <div class="mb-3">#}
-{#              <label for="{{ form.suburb.id_for_label }}" class="form-label">#}
-{#                {{ form.suburb.label }} (optional)#}
-{#              </label>#}
-{#              {{ form.suburb }}#}
-{#              {% if form.suburb.errors %}#}
-{#                <div class="invalid-feedback d-block">#}
-{#                  {{ form.suburb.errors|first }}#}
-{#                </div>#}
-{#              {% endif %}#}
-{#            </div>#}
-{##}
-{#            <div class="mb-4">#}
-{#              <label for="{{ form.street_address.id_for_label }}" class="form-label">#}
-{#                {{ form.street_address.label }}#}
-{#              </label>#}
-{#              {{ form.street_address }}#}
-{#              {% if form.street_address.errors %}#}
-{#                <div class="invalid-feedback d-block">#}
-{#                  {{ form.street_address.errors|first }}#}
-{#                </div>#}
-{#              {% endif %}#}
-{#            </div>#}
-{##}
-{#            <div class="d-flex justify-content-between">#}
-{#              <a href="{% url 'add_property_step2' %}" class="btn btn-secondary">#}
-{#                <i class="fas fa-arrow-left me-1"></i> Back#}
-{#              </a>#}
-{#              <button type="submit" class="btn btn-primary">#}
-{#                Next <i class="fas fa-arrow-right ms-1"></i>#}
-{#              </button>#}
-{#            </div>#}
-{#          </form>#}
-{#        </div>#}
-{#      </div>#}
-{#    </div>#}
-{#  </div>#}
-{#</div>#}
-{##}
-{#<style>#}
-{#  /* Add custom styling for form controls */#}
-{#  input[type="text"] {#}
-{#    padding: 10px;#}
-{#    border-radius: 5px;#}
-{#    border: 1px solid #ced4da;#}
-{#    width: 100%;#}
-{#  }#}
-{#  .form-label {#}
-{#    font-weight: 500;#}
-{#    margin-bottom: 5px;#}
-{#  }#}
-{#</style>#}
-{#{% endblock %}#}
-
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -167,8 +87,10 @@
     const street = document.getElementById("id_street_address").value;
     const suburb = document.getElementById("id_suburb").value;
     const city = document.getElementById("id_city").value;
-    const fullAddress = `${street}, ${suburb}, ${city}, Zimbabwe`;
-
+    let fullAddress = `${street}, ${city}, Zimbabwe`;
+        if (suburb) {
+    fullAddress = `${street}, ${suburb}, ${city}, Zimbabwe`;
+    }
     const apiKey = "{{ OPEN_CAGE_API_KEY|default:'' }}";  // inject this via context in views.py
     const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
 

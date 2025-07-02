@@ -5,77 +5,176 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="mb-4 text-center">Sign Up</h2>
-            <form method="POST" novalidate>
-                {% csrf_token %}
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body p-4">
+                    <h2 class="mb-4 text-center text-primary">Create Your Account</h2>
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
 
-                <!-- Display non-field errors -->
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
+                        <!-- Display non-field errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- First Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_first_name" class="form-label">First Name</label>
+                                {{ form.first_name|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your first name" }}
+                                <div class="invalid-feedback">
+                                    {{ form.first_name.errors }}
+                                </div>
+                            </div>
+
+                            <!-- Last Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_last_name" class="form-label">Last Name</label>
+                                {{ form.last_name|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your last name" }}
+                                <div class="invalid-feedback">
+                                    {{ form.last_name.errors }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            {{ form.email|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your email" }}
+                            <div class="invalid-feedback">
+                                {{ form.email.errors }}
+                            </div>
+                            <small class="form-text text-muted">We'll never share your email with anyone else.</small>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label for="id_phone_number" class="form-label">Phone Number</label>
+                            {{ form.phone_number|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your phone number" }}
+                            <div class="invalid-feedback">
+                                {{ form.phone_number.errors }}
+                            </div>
+                        </div>
+
+                        <!-- User Type -->
+                        <div class="mb-3">
+                            <label class="form-label">I am signing up as a:</label>
+                            <div class="d-flex w-100 gap-3">
+                                {% for choice in form.user_type %}
+                                    {{ choice.tag }}
+                                    <label for="{{ choice.id_for_label }}" class="btn btn-outline-primary">
+                                        {{ choice.choice_label }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            <div class="invalid-feedback d-block">
+                                {{ form.user_type.errors }}
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="id_password1" class="form-label">Password</label>
+                            {{ form.password1|add_class:"form-control form-control-lg"|attr:"placeholder:Create a password" }}
+                            <div class="invalid-feedback">
+                                {{ form.password1.errors }}
+                            </div>
+                            <small class="form-text text-muted">
+                                At least 8 characters with a mix of letters, numbers, and symbols.
+                            </small>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-4">
+                            <label for="id_password2" class="form-label">Confirm Password</label>
+                            {{ form.password2|add_class:"form-control form-control-lg"|attr:"placeholder:Confirm your password" }}
+                            <div class="invalid-feedback">
+                                {{ form.password2.errors }}
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg py-2">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-0">By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <p class="mb-0">Already have an account? <a href="{% url 'login' %}" class="fw-bold">Log In</a></p>
                     </div>
-                {% endif %}
-
-                <!-- First Name -->
-                <div class="mb-3">
-                    <label for="id_first_name" class="form-label">First Name</label>
-                    {{ form.first_name|add_class:"form-control" }}
-                    {{ form.first_name.errors }}
                 </div>
-
-                <!-- Last Name -->
-                <div class="mb-3">
-                    <label for="id_last_name" class="form-label">Last Name</label>
-                    {{ form.last_name|add_class:"form-control" }}
-                    {{ form.last_name.errors }}
-                </div>
-
-                <!-- Email -->
-                <div class="mb-3">
-                    <label for="id_email" class="form-label">Email</label>
-                    {{ form.email|add_class:"form-control" }}
-                    {{ form.email.errors }}
-                </div>
-
-                <!-- Phone Number -->
-                <div class="mb-3">
-                    <label for="id_phone_number" class="form-label">Phone Number</label>
-                    {{ form.phone_number|add_class:"form-control" }}
-                    {{ form.phone_number.errors }}
-                </div>
-
-                <!-- User Type -->
-                <div class="mb-3">
-                    <label class="form-label">Are you signing up as a:</label>
-                    {{ form.user_type }}
-                    {{ form.user_type.errors }}
-                </div>
-
-                <!-- Password -->
-                <div class="mb-3">
-                    <label for="id_password1" class="form-label">Password</label>
-                    {{ form.password1|add_class:"form-control" }}
-                    {{ form.password1.errors }}
-                </div>
-
-                <!-- Confirm Password -->
-                <div class="mb-3">
-                    <label for="id_password2" class="form-label">Confirm Password</label>
-                    {{ form.password2|add_class:"form-control" }}
-                    {{ form.password2.errors }}
-                </div>
-
-                <!-- Submit Button -->
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Create Account</button>
-                </div>
-            </form>
-
-            <div class="mt-3 text-center">
-                Already have an account? <a href="{% url 'login' %}">Log In</a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Custom styling */
+    .card {
+        border-radius: 15px;
+        border: none;
+    }
+
+    .form-control-lg {
+        border-radius: 10px;
+        padding: 12px 15px;
+    }
+
+    .btn-outline-primary.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .btn-group .btn {
+        border-radius: 10px !important;
+        padding: 10px 0;
+    }
+
+    .btn-group input[type="radio"] {
+        display: none;
+    }
+
+    .invalid-feedback {
+        display: block;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    .text-primary {
+        color: #0d6efd !important;
+    }
+</style>
+
+<script>
+    // Add Bootstrap's validation classes
+    (function() {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('form')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
 {% endblock %}

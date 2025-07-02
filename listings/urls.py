@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import add_property_step1, add_property_step2, add_property_step3, add_property_step4, add_property_step5, add_property_step6,  delete_listing, delete_property_image, edit_listing, upload_property_images, start_property_listing, add_property_step7, add_property_step8, add_property_step9, choose_payment,upload_profile_photo,upload_main_image, property_detail, recent_listings_view, featured_listings_view, location_suggestions
+from .views import add_property_step1, add_property_step2, add_property_step3, add_property_step4, add_property_step5, \
+    add_property_step6,  delete_listing, delete_property_image, edit_listing, upload_property_images, start_property_listing, \
+    add_property_step7, add_property_step8, add_property_step9, choose_payment,upload_profile_photo,upload_main_image, \
+    property_detail, recent_listings_view, featured_listings_view, location_suggestions, resume_listing, delete_draft_listing
 
 urlpatterns = [
     path('add-property/step-1/', add_property_step1, name='add_property_step1'),
@@ -23,4 +26,7 @@ urlpatterns = [
     path('recent/', recent_listings_view, name='recent_listings'),
     path('featured/', featured_listings_view, name='featured_listings'),
     path('api/locations/', location_suggestions, name='location_suggestions'),
+    path('resume-listing/<int:property_id>/', resume_listing, name='resume_listing'),
+    path('drafts/delete/<int:property_id>/', delete_draft_listing, name='delete_draft_listing'),
+
 ]
