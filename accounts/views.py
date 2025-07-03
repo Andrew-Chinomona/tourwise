@@ -65,9 +65,9 @@ def home_view(request):
     recent_listings = Property.objects.filter(is_paid=True ,created_at__gte=two_weeks_ago).order_by('-created_at')[:8]
 
     # Get featured listings
-    priority_listings = list(Property.objects.filter(listing_type='priority', is_paid =True).order_by('-created_at')[:8])
+    priority_listings = list(Property.objects.filter( is_paid =True,listing_type='priority').order_by('-created_at')[:8])
     if len(priority_listings) < 8:
-        fallback = Property.objects.filter(listing_type='normal').order_by('-created_at')[:8 - len(priority_listings)]
+        fallback = Property.objects.filter(is_paid=True,listing_type='normal').order_by('-created_at')[:8 - len(priority_listings)]
         featured_listings = priority_listings + list(fallback)
     else:
         featured_listings = priority_listings

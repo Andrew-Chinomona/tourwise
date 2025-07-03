@@ -24,15 +24,16 @@
       color: var(--charcoal-text);
     }
 
-    /* Navigation Styling */
     .navbar-custom {
-      background-color: var(--warm-tan) !important;
-      padding: 0.5rem 0;
+      background: linear-gradient(var(--muted-cream), rgba(255, 255, 255, 0.8));
+      height: 70px;
+      padding: 0;
     }
 
     .navbar-custom .navbar-brand img {
-      height: 50px;
+      max-height: 100px;
       width: auto;
+      object-fit: contain;
     }
 
     .navbar-custom .navbar-nav .nav-link {
@@ -48,7 +49,6 @@
       background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23c15a2e' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     }
 
-    /* Button Styling */
     .btn-primary-custom {
       background-color: var(--brick-orange);
       border: 2px solid var(--brick-orange);
@@ -67,12 +67,12 @@
     }
 
     .btn-outline-custom {
-      border: 2px solid var(--brick-orange);
       color: var(--brick-orange);
       padding: 0.75rem 2rem;
       font-weight: 600;
       background-color: transparent;
       border-radius: 50px;
+      border-color: black;
       transition: all 0.3s ease;
     }
 
@@ -97,9 +97,8 @@
       color: white;
     }
 
-    /* Footer Styling */
     .footer-custom {
-      background-color: var(--warm-tan);
+      background: linear-gradient(var(--muted-cream), rgba(255, 255, 255, 0.8));
       color: var(--charcoal-text);
       padding: 1.5rem 0;
       margin-top: 2rem;
@@ -109,7 +108,7 @@
       color: var(--charcoal-text);
       font-weight: 600;
       margin-bottom: 1rem;
-        font-size: 1.1rem;
+      font-size: 1.1rem;
     }
 
     .footer-custom a {
@@ -128,7 +127,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Card Styling */
     .card-custom {
       border: none;
       border-radius: 12px;
@@ -153,12 +151,10 @@
       font-weight: 700;
     }
 
-    /* Text Shadow Utility */
     .text-shadow {
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
-    /* Responsive adjustments */
     @media (max-width: 768px) {
       .navbar-custom .navbar-brand img {
         height: 60px;
@@ -173,26 +169,40 @@
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-  <img src="{% static 'images/logo.png' %}" alt="Tourwise Logo" class="me-2">
-  <span class="fw-bold fs-4">Tourwise</span>
-</a>
+        <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="me-2" style="max-width: 100px;">
+        <span class="fw-bold fs-4">Tourwise</span>
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center">
-          <!-- Show Become Host only if NOT a host -->
           {% if not user.is_authenticated or user.user_type != 'host' %}
-          <li class="nav-item me-2">
-            <a href="{% url 'become_host' %}" class="btn btn-outline-custom">Become Host</a>
-          </li>
+            <li class="nav-item me-2">
+              <a href="{% url 'become_host' %}" class="btn btn-outline-custom">Become Host</a>
+            </li>
           {% endif %}
 
           {% if user.is_authenticated %}
-            <!-- Visible only when logged in -->
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
-                <i class="bi bi-person-circle fs-4"></i>
+              <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown"
+                 role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
+                {% if user.profile_photo %}
+                  <img src="{{ user.profile_photo.url }}"
+                       class="rounded-circle"
+                       alt="Profile Photo"
+                       width="50" height="50"
+                       style="object-fit: cover; ">
+                {% else %}
+                  <img src="{% static 'images/user.png' %}"
+                       class="rounded-circle"
+                       alt="Default User"
+                       width="36" height="36"
+                       style="object-fit: cover;">
+                {% endif %}
+                <img src="{% static 'images/menu.png' %}"
+                     alt="Menu Icon"
+                     width="28" height="28">
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                 <li><a class="dropdown-item" href="{% url 'host_dashboard' %}">Profile</a></li>
@@ -201,7 +211,6 @@
               </ul>
             </li>
           {% else %}
-            <!-- Visible only when not logged in -->
             <li class="nav-item me-2">
               <a href="{% url 'signup' %}" class="btn btn-outline-custom">Sign Up <i class="bi bi-person-plus"></i></a>
             </li>
@@ -214,23 +223,15 @@
     </div>
   </nav>
 
-  {% block content %}
-  {% endblock %}
+  {% block content %}{% endblock %}
 
   <!-- Footer -->
   <footer class="footer-custom">
     <div class="container">
       <div class="row">
-        <!-- Column 1: Logo + Downloads -->
         <div class="col-md-4 mb-4">
-          <img src="{% static 'images/logo.png' %}" alt="Tourwise Logo" class="mb-3" style="max-width: 200px;">
-{#          <div class="d-flex flex-column">#}
-{#            <a href="#" class="btn btn-outline-custom btn-sm mb-2">Download on Play Store</a>#}
-{#            <a href="#" class="btn btn-outline-custom btn-sm">Download on App Store</a>#}
-{#          </div>#}
+          <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="mb-3" style="max-width: 280px;">
         </div>
-
-        <!-- Column 2: Company Info -->
         <div class="col-md-4 mb-4">
           <h5>Company</h5>
           <ul class="list-unstyled">
@@ -240,8 +241,6 @@
             <li class="mb-2"><a href="#">FAQs</a></li>
           </ul>
         </div>
-
-        <!-- Column 3: Help Center -->
         <div class="col-md-4 mb-4">
           <h5>Contact Us</h5>
           <ul class="list-unstyled">
@@ -260,4 +259,41 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
+<style>
+  /* ... your existing styles ... */
+
+  /* Custom Navbar Dropdown */
+  .dropdown-menu {
+    background-color: var(--muted-cream) !important;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    transform: translateY(10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease-in-out;
+  }
+
+  .dropdown-menu.show {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .dropdown-menu .dropdown-item {
+    padding: 0.65rem 1.25rem;
+    font-weight: 500;
+    color: var(--charcoal-text);
+    transition: background-color 0.2s ease;
+  }
+
+  .dropdown-menu .dropdown-item:hover {
+    background-color: var(--brick-orange);
+    color: white;
+    border-radius: 6px;
+  }
+</style>
+
 </html>

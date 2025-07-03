@@ -3,7 +3,7 @@ from django.forms.widgets import FileInput
 from django.forms.widgets import ClearableFileInput
 from .models import Amenity, Property, Currency
 from django.utils.safestring import mark_safe
-from listings.models import Currency
+
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True

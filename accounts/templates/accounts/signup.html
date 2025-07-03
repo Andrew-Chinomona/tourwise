@@ -6,13 +6,15 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg">
-                <div class="card-body p-4">
-                    <h2 class="mb-4 text-center text-primary">Create Your Account</h2>
+            <div class="card shadow-sm border-0" style="background-color: #f9f5ef;">
+                <div class="card-header border-0 pt-4" style="background-color: #f9f5ef;">
+                    <h2 class="mb-0 text-center" style="color: #2f2f2f;">Create Your Account</h2>
+                    <p class="text-center" style="color: #2f2f2f;">Fill in your details below to sign up</p>
+                </div>
+                <div class="card-body px-4 py-3">
                     <form method="POST" novalidate>
                         {% csrf_token %}
 
-                        <!-- Display non-field errors -->
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger">
                                 {{ form.non_field_errors }}
@@ -20,95 +22,92 @@
                         {% endif %}
 
                         <div class="row">
-                            <!-- First Name -->
                             <div class="col-md-6 mb-3">
-                                <label for="id_first_name" class="form-label">First Name</label>
-                                {{ form.first_name|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your first name" }}
-                                <div class="invalid-feedback">
-                                    {{ form.first_name.errors }}
-                                </div>
+                                <label for="id_first_name" class="form-label fw-medium" style="color: #2f2f2f;">First Name</label>
+                                {% render_field form.first_name class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your first name" %}
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
                             </div>
-
-                            <!-- Last Name -->
                             <div class="col-md-6 mb-3">
-                                <label for="id_last_name" class="form-label">Last Name</label>
-                                {{ form.last_name|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your last name" }}
-                                <div class="invalid-feedback">
-                                    {{ form.last_name.errors }}
+                                <label for="id_last_name" class="form-label fw-medium" style="color: #2f2f2f;">Last Name</label>
+                                {% render_field form.last_name class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your last name" %}
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label fw-medium" style="color: #2f2f2f;">Email</label>
+                            {% render_field form.email class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your email" %}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
                                 </div>
-                            </div>
+                            {% endif %}
                         </div>
 
-                        <!-- Email -->
                         <div class="mb-3">
-                            <label for="id_email" class="form-label">Email</label>
-                            {{ form.email|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your email" }}
-                            <div class="invalid-feedback">
-                                {{ form.email.errors }}
-                            </div>
-                            <small class="form-text text-muted">We'll never share your email with anyone else.</small>
+                            <label for="id_phone_number" class="form-label fw-medium" style="color: #2f2f2f;">Phone Number</label>
+                            {% render_field form.phone_number class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your phone number" %}
+                            {% if form.phone_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.phone_number.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <!-- Phone Number -->
                         <div class="mb-3">
-                            <label for="id_phone_number" class="form-label">Phone Number</label>
-                            {{ form.phone_number|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your phone number" }}
-                            <div class="invalid-feedback">
-                                {{ form.phone_number.errors }}
-                            </div>
-                        </div>
-
-                        <!-- User Type -->
-                        <div class="mb-3">
-                            <label class="form-label">I am signing up as a:</label>
+                            <label class="form-label fw-medium" style="color: #2f2f2f;">I am signing up as a:</label>
                             <div class="d-flex w-100 gap-3">
                                 {% for choice in form.user_type %}
                                     {{ choice.tag }}
-                                    <label for="{{ choice.id_for_label }}" class="btn btn-outline-primary">
+                                    <label for="{{ choice.id_for_label }}" class="btn rounded-3 flex-grow-1" style="border-color: #e4d3b2; color: var(--charcoal-text);">
                                         {{ choice.choice_label }}
                                     </label>
                                 {% endfor %}
                             </div>
-                            <div class="invalid-feedback d-block">
-                                {{ form.user_type.errors }}
-                            </div>
+                            {% if form.user_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.user_type.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <!-- Password -->
                         <div class="mb-3">
-                            <label for="id_password1" class="form-label">Password</label>
-                            {{ form.password1|add_class:"form-control form-control-lg"|attr:"placeholder:Create a password" }}
-                            <div class="invalid-feedback">
-                                {{ form.password1.errors }}
-                            </div>
-                            <small class="form-text text-muted">
-                                At least 8 characters with a mix of letters, numbers, and symbols.
-                            </small>
+                            <label for="id_password1" class="form-label fw-medium" style="color: #2f2f2f;">Password</label>
+                            {% render_field form.password1 class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Create a password" %}
+                            {% if form.password1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password1.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <!-- Confirm Password -->
                         <div class="mb-4">
-                            <label for="id_password2" class="form-label">Confirm Password</label>
-                            {{ form.password2|add_class:"form-control form-control-lg"|attr:"placeholder:Confirm your password" }}
-                            <div class="invalid-feedback">
-                                {{ form.password2.errors }}
-                            </div>
+                            <label for="id_password2" class="form-label fw-medium" style="color: #2f2f2f;">Confirm Password</label>
+                            {% render_field form.password2 class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Confirm your password" %}
+                            {% if form.password2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password2.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <!-- Submit Button -->
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg py-2">
+                            <button type="submit" class="btn py-2 rounded-3 fw-medium" style="background-color: #c15a2e; color: white;">
                                 <i class="fas fa-user-plus me-2"></i>Create Account
                             </button>
                         </div>
-
-                        <div class="text-center">
-                            <p class="mb-0">By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
-                        </div>
                     </form>
 
-                    <div class="mt-4 text-center">
-                        <p class="mb-0">Already have an account? <a href="{% url 'login' %}" class="fw-bold">Log In</a></p>
+                    <div class="text-center pt-2">
+                        <p style="color: #2f2f2f;">Already have an account? <a href="{% url 'login' %}" style="color: #c15a2e;" class="text-decoration-none">Log In</a></p>
                     </div>
                 </div>
             </div>
@@ -117,64 +116,70 @@
 </div>
 
 <style>
-    /* Custom styling */
+    body {
+        background-color: #f9f5ef;
+    }
     .card {
-        border-radius: 15px;
+        border-radius: 12px;
+        border: 1px solid #e4d3b2;
+    }
+    .form-control {
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus {
+        border-color: #c15a2e;
+        box-shadow: 0 0 0 0.25rem rgba(193, 90, 46, 0.15);
+        background-color: #f3ecdf;
+    }
+    .btn {
+        transition: background-color 0.2s;
         border: none;
     }
-
-    .form-control-lg {
-        border-radius: 10px;
-        padding: 12px 15px;
+    .btn:hover {
+        background-color: #CC5500 !important;
     }
-
-    .btn-outline-primary.active {
-        background-color: #0d6efd;
-        color: white;
-    }
-
-    .btn-group .btn {
-        border-radius: 10px !important;
-        padding: 10px 0;
-    }
-
-    .btn-group input[type="radio"] {
-        display: none;
-    }
-
     .invalid-feedback {
-        display: block;
+        font-size: 0.85rem;
+        color: red;
     }
+    input[type="radio"] {
+    display: none;
+}
 
-    a {
-        text-decoration: none;
-    }
+input[type="radio"] + label {
+    background-color: #f3ecdf;
+    color: var(--charcoal-text);
+    border: 1px solid #e4d3b2;
+    padding: 10px;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
 
-    .text-primary {
-        color: #0d6efd !important;
-    }
+input[type="radio"]:checked + label {
+    background-color: #CC5500;
+    color: var(--warm-tan);
+    border-color: #c15a2e;
+}
+
+input[type="radio"] + label:hover {
+    background-color: var(--warm-tan);
+}
+
 </style>
 
 <script>
-    // Add Bootstrap's validation classes
-    (function() {
-        'use strict'
-
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        var forms = document.querySelectorAll('form')
-
-        // Loop over them and prevent submission
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-
-                    form.classList.add('was-validated')
-                }, false)
-            })
-    })()
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('form');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
 </script>
 {% endblock %}

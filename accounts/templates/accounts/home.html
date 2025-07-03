@@ -7,7 +7,7 @@
       position: relative;
       height: 90vh;
       min-height: 600px;
-      background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 1)),
+      background: linear-gradient( rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.8), var(--muted-cream)),
                   url('{% static "images/zim-property-hero.png" %}') no-repeat center center;
       background-size: cover;
       display: flex;
@@ -236,7 +236,7 @@
           <div class="col-md-3 mb-4">
             <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
               <div class="card card-custom h-100">
-                {% if property.main_image %}
+                {% if property.main_image  %}
                   <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
                 {% endif %}
                 <div class="card-body">

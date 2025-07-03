@@ -4,15 +4,15 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <div class="card shadow-sm">
+      <div class="card shadow-sm border-0" style="background-color: #f9f5ef; border: 1px solid #e4d3b2;">
         <div class="card-body">
-          <h2 class="card-title mb-4">Step 5: Upload Interior Images</h2>
+          <h2 class="card-title mb-4" style="color: #2f2f2f;">Step 5: Upload Interior Images</h2>
 
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="mb-4">
-              <label for="{{ form.images.id_for_label }}" class="form-label">
+              <label for="{{ form.images.id_for_label }}" class="form-label fw-medium" style="color: #2f2f2f;">
                 {{ form.images.label }}
               </label>
               <div class="custom-file">
@@ -21,10 +21,11 @@
                        class="form-control"
                        id="{{ form.images.id_for_label }}"
                        multiple
-                       accept="image/*">
+                       accept="image/*"
+                       style="border-color: #e4d3b2; background-color: #ffffff;">
               </div>
               {% if form.images.errors %}
-                <div class="invalid-feedback d-block">
+                <div class="invalid-feedback d-block" style="color: #c15a2e;">
                   {{ form.images.errors|first }}
                 </div>
               {% endif %}
@@ -34,10 +35,10 @@
             </div>
 
             <div class="d-flex justify-content-between">
-              <a href="{% url 'add_property_step4' %}" class="btn btn-secondary">
+              <a href="{% url 'add_property_step4' %}" class="btn btn-outline-secondary" style="border-color: #e4d3b2; color: #2f2f2f;">
                 <i class="fas fa-arrow-left me-1"></i> Back
               </a>
-              <button type="submit" class="btn btn-primary">
+              <button type="submit" class="btn fw-medium" style="background-color: #c15a2e; color: white;">
                 Next <i class="fas fa-arrow-right ms-1"></i>
               </button>
             </div>
@@ -49,48 +50,43 @@
 </div>
 
 <style>
+  body {
+    background-color: #f9f5ef;
+  }
+
+  .card {
+    border-radius: 12px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+  }
+
   .custom-file {
     position: relative;
     display: inline-block;
     width: 100%;
   }
-  .custom-file-input {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    height: calc(2.25rem + 2px);
-    margin: 0;
-    opacity: 0;
+
+  .btn-outline-secondary:hover {
+    background-color: #f3ecdf;
+    color: #2f2f2f;
+    border-color: #c15a2e;
   }
-  .custom-file-label {
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    z-index: 1;
-    height: calc(2.25rem + 2px);
-    padding: .375rem .75rem;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    border: 1px solid #ced4da;
-    border-radius: .25rem;
+
+  .btn:hover {
+    background-color: #a84b24 !important;
+    color: white !important;
   }
-  .custom-file-label::after {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 3;
-    display: block;
-    height: calc(2.25rem + 2px);
-    padding: .375rem .75rem;
-    line-height: 1.5;
-    color: #495057;
-    content: "Browse";
-    background-color: #e9ecef;
-    border-left: inherit;
-    border-radius: 0 .25rem .25rem 0;
+
+  .form-label {
+    font-weight: 500;
+  }
+
+  .invalid-feedback {
+    font-size: 0.85rem;
+    color: red;
   }
 </style>
 {% endblock %}

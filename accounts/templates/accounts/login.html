@@ -3,17 +3,16 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg rounded-4 border-0">
-                <div class="card-body px-5 py-4">
-                    <div class="text-center mb-4">
-                        <h2 class="text-primary">Welcome Back</h2>
-                        <p class="text-muted mb-0">Please enter your credentials to login</p>
-                    </div>
-
-                    <form method="post" novalidate>
+            <div class="card shadow-sm border-0" style="background-color: #f9f5ef;">
+                <div class="card-header border-0 pt-4" style="background-color: #f9f5ef;">
+                    <h2 class="mb-0 text-center" style="color: #2f2f2f;">Login to Your Account</h2>
+                    <p class="text-center" style="color: #2f2f2f;">Welcome back! Please login below</p>
+                </div>
+                <div class="card-body px-4 py-3">
+                    <form method="POST" novalidate>
                         {% csrf_token %}
 
                         {% if error %}
@@ -24,66 +23,46 @@
                         {% endif %}
 
                         <!-- Identifier -->
-                        <div class="mb-4">
-                            <label for="{{ form.identifier.id_for_label }}" class="form-label">Email or Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                {{ form.identifier|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your email or username" }}
-                            </div>
-                            <div class="invalid-feedback">
-                                {{ form.identifier.errors }}
-                            </div>
+                        <div class="mb-3">
+                            <label for="id_identifier" class="form-label fw-medium" style="color: #2f2f2f;">Email or Username</label>
+                            {% render_field form.identifier class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your email or username" %}
+                            {% if form.identifier.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.identifier.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <!-- Password -->
-                        <div class="mb-4">
-                            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                {{ form.password|add_class:"form-control form-control-lg"|attr:"placeholder:Enter your password" }}
-                            </div>
-                            <div class="invalid-feedback">
-                                {{ form.password.errors }}
-                            </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label fw-medium" style="color: #2f2f2f;">Password</label>
+                            {% render_field form.password class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your password" %}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password.errors.0 }}
+                                </div>
+                            {% endif %}
                             <div class="text-end mt-2">
-                                <a href="#" class="text-decoration-none small">Forgot password?</a>
+                                <a href="#" class="text-decoration-none small" style="color: #c15a2e;">Forgot password?</a>
                             </div>
                         </div>
 
                         <!-- Remember Me -->
                         <div class="form-check mb-4">
-                            <input type="checkbox" class="form-check-input" id="rememberMe">
-                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                            <input type="checkbox" class="form-check-input" id="rememberMe" style="border-color: #e4d3b2;">
+                            <label class="form-check-label" for="rememberMe" style="color: #2f2f2f;">Remember me</label>
                         </div>
 
                         <!-- Login Button -->
-                        <div class="d-grid mb-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn py-2 rounded-3 fw-medium" style="background-color: #c15a2e; color: white;">
                                 <i class="fas fa-sign-in-alt me-2"></i>Login
                             </button>
                         </div>
-
-                        <!-- Divider -->
-                        <div class="divider-text text-muted my-4">
-                            <span class="bg-white px-3">or continue with</span>
-                        </div>
-
-                        <!-- Social Logins -->
-                        <div class="d-flex justify-content-center gap-3">
-                            <a href="#" class="btn btn-outline-primary rounded-circle p-2">
-                                <i class="fab fa-google"></i>
-                            </a>
-                            <a href="#" class="btn btn-outline-primary rounded-circle p-2">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="btn btn-outline-primary rounded-circle p-2">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                        </div>
                     </form>
 
-                    <div class="mt-4 text-center">
-                        <p class="mb-0">Don't have an account? <a href="{% url 'signup' %}" class="fw-bold">Sign up</a></p>
+                    <div class="text-center pt-2">
+                        <p style="color: #2f2f2f;">Don't have an account? <a href="{% url 'signup' %}" style="color: #c15a2e;" class="text-decoration-none">Sign Up</a></p>
                     </div>
                 </div>
             </div>
@@ -92,64 +71,31 @@
 </div>
 
 <style>
+    body {
+        background-color: #f9f5ef;
+    }
     .card {
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
-        transition: box-shadow 0.3s ease;
+        border-radius: 12px;
+        border: 1px solid #e4d3b2;
     }
-
-    .card:hover {
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+    .form-control {
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
-
-    .form-control-lg {
-        border-radius: 10px;
-        padding: 12px 15px;
+    .form-control:focus {
+        border-color: #c15a2e;
+        box-shadow: 0 0 0 0.25rem rgba(193, 90, 46, 0.15);
+        background-color: #f3ecdf;
     }
-
-    .input-group-text {
-        background-color: #f1f1f1;
-        border-right: none;
+    .btn {
+        transition: background-color 0.2s;
+        border: none;
     }
-
-    .input-group .form-control {
-        border-left: none;
+    .btn:hover {
+        background-color: #a84b24 !important;
     }
-
-    .divider-text {
-        position: relative;
-        text-align: center;
-    }
-
-    .divider-text::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 0;
-        width: 100%;
-        height: 1px;
-        background-color: #dee2e6;
-        z-index: 0;
-    }
-
-    .divider-text span {
-        position: relative;
-        z-index: 1;
-    }
-
-    .btn-outline-primary.rounded-circle {
-        width: 44px;
-        height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
     .invalid-feedback {
-        display: block;
-    }
-
-    a {
-        text-decoration: none;
+        font-size: 0.85rem;
+        color: red;
     }
 </style>
 
