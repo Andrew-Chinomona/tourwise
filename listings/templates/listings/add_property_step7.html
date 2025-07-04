@@ -4,18 +4,18 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <div class="card shadow-sm">
+      <div class="card shadow-sm" style="background-color: #f9f5ef; border: 1px solid #e4d3b2;">
         <div class="card-body">
-          <h2 class="card-title mb-4">Step 7: Choose Property Amenities</h2>
+          <h2 class="card-title mb-4" style="color: #2f2f2f;">Step 7: Choose Property Amenities</h2>
 
           <form method="post">
             {% csrf_token %}
 
             <div class="mb-4">
-              <label class="form-label mb-3">{{ form.amenities.label }}</label>
+              <label class="form-label mb-3 fw-medium" style="color: #2f2f2f;">{{ form.amenities.label }}</label>
 
               {% if form.amenities.errors %}
-                <div class="invalid-feedback d-block">
+                <div class="invalid-feedback d-block" style="color: #c15a2e;">
                   {{ form.amenities.errors|first }}
                 </div>
               {% endif %}
@@ -23,10 +23,16 @@
               <!-- Grid layout for 3-column checkboxes -->
               <div class="row">
                 {% for checkbox in form.amenities %}
-                  <div class="col-md-4 mb-2">
+                  <div class="col-md-4 mb-3">
                     <div class="form-check">
-                      {{ checkbox.tag }}
-                      <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                      <input type="checkbox"
+                             class="form-check-input me-2"
+                             id="{{ checkbox.id_for_label }}"
+                             name="{{ form.amenities.name }}"
+                             value="{{ checkbox.data.value }}"
+                             {% if checkbox.data.selected %}checked{% endif %}
+                             style="border-color: #e4d3b2; width: 18px; height: 18px;">
+                      <label class="form-check-label" for="{{ checkbox.id_for_label }}" style="color: #2f2f2f;">
                         {{ checkbox.choice_label }}
                       </label>
                     </div>
@@ -34,16 +40,16 @@
                 {% endfor %}
               </div>
 
-              <small class="form-text text-muted">
+              <small class="form-text" style="color: #7a6a5a;">
                 Select all amenities that apply to your property
               </small>
             </div>
 
             <div class="d-flex justify-content-between">
-              <a href="{% url 'add_property_step6' %}" class="btn btn-secondary">
+              <a href="{% url 'add_property_step6' %}" class="btn rounded-3" style="border-color: #e4d3b2; color: #c15a2e;">
                 <i class="fas fa-arrow-left me-1"></i> Back
               </a>
-              <button type="submit" class="btn btn-primary">
+              <button type="submit" class="btn rounded-3" style="background-color: #c15a2e; color: white;">
                 Next <i class="fas fa-arrow-right ms-1"></i>
               </button>
             </div>
@@ -55,11 +61,41 @@
 </div>
 
 <style>
-  .form-check input[type="checkbox"] {
-    margin-right: 8px;
+  .card {
+    border-radius: 12px;
   }
+
+  .form-check-input {
+    transition: all 0.2s ease;
+  }
+
+  .form-check-input:checked {
+    background-color: #c15a2e;
+    border-color: #c15a2e;
+  }
+
+  .form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(193, 90, 46, 0.25);
+    border-color: #c15a2e;
+  }
+
   .form-check-label {
     cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .form-check-label:hover {
+    color: #c15a2e;
+  }
+
+  .btn {
+    transition: all 0.2s ease;
+    padding: 8px 16px;
+  }
+
+  .btn:hover {
+    background-color: #a84b24 !important;
+    color: white !important;
   }
 </style>
 {% endblock %}

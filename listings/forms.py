@@ -1,12 +1,13 @@
 from django import forms
-from django.forms.widgets import FileInput
 from django.forms.widgets import ClearableFileInput
 from .models import Amenity, Property, Currency
-from django.utils.safestring import mark_safe
 
+
+# ---------- Utility Widgets ----------
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
+
 
 class MultipleFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
@@ -16,10 +17,11 @@ class MultipleFileField(forms.FileField):
     def clean(self, data, initial=None):
         single_file_clean = super().clean
         if isinstance(data, (list, tuple)):
-            result = [single_file_clean(d, initial) for d in data]
-        else:
-            result = single_file_clean(data, initial)
-        return result
+            return [single_file_clean(d, initial) for d in data]
+        return single_file_clean(data, initial)
+
+
+# ---------- Step Forms ----------
 
 class PropertyStep1Form(forms.Form):
     property_type = forms.ChoiceField(
@@ -27,6 +29,7 @@ class PropertyStep1Form(forms.Form):
         widget=forms.RadioSelect,
         label="What type of property are you listing?"
     )
+
 
 class PropertyStep2Form(forms.Form):
     description = forms.CharField(
@@ -39,6 +42,7 @@ class PropertyStep2Form(forms.Form):
         max_length=1000,
         required=True
     )
+
 
 class PropertyStep3Form(forms.Form):
     city = forms.CharField(
@@ -66,8 +70,6 @@ class PropertyStep3Form(forms.Form):
             'class': 'form-control'
         })
     )
-
-    # Hidden fields for coordinates (populated by JS)
     latitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
     longitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
 
@@ -89,11 +91,12 @@ class PropertyStep4Form(forms.Form):
     def clean_main_image(self):
         image = self.cleaned_data.get('main_image')
         if image:
-            if image.size > 5 * 1024 * 1024:  # 5MB limit
-                raise forms.ValidationError("Image file too large (max 5MB)")
+            if image.size > 10 * 1024 * 1024:
+                raise forms.ValidationError("Image file too large (max 10MB)")
             if not image.content_type.startswith('image/'):
                 raise forms.ValidationError("File is not an image")
         return image
+
 
 class PropertyStep5Form(forms.Form):
     images = MultipleFileField(
@@ -114,8 +117,8 @@ class PropertyStep5Form(forms.Form):
         for f in files:
             if not f.content_type.startswith('image/'):
                 raise forms.ValidationError(f"{f.name} is not an image file.")
-            if f.size > 5 * 1024 * 1024:  # 5MB limit
-                raise forms.ValidationError(f"{f.name} is too large (max 5MB).")
+            if f.size > 10 * 1024 * 1024:
+                raise forms.ValidationError(f"{f.name} is too large (max 10MB).")
         return files
 
 
@@ -143,17 +146,13 @@ class PropertyStep6Form(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Order currencies alphabetically
         self.fields['currency'].queryset = Currency.objects.all().order_by('code')
 
-        # Default to USD if no initial currency
-        if not self.initial.get('currency'):
-            try:
-                usd = Currency.objects.get(code='USD')
+        if not self.is_bound and not self.initial.get('currency'):
+            usd = Currency.objects.filter(code__iexact='USD').first()
+            if usd:
                 self.initial['currency'] = usd
-            except Currency.DoesNotExist:
-                pass
+
 
 class PropertyStep7Form(forms.Form):
     amenities = forms.ModelMultipleChoiceField(
@@ -165,7 +164,6 @@ class PropertyStep7Form(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Dynamically load all amenities in case they change
         self.fields['amenities'].queryset = Amenity.objects.all()
 
 
@@ -199,7 +197,6 @@ class PropertyStep8Form(forms.Form):
         property_obj = kwargs.pop('property_obj', None)
         super().__init__(*args, **kwargs)
 
-        # Set initial values from user profile if available
         if self.user and self.user.is_authenticated:
             self.fields['contact_name'].initial = (
                 f"{self.user.first_name} {self.user.last_name}".strip()
@@ -208,11 +205,11 @@ class PropertyStep8Form(forms.Form):
             )
             self.fields['contact_email'].initial = self.user.email
 
-            # Prefer property's existing contact info if available, otherwise use user's
             if property_obj and property_obj.contact_phone:
                 self.fields['contact_phone'].initial = property_obj.contact_phone
             elif hasattr(self.user, 'phone_number') and self.user.phone_number:
                 self.fields['contact_phone'].initial = self.user.phone_number
+
 
 class PropertyStep9Form(forms.Form):
     bedrooms = forms.IntegerField(
@@ -239,6 +236,8 @@ class PropertyStep9Form(forms.Form):
             'class': 'form-control'
         })
     )
+
+
 class ChoosePaymentForm(forms.Form):
     listing_type = forms.ChoiceField(
         choices=Property.LISTING_TYPE_CHOICES,
@@ -246,30 +245,31 @@ class ChoosePaymentForm(forms.Form):
         label="Choose your listing type"
     )
 
+
+# ---------- Edit Form ----------
+
 class EditPropertyForm(forms.ModelForm):
-        class Meta:
-            model = Property
-            fields = [
-                'property_type',
-                'title',
-                'description',
-                'street_address',
-                'suburb',
-                'city',
-                #'main_image',
-                #'profile_photo',
-                'bedrooms',
-                'bathrooms',
-                'area',
-                'price',
-                'contact_phone',
-                'contact_email',
-                'listing_type',
-                'amenities',
-                'currency',
-            ]
-            widgets = {
-                'description': forms.Textarea(attrs={'class': 'form-control','rows': 4}),
-                'listing_type': forms.RadioSelect(),
-                'amenities': forms.CheckboxSelectMultiple(),
-            }
+    class Meta:
+        model = Property
+        fields = [
+            'property_type',
+            'title',
+            'description',
+            'street_address',
+            'suburb',
+            'city',
+            'bedrooms',
+            'bathrooms',
+            'area',
+            'price',
+            'contact_phone',
+            'contact_email',
+            'listing_type',
+            'amenities',
+            'currency',
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'listing_type': forms.RadioSelect(),
+            'amenities': forms.CheckboxSelectMultiple(),
+        }

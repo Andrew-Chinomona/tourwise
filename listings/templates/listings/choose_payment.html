@@ -4,143 +4,146 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-10">
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-sm mb-4" style="background-color: #f9f5ef; border: 1px solid #e4d3b2;">
         <div class="card-body">
-          <h2 class="card-title mb-4">Confirm Your Listing Details</h2>
+          <h2 class="card-title mb-4" style="color: #2f2f2f;">Confirm Your Listing Details</h2>
 
           <!-- Property Preview -->
           <div class="row mb-4">
-<!-- Main Image -->
-<div class="col-md-6 position-relative mb-3 mb-md-0">
-  {% if property.main_image %}
-    <img src="{{ property.main_image.url }}" alt="Main Image"
-         class="img-fluid rounded"
-         style="width: 100%; height: 300px; object-fit: cover;">
-  {% endif %}
+            <!-- Main Image -->
+            <div class="col-md-6 position-relative mb-3 mb-md-0">
+              {% if property.main_image %}
+                <img src="{{ property.main_image.url }}" alt="Main Image"
+                     class="img-fluid rounded"
+                     style="width: 100%; height: 300px; object-fit: cover; border: 1px solid #e4d3b2;">
+              {% endif %}
 
-  {% if property.profile_photo %}
-    <div class="position-absolute" style="bottom: 20px; left: 20px; display: flex; align-items: center;">
-      <img src="{{ property.profile_photo.url }}"
-           style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-      <span class="ms-2 text-white bg-dark px-2 py-1 rounded">{{ user.username }}</span>
-    </div>
-  {% endif %}
-</div>
+              {% if property.profile_photo %}
+                <div class="position-absolute" style="bottom: 20px; left: 20px; display: flex; align-items: center;">
+                  <img src="{{ property.profile_photo.url }}"
+                       style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid white;">
+                  <span class="ms-2 text-white px-2 py-1 rounded" style="background-color: #2f2f2f;">{{ user.username }}</span>
+                </div>
+              {% endif %}
+            </div>
 
-<!-- Interior Images - Match Main Image Height -->
-<div class="col-md-6 d-flex flex-column justify-content-between" style="height: 300px;">
-  <div class="row g-0 mb-2">
-    {% for img in property.images.all|slice:":2" %}
-      <div class="col-6 pe-1">
-        <img src="{{ img.image.url }}" alt="Interior"
-             class="img-fluid rounded w-100"
-             style="height: 140px; object-fit: cover;">
-      </div>
-    {% endfor %}
-  </div>
-  <div class="row g-0">
-    {% for img in property.images.all|slice:"2:4" %}
-      <div class="col-6 pe-1">
-        <img src="{{ img.image.url }}" alt="Interior"
-             class="img-fluid rounded w-100"
-             style="height: 140px; object-fit: cover;">
-      </div>
-    {% endfor %}
-  </div>
-</div>
+            <!-- Interior Images - Match Main Image Height -->
+            <div class="col-md-6 d-flex flex-column justify-content-between" style="height: 300px;">
+              <div class="row g-0 mb-2">
+                {% for img in property.images.all|slice:":2" %}
+                  <div class="col-6 pe-1">
+                    <img src="{{ img.image.url }}" alt="Interior"
+                         class="img-fluid rounded w-100"
+                         style="height: 140px; object-fit: cover; border: 1px solid #e4d3b2;">
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="row g-0">
+                {% for img in property.images.all|slice:"2:4" %}
+                  <div class="col-6 pe-1">
+                    <img src="{{ img.image.url }}" alt="Interior"
+                         class="img-fluid rounded w-100"
+                         style="height: 140px; object-fit: cover; border: 1px solid #e4d3b2;">
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
 
           <!-- Property Details -->
           <div class="mb-4">
-            <h4 class="text-truncate" style="max-width: 100%;">
+            <h4 class="text-truncate" style="max-width: 100%; color: #2f2f2f;">
               {{ property.title }}
             </h4>
-            <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
+            <p style="color: #7a6a5a;">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
 
             <div class="row mb-3">
               <div class="col-md-3 mb-2">
-                <label class="form-label">Bedrooms</label>
-                <input type="number" value="{{ property.bedrooms }}" class="form-control" readonly>
+                <label class="form-label fw-medium" style="color: #2f2f2f;">Bedrooms</label>
+                <input type="number" value="{{ property.bedrooms }}" class="form-control rounded-3" style="background-color: white; border-color: #e4d3b2;" readonly>
               </div>
               <div class="col-md-3 mb-2">
-                <label class="form-label">Bathrooms</label>
-                <input type="number" value="{{ property.bathrooms }}" class="form-control" readonly>
+                <label class="form-label fw-medium" style="color: #2f2f2f;">Bathrooms</label>
+                <input type="number" value="{{ property.bathrooms }}" class="form-control rounded-3" style="background-color: white; border-color: #e4d3b2;" readonly>
               </div>
               <div class="col-md-3 mb-2">
-                <label class="form-label">Area (m²)</label>
-                <input type="number" value="{{ property.area }}" class="form-control" readonly>
+                <label class="form-label fw-medium" style="color: #2f2f2f;">Area (m²)</label>
+                <input type="number" value="{{ property.area }}" class="form-control rounded-3" style="background-color: white; border-color: #e4d3b2;" readonly>
               </div>
               <div class="col-md-3 mb-2">
-                <label class="form-label">Price</label>
-                <input type="text" value="{{ property.currency }}{{ property.price }}" class="form-control" readonly>
+                <label class="form-label fw-medium" style="color: #2f2f2f;">Price</label>
+                <input type="text" value="{{ property.currency }}{{ property.price }}" class="form-control rounded-3" style="background-color: white; border-color: #e4d3b2;" readonly>
               </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Description</label>
-              <textarea class="form-control" rows="3" readonly>{{ property.description }}</textarea>
+              <label class="form-label fw-medium" style="color: #2f2f2f;">Description</label>
+              <textarea class="form-control rounded-3" rows="3" style="background-color: white; border-color: #e4d3b2;" readonly>{{ property.description }}</textarea>
             </div>
 
             <div class="row mb-3">
               <div class="col-md-6 mb-2">
-                <label class="form-label">Contact Phone</label>
-                <input type="text" value="{{ property.contact_phone }}" class="form-control" readonly>
+                <label class="form-label fw-medium" style="color: #2f2f2f;">Contact Phone</label>
+                <input type="text" value="{{ property.contact_phone }}" class="form-control rounded-3" style="background-color: white; border-color: #e4d3b2;" readonly>
               </div>
               <div class="col-md-6 mb-2">
-                <label class="form-label">Contact Email</label>
-                <input type="email" value="{{ property.contact_email }}" class="form-control" readonly>
+                <label class="form-label fw-medium" style="color: #2f2f2f;">Contact Email</label>
+                <input type="email" value="{{ property.contact_email }}" class="form-control rounded-3" style="background-color: white; border-color: #e4d3b2;" readonly>
               </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Amenities</label>
+              <label class="form-label fw-medium" style="color: #2f2f2f;">Amenities</label>
               <div class="d-flex flex-wrap gap-2">
                 {% for amenity in property.amenities.all %}
-                  <span class="badge bg-secondary">{{ amenity.name }}</span>
+                  <span class="badge rounded-pill" style="background-color: #e4d3b2; color: #2f2f2f;">{{ amenity.name }}</span>
                 {% empty %}
-                  <span class="text-muted">No amenities listed</span>
+                  <span style="color: #7a6a5a;">No amenities listed</span>
                 {% endfor %}
               </div>
             </div>
 
             <!-- Map Section -->
-            <hr class="my-4">
-            <h5>📍 Property Location on Map</h5>
-            <div id="map" style="height: 400px;" class="mb-4"></div>
+            <hr class="my-4" style="border-color: #e4d3b2;">
+            <h5 style="color: #2f2f2f;">📍 Property Location on Map</h5>
+            <div id="map" style="height: 400px; border-radius: 12px; border: 1px solid #e4d3b2;" class="mb-4"></div>
           </div>
         </div>
       </div>
 
       <!-- Payment Options -->
-      <div class="card shadow-sm">
+      <div class="card shadow-sm" style="background-color: #f9f5ef; border: 1px solid #e4d3b2;">
         <div class="card-body">
           <form method="post">
             {% csrf_token %}
 
-            <h5 class="mb-3">Select Listing Type</h5>
+            <h5 class="mb-3" style="color: #2f2f2f;">Select Listing Type</h5>
 
             <div class="mb-3">
-              <div class="form-check">
+              <div class="form-check mb-2">
                 <input class="form-check-input" type="radio" name="listing_type" id="normal"
-                       value="normal" {% if form.initial.listing_type == 'normal' %}checked{% endif %}>
-                <label class="form-check-label" for="normal">
+                       value="normal" {% if form.initial.listing_type == 'normal' %}checked{% endif %}
+                       style="border-color: #e4d3b2; width: 18px; height: 18px;">
+                <label class="form-check-label" for="normal" style="color: #2f2f2f;">
                   Normal Listing - $10
                 </label>
               </div>
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="listing_type" id="priority"
-                       value="priority" {% if form.initial.listing_type == 'priority' %}checked{% endif %}>
-                <label class="form-check-label" for="priority">
+                       value="priority" {% if form.initial.listing_type == 'priority' %}checked{% endif %}
+                       style="border-color: #e4d3b2; width: 18px; height: 18px;">
+                <label class="form-check-label" for="priority" style="color: #2f2f2f;">
                   Priority Listing - $20 (featured on homepage)
                 </label>
               </div>
             </div>
 
             <div class="d-flex justify-content-between">
-              <a href="{% url 'add_property_step9' %}" class="btn btn-secondary">
-                Back
+              <a href="{% url 'add_property_step9' %}" class="btn rounded-3" style="border-color: #e4d3b2; color: #c15a2e;">
+                <i class="fas fa-arrow-left me-1"></i> Back
               </a>
-              <button type="submit" class="btn btn-success">
-                Confirm & Publish
+              <button type="submit" class="btn rounded-3" style="background-color: #c15a2e; color: white;">
+                Confirm & Publish <i class="fas fa-check ms-1"></i>
               </button>
             </div>
           </form>
@@ -162,15 +165,63 @@
     if (lat && lng) {
       const map = L.map('map').setView([lat, lng], 15);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+        attribution: 'Map data © <a href="https://openstreetmap.org" style="color: #c15a2e;">OpenStreetMap</a> contributors'
       }).addTo(map);
 
-      L.marker([lat, lng]).addTo(map)
+      // Custom marker icon
+      const customIcon = L.icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        shadowSize: [41, 41]
+      });
+
+      L.marker([lat, lng], {icon: customIcon}).addTo(map)
         .bindPopup("Property Location")
         .openPopup();
     } else {
-      document.getElementById("map").innerHTML = "<p class='text-muted'>No location available for this property.</p>";
+      document.getElementById("map").innerHTML = "<p style='color: #7a6a5a;'>No location available for this property.</p>";
     }
   });
 </script>
+
+<style>
+  .card {
+    border-radius: 12px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .form-check-input:checked {
+    background-color: #c15a2e;
+    border-color: #c15a2e;
+  }
+
+  .form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(193, 90, 46, 0.25);
+  }
+
+  .btn {
+    transition: all 0.2s;
+    padding: 8px 16px;
+  }
+
+  .btn:hover {
+    background-color: #a84b24 !important;
+    color: white !important;
+  }
+
+  .leaflet-container {
+    background-color: #f9f5ef !important;
+  }
+
+  .leaflet-popup-content a {
+    color: #c15a2e !important;
+  }
+</style>
 {% endblock %}
