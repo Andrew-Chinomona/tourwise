@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Payment Instructions</h2>
+                    
+                    <div class="alert alert-info">
+                        {{ instructions|safe }}
+                    </div>
+
+                    <div id="payment-status" class="alert alert-warning">
+                        Checking payment status...
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <div class="spinner-border text-primary" role="status" id="payment-spinner">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let checkCount = 0;
+const maxChecks = 60; // Stop checking after 5 minutes (60 * 5 seconds)
+
+function checkPaymentStatus() {
+    fetch('{{ poll_url }}')
+        .then(response => response.json())
+        .then(data => {
+            checkCount++;
+            
+            if (data.status === 'paid') {
+                document.getElementById('payment-status').className = 'alert alert-success';
+                document.getElementById('payment-status').textContent = 'Payment successful! Redirecting...';
+                document.getElementById('payment-spinner').style.display = 'none';
+                window.location.href = '{% url "payment_complete" %}?reference={{ reference }}';
+            } else if (checkCount >= maxChecks) {
+                document.getElementById('payment-status').className = 'alert alert-danger';
+                document.getElementById('payment-status').textContent = 'Payment timeout. Please try again.';
+                document.getElementById('payment-spinner').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+// Check status every 5 seconds
+const statusInterval = setInterval(() => {
+    if (checkCount < maxChecks) {
+        checkPaymentStatus();
+    } else {
+        clearInterval(statusInterval);
+    }
+}, 5000);
+
+// Initial check
+checkPaymentStatus();
+</script>
+{% endblock %}

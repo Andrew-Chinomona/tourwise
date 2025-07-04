@@ -156,3 +156,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENCAGE_API_KEY = os.getenv('OPENCAGE_API_KEY')
+
+
+# Paynow Settings
+PAYNOW_INTEGRATION_ID = 'YOUR_INTEGRATION_ID'
+PAYNOW_INTEGRATION_KEY = 'YOUR_INTEGRATION_KEY'
+PAYNOW_RETURN_URL = 'http://yourdomain.com/payments/complete/'  # Update with your domain
+PAYNOW_RESULT_URL = 'http://yourdomain.com/payments/update/'   # Update with your domain
+PAYNOW_MODE = 'test'  # Change to 'live' for production

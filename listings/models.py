@@ -21,8 +21,8 @@ class Amenity(models.Model):
 
 class Property(models.Model):
     LISTING_TYPE_CHOICES = [
-        ('normal', 'Normal'),
-        ('priority', 'Priority'),
+        ('normal', 'Normal Listing ($10)'),
+        ('priority', 'Priority Listing ($20)'),
     ]
 
     PROPERTY_TYPE_CHOICES = [
@@ -67,12 +67,25 @@ class Property(models.Model):
     contact_email = models.EmailField(blank=True)
     # contact_name = models.CharField(max_length=100, blank=True)
 
+    # Add `listing_type` field and the other necessary fields here
+    listing_type = models.CharField(
+        max_length=10,
+        choices=LISTING_TYPE_CHOICES,
+        default='normal',
+        help_text="Type of listing for this property"
+    )
+
     # Listing type & status
-    listing_type = models.CharField(max_length=10, choices=LISTING_TYPE_CHOICES, default='normal')
     is_paid = models.BooleanField(default=False)
 
     #Metadata
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def get_listing_price(listing_type):
+        if listing_type == 'priority':
+            return 20.00
+        return 10.00
 
     def __str__(self):
         return f"{self.title} ({self.city})"
@@ -93,4 +106,3 @@ class PropertyImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.property.title}"
-

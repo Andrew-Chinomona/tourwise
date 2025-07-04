@@ -244,6 +244,8 @@ def add_property_step9(request):
         'property': property_obj
     })
 
+from payments.services import paynow_service
+
 @login_required
 def choose_payment(request):
     property_id = request.session.get('editing_property_id')
@@ -253,34 +255,34 @@ def choose_payment(request):
         form = ChoosePaymentForm(request.POST)
         if form.is_valid():
             listing_type = form.cleaned_data['listing_type']
+
+            # Save listing type (without setting is_paid)
             property_obj.listing_type = listing_type
-            property_obj.is_paid = True
             property_obj.save()
 
-            Payment.objects.create(
-                property=property_obj,
-                user=request.user,
-                listing_type=listing_type,
-                amount=20.00 if listing_type == 'priority' else 10.00,
-                is_complete=True
-            )
+            # Create Paynow payment
+            service = paynow_service()
+            response = service.create_payment(property_obj, request.user)
 
-            request.session.pop('editing_property_id', None)
-            return redirect('host_dashboard')
+            if response and response.success:
+                return render(request, 'payments/payment_instructions.html', {
+                    'poll_url': response.poll_url,
+                    'instructions': response.instructions
+                })
+
+            return render(request, 'payments/payment_error.html')
 
     else:
         form = ChoosePaymentForm(initial={'listing_type': property_obj.listing_type})
         property_obj.current_step = 10
         property_obj.save()
 
-    # Add latitude and longitude to the context
     return render(request, 'listings/choose_payment.html', {
         'form': form,
         'property': property_obj,
         'latitude': property_obj.latitude,
         'longitude': property_obj.longitude,
     })
-
 
 
 @login_required()
@@ -351,12 +353,12 @@ def property_detail(request, pk):
 
 def recent_listings_view(request):
     two_weeks_ago = timezone.now() - timedelta(weeks=2)
-    recent_properties =  Property.objects.filter(created_at__gte=two_weeks_ago).order_by('-created_at')
+    recent_properties =  Property.objects.filter(is_paid=True,created_at__gte=two_weeks_ago).order_by('-created_at')
     return render(request, 'listings/recent_listings.html', {'properties': recent_properties, 'title': 'Recent Listings'})
 
 
 def featured_listings_view(request):
-    featured_properties =list(Property.objects.filter(listing_type = 'priority').order_by('-created_at'))
+    featured_properties =list(Property.objects.filter(is_paid=True,  listing_type = 'priority').order_by('-created_at'))
 
     if len(featured_properties) < 10:
         fallback = Property.objects.filter(listing_type = 'normal').order_by('-created_at')[:10 - len(featured_properties)]

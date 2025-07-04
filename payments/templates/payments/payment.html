@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Choose Your Listing Type</h2>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            {% for radio in form.listing_type %}
+                            <div class="card mb-3 {% if radio.choice_value == 'priority' %}border-primary{% endif %}">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                            {% if radio.choice_value == 'normal' %}
+                                            <h5 class="mb-2">Normal Listing - $10</h5>
+                                            <ul class="list-unstyled text-muted">
+                                                <li>✓ Standard visibility</li>
+                                                <li>✓ Basic search placement</li>
+                                                <li>✓ 30 days listing duration</li>
+                                            </ul>
+                                            {% else %}
+                                            <h5 class="mb-2 text-primary">Priority Listing - $20</h5>
+                                            <ul class="list-unstyled text-muted">
+                                                <li>✓ Featured on homepage</li>
+                                                <li>✓ Top search results</li>
+                                                <li>✓ Highlighted listing</li>
+                                                <li>✓ 60 days listing duration</li>
+                                            </ul>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if form.listing_type.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.listing_type.errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'add_property_step9' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Proceed to Payment <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

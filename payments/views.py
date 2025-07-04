@@ -1,3 +1,49 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from .services import PaynowPaymentService
+from .models import Payment
 
-# Create your views here.
+
+@login_required
+def initiate_payment(request, property_id):
+    property_obj = Property.objects.get(id=property_id)
+    service = PaynowPaymentService()
+
+    response = service.create_payment(property_obj, request.user)
+
+    if response and response.success:
+        return render(request, 'payments/payment_instructions.html', {
+            'poll_url': response.poll_url,
+            'instructions': response.instructions
+        })
+
+    return render(request, 'payments/payment_error.html')
+
+
+@login_required
+def payment_complete(request):
+    reference = request.GET.get('reference')
+    if reference:
+        payment = Payment.objects.get(reference=reference)
+        service = PaynowPaymentService()
+
+        if service.check_payment_status(payment):
+            payment.property.is_published = True
+            payment.property.save()
+            return render(request, 'payments/payment_success.html')
+
+    return render(request, 'payments/payment_failed.html')
+
+
+@csrf_exempt
+def payment_update(request):
+    # Handle Paynow webhook
+    if request.method == 'POST':
+        reference = request.POST.get('reference')
+        if reference:
+            payment = Payment.objects.get(reference=reference)
+            service = PaynowPaymentService()
+            service.check_payment_status(payment)
+    return HttpResponse(status=200)
