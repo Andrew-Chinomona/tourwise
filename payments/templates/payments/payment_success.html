@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm" style="background-color: #f9f5ef; border: 1px solid #e4d3b2;">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4" style="color: #2f2f2f;">Payment Successful</h2>
+                    <p class="lead" style="color: #2f2f2f;">Thank you for your payment. Your listing is now published</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary-custom mt-4">Return Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

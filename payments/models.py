@@ -3,11 +3,7 @@ from django.conf import settings
 from listings.models import Property
 
 class Payment(models.Model):
-    # Remove `amount` field
-
-    @property
-    def amount(self):
-        return Property.get_listing_price(self.listing_type)  # Dynamically calculate amount
+    amount = models.DecimalField(max_digits=6, decimal_places=2, help_text="Amount in USD",)
 
     LISTING_TYPE_CHOICES = Property.LISTING_TYPE_CHOICES
     listing_type = models.CharField(

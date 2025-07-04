@@ -31,7 +31,7 @@ def payment_complete(request):
         service = paynow_service
 
         if service.check_payment_status(payment):
-            payment.property.is_published = True
+            payment.property.is_paid = True
             payment.property.save()
             return render(request, 'payments/payment_success.html')
 
