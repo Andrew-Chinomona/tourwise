@@ -1,12 +1,11 @@
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, logout, authenticate,get_backends
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from listings.models import Property, PropertyImage
 from django.shortcuts import render, redirect
 from .forms import SignupForm, CustomLoginForm, ProfilePhotoForm
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import F, Value, CharField, Q
+from django.db.models import Value, CharField, Q
 from django.db.models.functions import Concat
 
 
@@ -90,7 +89,7 @@ def home_view(request):
 @login_required()
 def host_dashboard(request):
     if request.user.user_type != 'host':
-        return redirect('home')  # you missed return here
+        return redirect('home')
 
     user = request.user
     my_properties = Property.objects.filter(owner=user, is_paid =True)
@@ -142,11 +141,6 @@ def search_results_view(request):
         'property_type': property_type,
         'max_price': max_price
     })
-
-from django.contrib.auth import login
-from django.shortcuts import render, redirect
-from .forms import SignupForm
-from .models import CustomUser
 
 def become_host_view(request):
     if request.user.is_authenticated:

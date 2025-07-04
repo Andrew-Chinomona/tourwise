@@ -25,7 +25,6 @@ class PaynowService:
             property=property_obj,
             user=user,
             listing_type=property_obj.listing_type,
-            amount=amount,
             reference=reference
         )
 

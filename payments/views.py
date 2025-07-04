@@ -2,14 +2,15 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from .services import PaynowPaymentService
+from .services import paynow_service
 from .models import Payment
+from listings.models import Property
 
 
 @login_required
 def initiate_payment(request, property_id):
     property_obj = Property.objects.get(id=property_id)
-    service = PaynowPaymentService()
+    service = paynow_service
 
     response = service.create_payment(property_obj, request.user)
 
@@ -27,7 +28,7 @@ def payment_complete(request):
     reference = request.GET.get('reference')
     if reference:
         payment = Payment.objects.get(reference=reference)
-        service = PaynowPaymentService()
+        service = paynow_service
 
         if service.check_payment_status(payment):
             payment.property.is_published = True
@@ -44,6 +45,6 @@ def payment_update(request):
         reference = request.POST.get('reference')
         if reference:
             payment = Payment.objects.get(reference=reference)
-            service = PaynowPaymentService()
+            service = paynow_service
             service.check_payment_status(payment)
     return HttpResponse(status=200)

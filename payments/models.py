@@ -16,12 +16,6 @@ class Payment(models.Model):
         default='normal',
     )
 
-    def save(self, *args, **kwargs):
-        # Dynamically calculate the amount based on the Property model's logic
-        if self.listing_type:
-            self.amount = Property.get_listing_price(self.listing_type)
-        super().save(*args, **kwargs)
-
     PENDING = 'pending'
     PAID = 'paid'
     FAILED = 'failed'
@@ -85,10 +79,4 @@ class Payment(models.Model):
         return f"Payment #{self.id} - {self.property.title} ({self.get_status_display()})"
 
     def save(self, *args, **kwargs):
-        # Set amount based on listing type if not set
-        if not self.amount:
-            if self.listing_type == 'normal':
-                self.amount = 10.00
-            elif self.listing_type == 'priority':
-                self.amount = 20.00
         super().save(*args, **kwargs)

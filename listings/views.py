@@ -190,11 +190,6 @@ def add_property_step7(request):
 
     return render(request, 'listings/add_property_step7.html', {'form': form})
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PropertyStep8Form
-from .models import Property
-
 @login_required
 def add_property_step8(request):
     property_id = request.session.get('editing_property_id')
@@ -261,7 +256,7 @@ def choose_payment(request):
             property_obj.save()
 
             # Create Paynow payment
-            service = paynow_service()
+            service = paynow_service
             response = service.create_payment(property_obj, request.user)
 
             if response and response.success:
@@ -341,7 +336,7 @@ def property_detail(request, pk):
     property_obj = get_object_or_404(Property, pk=pk)
 
     interior_images = PropertyImage.objects.filter(property=property_obj)
-    amenities = property_obj.amenities.all() if hasattr(property_obj, 'amenities') else []
+    amenities = property_obj.amenities.all()
 
     return render(request, 'listings/property_detail.html', {
         'property': property_obj,
