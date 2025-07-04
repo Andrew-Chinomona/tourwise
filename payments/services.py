@@ -19,19 +19,31 @@ class PaynowService:
         if not hasattr(user, "phone_number") or not user.phone_number:
             raise ValueError("Phone number is required for mobile money payment.")
 
-        if property_obj.is_paid:
-            raise ValueError("This property has already been paid for and published.")
+        # Use existing failed payment or create new
+        payment = Payment.objects.filter(property=property_obj).first()
 
-        reference = f"PROP-{uuid.uuid4().hex[:8]}"
         amount = 20.00 if property_obj.listing_type == 'priority' else 10.00
+        reference = f"PROP-{uuid.uuid4().hex[:8]}"  # always generate new reference
 
-        payment = Payment.objects.create(
-            property=property_obj,
-            user=user,
-            listing_type=property_obj.listing_type,
-            amount=amount,
-            reference=reference
-        )
+        if payment:
+            if payment.status == Payment.PAID:
+                raise ValueError("This property has already been paid for.")
+            # Update existing failed/pending payment
+            payment.reference = reference
+            payment.amount = amount
+            payment.listing_type = property_obj.listing_type
+            payment.status = Payment.PENDING
+            payment.poll_url = None  # reset poll URL
+            payment.save()
+        else:
+            # Create new payment
+            payment = Payment.objects.create(
+                property=property_obj,
+                user=user,
+                listing_type=property_obj.listing_type,
+                amount=amount,
+                reference=reference
+            )
 
         try:
             payment_data = self.paynow.create_payment(reference, user.email)
@@ -79,3 +91,5 @@ class PaynowService:
             return True
 
         return False
+
+paynow_service = PaynowService()

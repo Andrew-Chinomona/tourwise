@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-%3$^sknytyjgqsmrjjxa@ml@zdpcm^8#546p!dz9&^@h4d-ln(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['5eb3-102-217-50-190.ngrok-free.app', 'localhost', '127.0.0.1']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://5eb3-102-217-50-190.ngrok-free.app',
+]
 
 
 # Application definition
@@ -159,8 +163,8 @@ OPENCAGE_API_KEY = os.getenv('OPENCAGE_API_KEY')
 
 
 # Paynow Settings
-PAYNOW_INTEGRATION_ID = 'YOUR_INTEGRATION_ID'
-PAYNOW_INTEGRATION_KEY = 'YOUR_INTEGRATION_KEY'
-PAYNOW_RETURN_URL = 'http://yourdomain.com/payments/complete/'  # Update with your domain
-PAYNOW_RESULT_URL = 'http://yourdomain.com/payments/update/'   # Update with your domain
+PAYNOW_INTEGRATION_ID = '21331'
+PAYNOW_INTEGRATION_KEY = '7cfce23b-0e43-4329-bc28-883ac466ab05'
+PAYNOW_RETURN_URL = 'http://5eb3-102-217-50-190.ngrok-free.app/payments/complete/'
+PAYNOW_RESULT_URL = 'http://5eb3-102-217-50-190.ngrok-free.app/payments/update/'
 PAYNOW_MODE = 'test'  # Change to 'live' for production

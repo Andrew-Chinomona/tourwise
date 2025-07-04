@@ -239,8 +239,6 @@ def add_property_step9(request):
         'property': property_obj
     })
 
-from payments.services import paynow_service
-
 @login_required
 def choose_payment(request):
     property_id = request.session.get('editing_property_id')
@@ -255,18 +253,7 @@ def choose_payment(request):
             property_obj.listing_type = listing_type
             property_obj.save()
 
-            # Create Paynow payment
-            service = paynow_service
-            response = service.create_payment(property_obj, request.user)
-
-            if response and response.success:
-                return render(request, 'payments/payment_instructions.html', {
-                    'poll_url': response.poll_url,
-                    'instructions': response.instructions
-                })
-
-            return render(request, 'payments/payment_error.html')
-
+            return redirect('initiate_payment', property_id=property_obj.id)
     else:
         form = ChoosePaymentForm(initial={'listing_type': property_obj.listing_type})
         property_obj.current_step = 10
