@@ -31,25 +31,77 @@
 let checkCount = 0;
 const maxChecks = 60; // Stop checking after 5 minutes (60 * 5 seconds)
 
-function checkPaymentStatus() {
-    fetch('{{ poll_url }}')
+function simulatePaymentSuccess() {
+    // Simulate successful payment for development
+    document.getElementById('payment-status').className = 'alert alert-info';
+    document.getElementById('payment-status').textContent = 'Simulating payment success...';
+    document.getElementById('payment-spinner').style.display = 'block';
+
+    // Call the simulation endpoint
+    fetch(`{% url "simulate_payment_success" reference=payment.reference %}`)
         .then(response => response.json())
         .then(data => {
-            checkCount++;
-            
-            if (data.status === 'paid') {
+            if (data.status === 'success') {
                 document.getElementById('payment-status').className = 'alert alert-success';
-                document.getElementById('payment-status').textContent = 'Payment successful! Redirecting...';
+                document.getElementById('payment-status').textContent = 'Payment simulated successfully! Redirecting...';
                 document.getElementById('payment-spinner').style.display = 'none';
-                window.location.href = '{% url "payment_complete" %}?reference={{ reference }}';
-            } else if (checkCount >= maxChecks) {
+
+                // Redirect to success page after a short delay
+                setTimeout(() => {
+                    window.location.href = '{% url "payment_complete" %}?reference={{ payment.reference }}';
+                }, 2000);
+            } else {
                 document.getElementById('payment-status').className = 'alert alert-danger';
-                document.getElementById('payment-status').textContent = 'Payment timeout. Please try again.';
+                document.getElementById('payment-status').textContent = 'Simulation failed: ' + (data.error || 'Unknown error');
                 document.getElementById('payment-spinner').style.display = 'none';
             }
         })
         .catch(error => {
+            console.error('Simulation error:', error);
+            document.getElementById('payment-status').className = 'alert alert-danger';
+            document.getElementById('payment-status').textContent = 'Simulation failed. Please try again.';
+            document.getElementById('payment-spinner').style.display = 'none';
+        });
+}
+
+function checkPaymentStatus() {
+    const pollUrl = '{{ poll_url }}';
+
+    // For development mode, use our status endpoint
+    const statusUrl = pollUrl.startsWith('/') ? pollUrl : `{% url "payment_status" reference=payment.reference %}`;
+
+    fetch(statusUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            checkCount++;
+
+            if (data.status === 'paid' || data.paid === true) {
+                document.getElementById('payment-status').className = 'alert alert-success';
+                document.getElementById('payment-status').textContent = 'Payment successful! Redirecting...';
+                document.getElementById('payment-spinner').style.display = 'none';
+                window.location.href = '{% url "payment_complete" %}?reference={{ payment.reference }}';
+            } else if (checkCount >= maxChecks) {
+                document.getElementById('payment-status').className = 'alert alert-danger';
+                document.getElementById('payment-status').textContent = 'Payment timeout. Please try again.';
+                document.getElementById('payment-spinner').style.display = 'none';
+            } else {
+                // Update status message
+                document.getElementById('payment-status').textContent = `Checking payment status... (${checkCount}/${maxChecks})`;
+            }
+        })
+        .catch(error => {
             console.error('Error:', error);
+            checkCount++;
+            if (checkCount >= maxChecks) {
+                document.getElementById('payment-status').className = 'alert alert-danger';
+                document.getElementById('payment-status').textContent = 'Payment check failed. Please refresh the page.';
+                document.getElementById('payment-spinner').style.display = 'none';
+            }
         });
 }
 

@@ -92,8 +92,17 @@ def host_dashboard(request):
         return redirect('home')
 
     user = request.user
-    my_properties = Property.objects.filter(owner=user, is_paid =True)
+    my_properties = Property.objects.filter(owner=user, is_paid=True)
     drafts = Property.objects.filter(owner=user, is_paid=False)
+
+    # Get payment status for drafts
+    draft_payments = {}
+    for draft in drafts:
+        try:
+            payment = draft.payment
+            draft_payments[draft.id] = payment
+        except:
+            draft_payments[draft.id] = None
 
     if request.method == 'POST':
         form = ProfilePhotoForm(request.POST, request.FILES, instance=user)
@@ -105,7 +114,8 @@ def host_dashboard(request):
 
     return render(request, 'accounts/host_dashboard.html', {
         'properties': my_properties,
-        'drafts' : drafts,
+        'drafts': drafts,
+        'draft_payments': draft_payments,
         'form': form
     })
 
@@ -114,7 +124,7 @@ def search_results_view(request):
     property_type = request.GET.get('property_type')
     max_price = request.GET.get('max_price')
 
-    properties = Property.objects.all()
+    properties = Property.objects.filter(is_paid=True)  # Only show paid listings
 
     # Filter by location (city or suburb)
     if query:

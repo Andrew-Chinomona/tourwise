@@ -5,11 +5,11 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-8 col-lg-6 col-sm-12">
             <div class="card shadow-sm border-0" style="background-color: #f9f5ef;">
                 <div class="card-header border-0 pt-4" style="background-color: #f9f5ef;">
-                    <h2 class="mb-0 text-center" style="color: #2f2f2f;">Login to Your Account</h2>
-                    <p class="text-center" style="color: #2f2f2f;">Welcome back! Please login below</p>
+                    <h2 class="mb-0 text-center" style="color: #2f2f2f; font-size: clamp(1.5rem, 4vw, 2rem);">Login to Your Account</h2>
+                    <p class="text-center" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Welcome back! Please login below</p>
                 </div>
                 <div class="card-body px-4 py-3">
                     <form method="POST" novalidate>
@@ -24,8 +24,8 @@
 
                         <!-- Identifier -->
                         <div class="mb-3">
-                            <label for="id_identifier" class="form-label fw-medium" style="color: #2f2f2f;">Email or Username</label>
-                            {% render_field form.identifier class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your email or username" %}
+                            <label for="id_identifier" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Email or Username</label>
+                            {% render_field form.identifier class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Enter your email or username" %}
                             {% if form.identifier.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.identifier.errors.0 }}
@@ -35,34 +35,34 @@
 
                         <!-- Password -->
                         <div class="mb-3">
-                            <label for="id_password" class="form-label fw-medium" style="color: #2f2f2f;">Password</label>
-                            {% render_field form.password class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your password" %}
+                            <label for="id_password" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Password</label>
+                            {% render_field form.password class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Enter your password" %}
                             {% if form.password.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.password.errors.0 }}
                                 </div>
                             {% endif %}
                             <div class="text-end mt-2">
-                                <a href="#" class="text-decoration-none small" style="color: #c15a2e;">Forgot password?</a>
+                                <a href="#" class="text-decoration-none small" style="color: #c15a2e; font-size: clamp(0.75rem, 2vw, 0.875rem);">Forgot password?</a>
                             </div>
                         </div>
 
                         <!-- Remember Me -->
                         <div class="form-check mb-4">
                             <input type="checkbox" class="form-check-input" id="rememberMe" style="border-color: #e4d3b2;">
-                            <label class="form-check-label" for="rememberMe" style="color: #2f2f2f;">Remember me</label>
+                            <label class="form-check-label" for="rememberMe" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Remember me</label>
                         </div>
 
                         <!-- Login Button -->
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn py-2 rounded-3 fw-medium" style="background-color: #c15a2e; color: white;">
+                            <button type="submit" class="btn py-2 rounded-3 fw-medium" style="background-color: #c15a2e; color: white; font-size: clamp(0.875rem, 2vw, 1rem);">
                                 <i class="fas fa-sign-in-alt me-2"></i>Login
                             </button>
                         </div>
                     </form>
 
                     <div class="text-center pt-2">
-                        <p style="color: #2f2f2f;">Don't have an account? <a href="{% url 'signup' %}" style="color: #c15a2e;" class="text-decoration-none">Sign Up</a></p>
+                        <p style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Don't have an account? <a href="{% url 'signup' %}" style="color: #c15a2e;" class="text-decoration-none">Sign Up</a></p>
                     </div>
                 </div>
             </div>
@@ -96,6 +96,42 @@
     .invalid-feedback {
         font-size: 0.85rem;
         color: red;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+    }
+
+    @media (min-width: 577px) and (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-header {
+            padding: 2rem;
+        }
     }
 </style>
 

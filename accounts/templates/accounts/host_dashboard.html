@@ -5,17 +5,17 @@
 
   <!-- Welcome message -->
   <div class="text-center mb-4">
-    <h3 style="color: #2f2f2f;">Welcome back, {{ user.username|title }}</h3>
+    <h3 style="color: #2f2f2f; font-size: clamp(1.5rem, 4vw, 2rem);">Welcome back, {{ user.username|title }}</h3>
   </div>
 
   <!-- Two Equal Containers -->
   <div class="row mb-4" style="align-items: stretch;">
     <!-- Left Container: Contact Information -->
-    <div class="col-md-6 pe-2">
+    <div class="col-lg-6 col-md-12 mb-3 mb-lg-0 pe-lg-2">
       <div class="card shadow h-100" style="border-radius: 1rem; background-color: white; border-color: #e4d3b2;">
         <div class="card-body">
-          <h5 class="card-title mb-3" style="color: #2f2f2f;">Contact Information</h5>
-          <p class="card-text" style="color: #2f2f2f;">
+          <h5 class="card-title mb-3" style="color: #2f2f2f; font-size: clamp(1.1rem, 2.5vw, 1.25rem);">Contact Information</h5>
+          <p class="card-text" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">
             <strong>Name:</strong> {{ user.get_full_name|default:user.username|title }}<br>
             <strong>Email:</strong> {{ user.email }}<br>
             <strong>Phone:</strong> {{ user.phone_number|default:"Not provided" }}
@@ -25,14 +25,14 @@
     </div>
 
     <!-- Right Container: Profile Picture -->
-    <div class="col-md-6 ps-2">
+    <div class="col-lg-6 col-md-12 ps-lg-2">
       <div class="card shadow h-100" style="border-radius: 1rem; background-color: white; border-color: #e4d3b2;">
         <div class="card-body d-flex flex-column h-100">
           <div class="row flex-grow-1 align-items-center">
             <!-- Image Display (Left) -->
-            <div class="col-md-5 d-flex flex-column justify-content-center">
+            <div class="col-md-5 col-12 d-flex flex-column justify-content-center mb-3 mb-md-0">
               {% if user.profile_photo %}
-                <div class="text-center" style="height: 160px; width: 160px; margin: 0 auto;">
+                <div class="text-center" style="height: clamp(120px, 25vw, 160px); width: clamp(120px, 25vw, 160px); margin: 0 auto;">
                   <img src="{{ user.profile_photo.url }}" alt="Profile Photo"
                        class="shadow rounded h-100 w-100"
                        style="object-fit: cover; border-color: #e4d3b2;">
@@ -43,14 +43,14 @@
             </div>
 
             <!-- Upload Form (Right) -->
-            <div class="col-md-7">
-              <h5 class="card-title mb-3 text-center" style="color: #2f2f2f;">Profile Picture</h5>
+            <div class="col-md-7 col-12">
+              <h5 class="card-title mb-3 text-center" style="color: #2f2f2f; font-size: clamp(1rem, 2.5vw, 1.1rem);">Profile Picture</h5>
               <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-2">
-                  <input type="file" name="profile_photo" class="form-control form-control-sm" style="border-color: #e4d3b2;">
+                  <input type="file" name="profile_photo" class="form-control form-control-sm" style="border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);">
                 </div>
-                <button type="submit" class="btn btn-sm w-100 rounded-3" style="background-color: #c15a2e; color: white;">Upload</button>
+                <button type="submit" class="btn btn-sm w-100 rounded-3" style="background-color: #c15a2e; color: white; font-size: clamp(0.875rem, 2vw, 1rem);">Upload</button>
               </form>
             </div>
           </div>
@@ -60,28 +60,28 @@
   </div>
 
   <!-- Dashboard -->
-  <h2 style="color: #2f2f2f;">My Dashboard</h2>
-  <a href="{% url 'start_property_listing' %}" class="btn mb-3 rounded-3" style="background-color: #c15a2e; color: white;">+ Add New Listing</a>
+  <h2 style="color: #2f2f2f; font-size: clamp(1.5rem, 4vw, 2rem); margin-bottom: 1rem;">My Dashboard</h2>
+  <a href="{% url 'start_property_listing' %}" class="btn mb-3 rounded-3" style="background-color: #c15a2e; color: white; font-size: clamp(0.875rem, 2vw, 1rem);">+ Add New Listing</a>
 
 {% if drafts %}
-  <h5 class="text-muted" style="color: #7a6a5a;">In Progress</h5>
-  <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+  <h5 class="text-muted mb-3" style="color: #7a6a5a; font-size: clamp(1rem, 2.5vw, 1.1rem);">In Progress</h5>
+  <div class="row g-3 mb-4">
     {% for draft in drafts %}
-      <div class="col">
+      <div class="col-lg-6 col-md-12">
         <div class="card shadow-sm h-100" style="border: 1px solid #e4d3b2; background-color: white;">
           <div class="card-body d-flex flex-column justify-content-between">
             <div>
-              <h5 class="card-title text-truncate" style="color: #2f2f2f;">{{ draft.title|default:"Untitled Listing" }}</h5>
-              <p class="card-text" style="color: #2f2f2f;">
+              <h5 class="card-title text-truncate" style="color: #2f2f2f; font-size: clamp(1rem, 2.5vw, 1.1rem);">{{ draft.title|default:"Untitled Listing" }}</h5>
+              <p class="card-text" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">
                 {% if draft.property_type %}Type: {{ draft.property_type|title }}<br>{% endif %}
                 {% if draft.city %}Location: {{ draft.street_address }}, {{ draft.suburb }}, {{ draft.city }}<br>{% endif %}
               </p>
             </div>
-            <div class="d-flex justify-content-between gap-2">
-              <a href="{% url 'resume_listing' draft.id %}" class="btn btn-sm w-50 rounded-3" style="background-color: #c15a2e; color: white;">Continue Editing</a>
+            <div class="d-flex justify-content-between gap-2 mt-3">
+              <a href="{% url 'resume_listing' draft.id %}" class="btn btn-sm w-50 rounded-3" style="background-color: #c15a2e; color: white; font-size: clamp(0.75rem, 2vw, 0.875rem);">Continue Editing</a>
               <form action="{% url 'delete_draft_listing' draft.id %}" method="post" class="w-50">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-3" style="border-color: #c15a2e; color: #c15a2e;">Delete</button>
+                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-3" style="border-color: #c15a2e; color: #c15a2e; font-size: clamp(0.75rem, 2vw, 0.875rem);">Delete</button>
               </form>
             </div>
           </div>
@@ -92,33 +92,34 @@
 {% endif %}
 
   {% if properties %}
-    <div class="row row-cols-1 row-cols-md-2 g-4">
+    <h5 class="text-muted mb-3" style="color: #7a6a5a; font-size: clamp(1rem, 2.5vw, 1.1rem);">My Listings</h5>
+    <div class="row g-3">
       {% for prop in properties %}
-        <div class="col">
+        <div class="col-lg-6 col-md-12">
           <div class="card shadow h-100" style="background-color: white; border-color: #e4d3b2;">
             <div class="row g-0 h-100">
               <!-- Left: Text Info -->
-              <div class="col-md-8">
+              <div class="col-md-8 col-12">
                 <div class="card-body d-flex flex-column h-100">
-                  <h5 class="card-title text-truncate" style="color: #2f2f2f; max-width: 100%;">
+                  <h5 class="card-title text-truncate" style="color: #2f2f2f; max-width: 100%; font-size: clamp(1rem, 2.5vw, 1.1rem);">
                     {{ prop.title|title }}
                   </h5>
-                  <p class="card-text" style="color: #2f2f2f;">
+                  <p class="card-text" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">
                     Type: {{ prop.property_type|title }}<br>
                     Status: {{ prop.listing_type|title }}<br>
                     Price: {{ prop.currency }} {{ prop.price }}
                   </p>
                   <div class="mt-auto">
-                    <a href="{% url 'edit_listing' prop.id %}" class="btn btn-sm rounded-3 me-2" style="background-color: #c15a2e; color: white;">Edit</a>
-                    <a href="{% url 'delete_listing' prop.id %}" class="btn btn-outline-danger btn-sm rounded-3" style="border-color: #c15a2e; color: #c15a2e;">Delete</a>
+                    <a href="{% url 'edit_listing' prop.id %}" class="btn btn-sm rounded-3 me-2" style="background-color: #c15a2e; color: white; font-size: clamp(0.75rem, 2vw, 0.875rem);">Edit</a>
+                    <a href="{% url 'delete_listing' prop.id %}" class="btn btn-outline-danger btn-sm rounded-3" style="border-color: #c15a2e; color: #c15a2e; font-size: clamp(0.75rem, 2vw, 0.875rem);">Delete</a>
                   </div>
                 </div>
               </div>
 
               <!-- Right: Image -->
-              <div class="col-md-4">
+              <div class="col-md-4 col-12">
                 {% if prop.main_image %}
-                  <div class="h-100" style="max-height: 200px; overflow: hidden;">
+                  <div class="h-100" style="max-height: clamp(150px, 30vw, 200px); overflow: hidden;">
                     <div class="h-100 w-100 p-2">
                       <div class="h-100 w-100 overflow-hidden rounded" style="border-radius: 0.75rem;">
                         <img src="{{ prop.main_image.url }}" alt="{{ prop.title }}"
@@ -128,8 +129,8 @@
                     </div>
                   </div>
                 {% else %}
-                  <div class="h-100 d-flex align-items-center justify-content-center p-3" style="background-color: #f3ecdf;">
-                    <span style="color: #7a6a5a;">No image</span>
+                  <div class="h-100 d-flex align-items-center justify-content-center p-3" style="background-color: #f3ecdf; min-height: 120px;">
+                    <span style="color: #7a6a5a; font-size: clamp(0.875rem, 2vw, 1rem);">No image</span>
                   </div>
                 {% endif %}
               </div>
@@ -139,21 +140,25 @@
       {% endfor %}
     </div>
   {% else %}
-    <p style="color: #2f2f2f;">You have no listings yet. Click "Add Listing" to create one.</p>
+    <div class="text-center py-5">
+      <i class="bi bi-house fs-1 text-muted mb-3"></i>
+      <h5 class="text-muted">You have no listings yet.</h5>
+      <p class="text-muted">Click "Add Listing" to create your first property listing.</p>
+    </div>
   {% endif %}
 </div>
 
 <style>
   /* Ensure consistent image containers */
   .image-container {
-    height: 160px;
-    width: 160px;
+    height: clamp(120px, 25vw, 160px);
+    width: clamp(120px, 25vw, 160px);
     overflow: hidden;
   }
 
   /* Property card image constraints */
   .property-image-container {
-    max-height: 200px;
+    max-height: clamp(150px, 30vw, 200px);
     overflow: hidden;
   }
 
@@ -176,6 +181,46 @@
   .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (min-width: 577px) and (max-width: 768px) {
+    .card-body {
+      padding: 1.25rem;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+
+  /* Ensure proper spacing on mobile */
+  .row.g-3 > div {
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .row.g-3 > div {
+      margin-bottom: 1.5rem;
+    }
   }
 </style>
 {% endblock %}

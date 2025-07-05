@@ -22,41 +22,80 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background-color: var(--muted-cream);
       color: var(--charcoal-text);
+      font-size: 16px;
+      line-height: 1.6;
     }
 
+    /* Responsive Typography */
+    h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+    h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
+    h3 { font-size: clamp(1.25rem, 3vw, 2rem); }
+    h4 { font-size: clamp(1.1rem, 2.5vw, 1.5rem); }
+    h5 { font-size: clamp(1rem, 2vw, 1.25rem); }
+
+    /* Navigation Responsive Design */
     .navbar-custom {
       background: linear-gradient(var(--muted-cream), rgba(255, 255, 255, 0.8));
-      height: 70px;
-      padding: 0;
+      min-height: 70px;
+      padding: 0.5rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-custom .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .navbar-custom .navbar-brand img {
-      max-height: 100px;
+      max-height: 60px;
       width: auto;
       object-fit: contain;
+    }
+
+    .navbar-custom .navbar-brand span {
+      font-size: clamp(1.25rem, 3vw, 1.5rem);
+      font-weight: 700;
+    }
+
+    .navbar-custom .navbar-nav {
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .navbar-custom .navbar-nav .nav-link {
       color: var(--charcoal-text) !important;
       font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-custom .navbar-nav .nav-link:hover {
+      background-color: var(--brick-orange);
+      color: white !important;
     }
 
     .navbar-custom .navbar-toggler {
       border-color: var(--brick-orange);
+      padding: 0.25rem 0.5rem;
     }
 
     .navbar-custom .navbar-toggler-icon {
       background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23c15a2e' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     }
 
+    /* Button Responsive Design */
     .btn-primary-custom {
       background-color: var(--brick-orange);
       border: 2px solid var(--brick-orange);
-      padding: 0.75rem 2rem;
+      padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 2rem);
       font-weight: 600;
       color: white;
       border-radius: 50px;
       transition: all 0.3s ease;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      white-space: nowrap;
     }
 
     .btn-primary-custom:hover {
@@ -68,12 +107,14 @@
 
     .btn-outline-custom {
       color: var(--brick-orange);
-      padding: 0.75rem 2rem;
+      padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 2rem);
       font-weight: 600;
       background-color: transparent;
       border-radius: 50px;
       border-color: black;
       transition: all 0.3s ease;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      white-space: nowrap;
     }
 
     .btn-outline-custom:hover {
@@ -85,11 +126,13 @@
     .btn-outline-white {
       border: 2px solid white;
       color: white;
-      padding: 0.75rem 2rem;
+      padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 2rem);
       font-weight: 600;
       background-color: transparent;
       border-radius: 50px;
       transition: all 0.3s ease;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      white-space: nowrap;
     }
 
     .btn-outline-white:hover {
@@ -97,10 +140,11 @@
       color: white;
     }
 
+    /* Footer Responsive Design */
     .footer-custom {
       background: linear-gradient(var(--muted-cream), rgba(255, 255, 255, 0.8));
       color: var(--charcoal-text);
-      padding: 1.5rem 0;
+      padding: clamp(1rem, 3vw, 1.5rem) 0;
       margin-top: 2rem;
     }
 
@@ -108,13 +152,14 @@
       color: var(--charcoal-text);
       font-weight: 600;
       margin-bottom: 1rem;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
     }
 
     .footer-custom a {
       color: rgba(47, 47, 47, 0.7);
       text-decoration: none;
       transition: color 0.3s ease;
+      font-size: clamp(0.875rem, 2vw, 1rem);
     }
 
     .footer-custom a:hover {
@@ -127,12 +172,14 @@
       margin-bottom: 0.5rem;
     }
 
+    /* Card Responsive Design */
     .card-custom {
       border: none;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       transition: all 0.3s ease;
       background-color: white;
+      height: 100%;
     }
 
     .card-custom:hover {
@@ -142,23 +189,171 @@
 
     .card-custom .card-img-top {
       border-radius: 12px 12px 0 0;
-      height: 180px;
+      height: clamp(150px, 25vw, 180px);
       object-fit: cover;
+    }
+
+    .card-custom .card-title {
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      font-weight: 600;
+    }
+
+    .card-custom .card-text {
+      font-size: clamp(0.875rem, 2vw, 1rem);
     }
 
     .price-text {
       color: var(--brick-orange);
       font-weight: 700;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
     }
 
     .text-shadow {
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
-    @media (max-width: 768px) {
-      .navbar-custom .navbar-brand img {
-        height: 60px;
+    /* Responsive Grid System */
+    .property-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    /* Mobile First Responsive Design */
+    @media (max-width: 576px) {
+      .navbar-custom {
+        min-height: 60px;
+        padding: 0.25rem 0;
       }
+
+      .navbar-custom .navbar-brand img {
+        max-height: 40px;
+      }
+
+      .navbar-custom .navbar-nav {
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+      }
+
+      .navbar-custom .navbar-nav .nav-link {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      .btn-primary-custom,
+      .btn-outline-custom,
+      .btn-outline-white {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      .footer-custom {
+        text-align: center;
+      }
+
+      .footer-custom .col-md-4 {
+        margin-bottom: 1.5rem;
+      }
+
+      .card-custom .card-img-top {
+        height: 160px;
+      }
+    }
+
+    @media (min-width: 577px) and (max-width: 768px) {
+      .navbar-custom .navbar-brand img {
+        max-height: 50px;
+      }
+
+      .card-custom .card-img-top {
+        height: 170px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .navbar-custom .navbar-brand img {
+        max-height: 60px;
+      }
+
+      .card-custom .card-img-top {
+        height: 180px;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .navbar-custom .navbar-brand img {
+        max-height: 70px;
+      }
+
+      .card-custom .card-img-top {
+        height: 200px;
+      }
+    }
+
+    /* Custom Navbar Dropdown */
+    .dropdown-menu {
+      background-color: var(--muted-cream) !important;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      padding: 0.5rem 0;
+      transform: translateY(10px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease-in-out;
+      min-width: 200px;
+    }
+
+    .dropdown-menu.show {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .dropdown-menu .dropdown-item {
+      padding: 0.65rem 1.25rem;
+      font-weight: 500;
+      color: var(--charcoal-text);
+      transition: background-color 0.2s ease;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+    }
+
+    .dropdown-menu .dropdown-item:hover {
+      background-color: var(--brick-orange);
+      color: white;
+      border-radius: 6px;
+    }
+
+    /* User Profile Image Responsive */
+    .user-profile-img {
+      width: clamp(32px, 6vw, 50px);
+      height: clamp(32px, 6vw, 50px);
+      object-fit: cover;
+    }
+
+    .menu-icon {
+      width: clamp(20px, 4vw, 28px);
+      height: clamp(20px, 4vw, 28px);
+    }
+
+    /* Container Responsive Padding */
+    .container {
+      padding-left: clamp(0.75rem, 3vw, 1rem);
+      padding-right: clamp(0.75rem, 3vw, 1rem);
+    }
+
+    /* Ensure no horizontal scroll */
+    body {
+      overflow-x: hidden;
+    }
+
+    /* Responsive spacing utilities */
+    .responsive-padding {
+      padding: clamp(1rem, 3vw, 2rem);
+    }
+
+    .responsive-margin {
+      margin: clamp(1rem, 3vw, 2rem);
     }
   </style>
   {% block extra_head %}{% endblock %}
@@ -169,10 +364,10 @@
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-        <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="me-2" style="max-width: 100px;">
-        <span class="fw-bold fs-4">Tourwise</span>
+        <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="me-2">
+        <span class="fw-bold">Tourwise</span>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -189,20 +384,16 @@
                  role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
                 {% if user.profile_photo %}
                   <img src="{{ user.profile_photo.url }}"
-                       class="rounded-circle"
-                       alt="Profile Photo"
-                       width="50" height="50"
-                       style="object-fit: cover; ">
+                       class="rounded-circle user-profile-img"
+                       alt="Profile Photo">
                 {% else %}
                   <img src="{% static 'images/user.png' %}"
-                       class="rounded-circle"
-                       alt="Default User"
-                       width="36" height="36"
-                       style="object-fit: cover;">
+                       class="rounded-circle user-profile-img"
+                       alt="Default User">
                 {% endif %}
                 <img src="{% static 'images/menu.png' %}"
                      alt="Menu Icon"
-                     width="28" height="28">
+                     class="menu-icon">
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                 <li><a class="dropdown-item" href="{% url 'host_dashboard' %}">Profile</a></li>
@@ -230,7 +421,7 @@
     <div class="container">
       <div class="row">
         <div class="col-md-4 mb-4">
-          <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="mb-3" style="max-width: 280px;">
+          <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="mb-3" style="max-width: 280px; width: 100%; height: auto;">
         </div>
         <div class="col-md-4 mb-4">
           <h5>Company</h5>
@@ -259,41 +450,5 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
-<style>
-  /* ... your existing styles ... */
-
-  /* Custom Navbar Dropdown */
-  .dropdown-menu {
-    background-color: var(--muted-cream) !important;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    padding: 0.5rem 0;
-    transform: translateY(10px);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.25s ease-in-out;
-  }
-
-  .dropdown-menu.show {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .dropdown-menu .dropdown-item {
-    padding: 0.65rem 1.25rem;
-    font-weight: 500;
-    color: var(--charcoal-text);
-    transition: background-color 0.2s ease;
-  }
-
-  .dropdown-menu .dropdown-item:hover {
-    background-color: var(--brick-orange);
-    color: white;
-    border-radius: 6px;
-  }
-</style>
 
 </html>

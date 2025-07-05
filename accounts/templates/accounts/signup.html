@@ -5,11 +5,11 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-8 col-lg-6 col-sm-12">
             <div class="card shadow-sm border-0" style="background-color: #f9f5ef;">
                 <div class="card-header border-0 pt-4" style="background-color: #f9f5ef;">
-                    <h2 class="mb-0 text-center" style="color: #2f2f2f;">Create Your Account</h2>
-                    <p class="text-center" style="color: #2f2f2f;">Fill in your details below to sign up</p>
+                    <h2 class="mb-0 text-center" style="color: #2f2f2f; font-size: clamp(1.5rem, 4vw, 2rem);">Create Your Account</h2>
+                    <p class="text-center" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Fill in your details below to sign up</p>
                 </div>
                 <div class="card-body px-4 py-3">
                     <form method="POST" novalidate>
@@ -22,18 +22,18 @@
                         {% endif %}
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_first_name" class="form-label fw-medium" style="color: #2f2f2f;">First Name</label>
-                                {% render_field form.first_name class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your first name" %}
+                            <div class="col-md-6 col-12 mb-3">
+                                <label for="id_first_name" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">First Name</label>
+                                {% render_field form.first_name class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Enter your first name" %}
                                 {% if form.first_name.errors %}
                                     <div class="invalid-feedback d-block">
                                         {{ form.first_name.errors.0 }}
                                     </div>
                                 {% endif %}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="id_last_name" class="form-label fw-medium" style="color: #2f2f2f;">Last Name</label>
-                                {% render_field form.last_name class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your last name" %}
+                            <div class="col-md-6 col-12 mb-3">
+                                <label for="id_last_name" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Last Name</label>
+                                {% render_field form.last_name class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Enter your last name" %}
                                 {% if form.last_name.errors %}
                                     <div class="invalid-feedback d-block">
                                         {{ form.last_name.errors.0 }}
@@ -43,8 +43,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="id_email" class="form-label fw-medium" style="color: #2f2f2f;">Email</label>
-                            {% render_field form.email class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your email" %}
+                            <label for="id_email" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Email</label>
+                            {% render_field form.email class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Enter your email" %}
                             {% if form.email.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.email.errors.0 }}
@@ -53,8 +53,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="id_phone_number" class="form-label fw-medium" style="color: #2f2f2f;">Phone Number</label>
-                            {% render_field form.phone_number class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Enter your phone number" %}
+                            <label for="id_phone_number" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Phone Number</label>
+                            {% render_field form.phone_number class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Enter your phone number" %}
                             {% if form.phone_number.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.phone_number.errors.0 }}
@@ -63,11 +63,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-medium" style="color: #2f2f2f;">I am signing up as a:</label>
-                            <div class="d-flex w-100 gap-3">
+                            <label class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">I am signing up as a:</label>
+                            <div class="d-flex w-100 gap-3 flex-wrap">
                                 {% for choice in form.user_type %}
                                     {{ choice.tag }}
-                                    <label for="{{ choice.id_for_label }}" class="btn rounded-3 flex-grow-1" style="border-color: #e4d3b2; color: var(--charcoal-text);">
+                                    <label for="{{ choice.id_for_label }}" class="btn rounded-3 flex-grow-1" style="border-color: #e4d3b2; color: var(--charcoal-text); font-size: clamp(0.875rem, 2vw, 1rem); min-width: 120px;">
                                         {{ choice.choice_label }}
                                     </label>
                                 {% endfor %}
@@ -80,8 +80,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="id_password1" class="form-label fw-medium" style="color: #2f2f2f;">Password</label>
-                            {% render_field form.password1 class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Create a password" %}
+                            <label for="id_password1" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Password</label>
+                            {% render_field form.password1 class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Create a password" %}
                             {% if form.password1.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.password1.errors.0 }}
@@ -90,8 +90,8 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="id_password2" class="form-label fw-medium" style="color: #2f2f2f;">Confirm Password</label>
-                            {% render_field form.password2 class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2;" placeholder="Confirm your password" %}
+                            <label for="id_password2" class="form-label fw-medium" style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Confirm Password</label>
+                            {% render_field form.password2 class="form-control rounded-3 py-2" style="background-color: white; border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);" placeholder="Confirm your password" %}
                             {% if form.password2.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.password2.errors.0 }}
@@ -100,14 +100,14 @@
                         </div>
 
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn py-2 rounded-3 fw-medium" style="background-color: #c15a2e; color: white;">
+                            <button type="submit" class="btn py-2 rounded-3 fw-medium" style="background-color: #c15a2e; color: white; font-size: clamp(0.875rem, 2vw, 1rem);">
                                 <i class="fas fa-user-plus me-2"></i>Create Account
                             </button>
                         </div>
                     </form>
 
                     <div class="text-center pt-2">
-                        <p style="color: #2f2f2f;">Already have an account? <a href="{% url 'login' %}" style="color: #c15a2e;" class="text-decoration-none">Log In</a></p>
+                        <p style="color: #2f2f2f; font-size: clamp(0.875rem, 2vw, 1rem);">Already have an account? <a href="{% url 'login' %}" style="color: #c15a2e;" class="text-decoration-none">Log In</a></p>
                     </div>
                 </div>
             </div>
@@ -143,28 +143,78 @@
         color: red;
     }
     input[type="radio"] {
-    display: none;
-}
+        display: none;
+    }
 
-input[type="radio"] + label {
-    background-color: #f3ecdf;
-    color: var(--charcoal-text);
-    border: 1px solid #e4d3b2;
-    padding: 10px;
-    text-align: center;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
+    input[type="radio"] + label {
+        background-color: #f3ecdf;
+        color: var(--charcoal-text);
+        border: 1px solid #e4d3b2;
+        padding: clamp(8px, 2vw, 10px);
+        text-align: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        font-size: clamp(0.875rem, 2vw, 1rem);
+    }
 
-input[type="radio"]:checked + label {
-    background-color: #CC5500;
-    color: var(--warm-tan);
-    border-color: #c15a2e;
-}
+    input[type="radio"]:checked + label {
+        background-color: #CC5500;
+        color: var(--warm-tan);
+        border-color: #c15a2e;
+    }
 
-input[type="radio"] + label:hover {
-    background-color: var(--warm-tan);
-}
+    input[type="radio"] + label:hover {
+        background-color: var(--warm-tan);
+    }
 
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .d-flex.gap-3 {
+            flex-direction: column;
+            gap: 0.5rem !important;
+        }
+
+        .d-flex.gap-3 label {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    @media (min-width: 577px) and (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+        }
+
+        .d-flex.gap-3 {
+            gap: 1rem !important;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-header {
+            padding: 2rem;
+        }
+    }
 </style>
 
 <script>

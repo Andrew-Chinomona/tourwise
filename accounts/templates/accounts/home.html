@@ -5,15 +5,15 @@
   <style>
     .hero-section {
       position: relative;
-      height: 90vh;
-      min-height: 600px;
+      height: clamp(500px, 80vh, 90vh);
+      min-height: 500px;
       background: linear-gradient( rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.8), var(--muted-cream)),
                   url('{% static "images/zim-property-hero.png" %}') no-repeat center center;
       background-size: cover;
       display: flex;
       align-items: center;
       color: white;
-      padding: 2rem;
+      padding: clamp(1rem, 4vw, 2rem);
     }
 
     .hero-content {
@@ -22,87 +22,158 @@
       text-align: center;
       position: relative;
       z-index: 2;
+      width: 100%;
     }
 
     .hero-title {
-      font-size: 3.5rem;
+      font-size: clamp(2rem, 6vw, 3.5rem);
       font-weight: 700;
-      margin-bottom: 1.5rem;
+      margin-bottom: clamp(1rem, 3vw, 1.5rem);
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        color: white;
+      color: white;
+      line-height: 1.2;
     }
 
     .hero-subtitle {
-      font-size: 1.5rem;
-      margin-bottom: 2.5rem;
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
       font-weight: 550;
       text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        color: black;
+      color: black;
+      line-height: 1.4;
     }
 
     .hero-buttons {
       display: flex;
-      gap: 1rem;
+      gap: clamp(0.5rem, 2vw, 1rem);
       justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 3rem;
+      margin-bottom: clamp(2rem, 5vw, 3rem);
     }
 
+    /* Updated Search Container */
     .search-container {
       background-color: white;
       border-radius: 50px;
-      padding: 1rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      margin-top: 3rem;
+      padding: 0.5rem 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-top: clamp(2rem, 5vw, 3rem);
+      width: 100%;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      transition: all 0.3s ease;
     }
 
-    .search-container .form-control {
-      border: none;
-      padding: 0;
-      background: transparent;
-      color: var(--charcoal-text);
+    .search-container:hover {
+      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
     }
 
-    .search-container .form-control:focus {
-      box-shadow: none;
-      border: none;
+    /* Search Form Layout */
+    .search-form {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    .search-container .form-select {
-      border: none;
-      padding: 0;
-      background: transparent;
-      color: var(--charcoal-text);
+    /* Search Field Styling */
+    .search-field {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      padding: 0.5rem 0;
     }
 
-    .search-container .form-select:focus {
-      box-shadow: none;
-      border: none;
-    }
-
-    .search-container .form-label {
+    .search-field label {
+      display: block;
       color: #6c757d;
       font-weight: 600;
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       margin-bottom: 0.25rem;
+      padding-left: 0.75rem;
     }
 
+    .search-field input,
+    .search-field select {
+      width: 100%;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      background: transparent;
+      color: var(--charcoal-text);
+      font-size: 0.875rem;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .search-field input:focus,
+    .search-field select:focus {
+      outline: none;
+      background: rgba(0,0,0,0.03);
+    }
+
+    .search-field input:hover,
+    .search-field select:hover {
+      background: rgba(0,0,0,0.03);
+    }
+
+    /* Divider between fields */
+    .search-divider {
+      width: 1px;
+      height: 40px;
+      background: rgba(0,0,0,0.1);
+      margin: 0 0.25rem;
+    }
+
+    /* Search Button */
     .search-btn {
       background-color: var(--brick-orange);
       border: none;
       border-radius: 50%;
-      width: 48px;
-      height: 48px;
+      width: 42px;
+      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       transition: all 0.3s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .search-btn:hover {
       background-color: #a14825;
       transform: scale(1.05);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .search-container {
+        border-radius: 25px;
+        padding: 0.75rem;
+      }
+
+      .search-form {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .search-field {
+        width: 100%;
+        padding: 0.25rem 0;
+      }
+
+      .search-divider {
+        display: none;
+      }
+
+      .search-btn {
+        margin-top: 0.5rem;
+        width: 48px;
+        height: 48px;
+        align-self: center;
+      }
     }
 
     /* Location suggestions styling */
@@ -114,6 +185,9 @@
       display: none;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 0.25rem;
     }
 
     .list-group-item-action:hover {
@@ -123,21 +197,87 @@
     /* Listings section */
     .listings-section {
       background-color: var(--muted-cream);
-      padding: 3rem 0;
+      padding: clamp(2rem, 5vw, 3rem) 0;
     }
 
     .section-title {
       color: var(--charcoal-text);
       font-weight: 700;
-      margin-bottom: 2rem;
+      margin-bottom: clamp(1.5rem, 4vw, 2rem);
+      font-size: clamp(1.5rem, 4vw, 2rem);
     }
 
     .featured-card {
       border: 2px solid #ffc107 !important;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
+    /* Responsive property grid */
+    .property-grid {
+      display: grid;
+      gap: clamp(1rem, 3vw, 1.5rem);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .property-card {
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .property-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .property-card .card-img-top {
+      height: clamp(160px, 25vw, 200px);
+      object-fit: cover;
+    }
+
+    /* Mobile First Responsive Design */
+    @media (max-width: 576px) {
+      .hero-section {
+        height: 70vh;
+        min-height: 400px;
+        padding: 1rem;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .property-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .listings-section {
+        padding: 1.5rem 0;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+    }
+
+    @media (min-width: 577px) and (max-width: 768px) {
+      .hero-section {
+        height: 80vh;
+        min-height: 500px;
+      }
+
       .hero-title {
         font-size: 2.5rem;
       }
@@ -146,22 +286,49 @@
         font-size: 1.2rem;
       }
 
-      .hero-buttons {
-        flex-direction: column;
-        align-items: center;
+      .property-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .hero-section {
+        height: 85vh;
+        min-height: 600px;
       }
 
-      .search-container {
-        border-radius: 20px;
-        padding: 1.5rem;
+      .hero-title {
+        font-size: 3rem;
       }
 
-      .search-container .row > div {
-        margin-bottom: 1rem;
+      .hero-subtitle {
+        font-size: 1.3rem;
       }
 
-      .search-container .border-end {
-        border-end: none !important;
+      .property-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .hero-section {
+        height: 90vh;
+        min-height: 600px;
+      }
+
+      .hero-title {
+        font-size: 3.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.5rem;
+      }
+
+      .property-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
       }
     }
   </style>
@@ -177,50 +344,48 @@
       <div class="hero-buttons">
         <a href="#search-section" class="btn btn-primary-custom">Discover Properties</a>
         <a href="{% url 'become_host' %}" class="btn btn-primary-custom">Become a Host</a>
-
       </div>
 
       <!-- Search Bar -->
       <div class="search-container" id="search-section">
-        <form method="get" action="{% url 'search_results' %}">
-          <div class="row align-items-center g-0 text-center text-md-start">
-            <!-- Location Input with Suggestions -->
-            <div class="col-md-4 px-3 border-end position-relative">
-              <label class="form-label mb-0 fw-semibold small">Location</label>
-              <input type="text"
-                     name="location"
-                     id="location-input"
-                     autocomplete="off"
-                     class="form-control"
-                     placeholder="Start typing a city or suburb...">
-              <ul id="location-suggestions"
-                  class="list-group position-absolute w-100 bg-white shadow-sm"></ul>
-            </div>
-
-            <!-- Property Type -->
-            <div class="col-md-4 px-3 border-end">
-              <label class="form-label mb-0 fw-semibold small">Type</label>
-              <select name="property_type" class="form-select">
-                <option value="">All Types</option>
-                <option value="house">House</option>
-                <option value="apartment">Apartment</option>
-                <option value="airbnb">Airbnb</option>
-              </select>
-            </div>
-
-            <!-- Max Price -->
-            <div class="col-md-3 px-3 border-end">
-              <label class="form-label mb-0 fw-semibold small">Max Price</label>
-              <input type="number" name="max_price" class="form-control" placeholder="e.g. 500">
-            </div>
-
-            <!-- Submit Button -->
-            <div class="col-md-1 ms-0">
-              <button type="submit" class="search-btn">
-                <i class="bi bi-search"></i>
-              </button>
-            </div>
+        <form method="get" action="{% url 'search_results' %}" class="search-form">
+          <!-- Location Input with Suggestions -->
+          <div class="search-field">
+            <label for="location-input">Location</label>
+            <input type="text"
+                   name="location"
+                   id="location-input"
+                   autocomplete="off"
+                   placeholder="Start typing a city or suburb...">
+            <ul id="location-suggestions"
+                class="list-group position-absolute w-100 bg-white shadow-sm"></ul>
           </div>
+
+          <div class="search-divider"></div>
+
+          <!-- Property Type -->
+          <div class="search-field">
+            <label for="property-type">Type</label>
+            <select name="property_type" id="property-type">
+              <option value="">All Types</option>
+              <option value="house">House</option>
+              <option value="apartment">Apartment</option>
+              <option value="airbnb">Airbnb</option>
+            </select>
+          </div>
+
+          <div class="search-divider"></div>
+
+          <!-- Max Price -->
+          <div class="search-field">
+            <label for="max-price">Max Price</label>
+            <input type="number" name="max_price" id="max-price" placeholder="e.g. 500">
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="search-btn">
+            <i class="bi bi-search"></i>
+          </button>
         </form>
       </div>
     </div>
@@ -231,9 +396,9 @@
     <div class="container">
       <!-- Recent Listings -->
       <h3 class="section-title">Recent Listings</h3>
-      <div class="row">
+      <div class="property-grid">
         {% for property in recent_listings %}
-          <div class="col-md-3 mb-4">
+          <div class="property-card">
             <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
               <div class="card card-custom h-100">
                 {% if property.main_image  %}
@@ -264,9 +429,9 @@
 
       <!-- Featured Listings -->
       <h3 class="section-title">Featured Listings</h3>
-      <div class="row">
+      <div class="property-grid">
         {% for property in featured_listings %}
-          <div class="col-md-3 mb-4">
+          <div class="property-card">
             <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
               <div class="card card-custom featured-card h-100">
                 {% if property.main_image %}

@@ -7,8 +7,32 @@
             <div class="card shadow-sm" style="background-color: #f9f5ef; border: 1px solid #e4d3b2;">
                 <div class="card-body text-center">
                     <h2 class="card-title mb-4" style="color: #2f2f2f;">Payment Error</h2>
-                    <p class="lead" style="color: #2f2f2f;">There was an error processing your payment. Please try again.</p>
-                    <a href="{% url 'home' %}" class="btn btn-primary-custom mt-4">Return Home</a>
+
+                    {% if error_message %}
+                        <div class="alert alert-danger mb-4">
+                            {{ error_message }}
+                        </div>
+                    {% else %}
+                        <p class="lead mb-4" style="color: #2f2f2f;">There was an error processing your payment.</p>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <h5 style="color: #2f2f2f;">What you can do:</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">• Check that your phone number is correct in your profile</li>
+                            <li class="mb-2">• Ensure you have sufficient funds in your mobile money account</li>
+                            <li class="mb-2">• Try the payment again</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'host_dashboard' %}" class="btn rounded-3" style="border-color: #e4d3b2; color: #c15a2e;">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                        </a>
+                        <a href="{% url 'choose_payment' %}" class="btn rounded-3" style="background-color: #c15a2e; color: white;">
+                            Try Again <i class="fas fa-redo ms-1"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

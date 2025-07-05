@@ -320,7 +320,7 @@ def upload_profile_photo(request, property_id):
     return redirect('edit_listing', property_id=property_id)
 
 def property_detail(request, pk):
-    property_obj = get_object_or_404(Property, pk=pk)
+    property_obj = get_object_or_404(Property, pk=pk, is_paid=True)  # Only show paid listings
 
     interior_images = PropertyImage.objects.filter(property=property_obj)
     amenities = property_obj.amenities.all()
@@ -340,10 +340,10 @@ def recent_listings_view(request):
 
 
 def featured_listings_view(request):
-    featured_properties =list(Property.objects.filter(is_paid=True,  listing_type = 'priority').order_by('-created_at'))
+    featured_properties = list(Property.objects.filter(is_paid=True, listing_type='priority').order_by('-created_at'))
 
     if len(featured_properties) < 10:
-        fallback = Property.objects.filter(listing_type = 'normal').order_by('-created_at')[:10 - len(featured_properties)]
+        fallback = Property.objects.filter(is_paid=True, listing_type='normal').order_by('-created_at')[:10 - len(featured_properties)]
         featured_properties += list(fallback)
 
     return render(request, 'listings/featured_listings.html', {'properties': featured_properties, 'title': 'Featured Listings'})
@@ -355,7 +355,8 @@ def location_suggestions(request):
         return JsonResponse([], safe=False)
 
     matches = Property.objects.filter(
-        Q(city__icontains=query) | Q(suburb__icontains=query)
+        Q(city__icontains=query) | Q(suburb__icontains=query),
+        is_paid=True  # Only suggest from paid listings
     ).values_list('city', 'suburb')
 
     # Use a set to avoid duplicate strings

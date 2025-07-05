@@ -3,17 +3,16 @@
 
 {% block content %}
 <div class="container mt-4">
-
   <!-- 🖼 Image Gallery -->
-  <div class="row mb-4" style="height: 400px; overflow: hidden;">
-    <div class="col-md-8 h-100 pe-1">
+  <div class="row mb-4" style="height: clamp(300px, 50vh, 400px); overflow: hidden;">
+    <div class="col-lg-8 col-md-12 h-100 pe-1 mb-2 mb-lg-0">
       <div class="h-100 rounded-start overflow-hidden">
         <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-img="{{ property.main_image.url }}">
           <img src="{{ property.main_image.url }}" alt="Main Image" class="img-fluid w-100 h-100" style="object-fit: cover;">
         </a>
       </div>
     </div>
-    <div class="col-md-4 h-100">
+    <div class="col-lg-4 col-md-12 h-100">
       <div class="row g-1 h-100 m-0">
         {% for image in interior_images %}
           {% if forloop.counter <= 3 %}
@@ -44,78 +43,96 @@
   <!-- 🔽 Property Info & Host Section -->
   <div class="row">
     <!-- Left Column -->
-    <div class="col-md-8">
-      <h3 class="text-truncate">{{ property.title }}</h3>
-      <p class="text-muted">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
+    <div class="col-lg-8 col-md-12 mb-4 mb-lg-0">
+      <h3 class="text-truncate mb-2">{{ property.title }}</h3>
+      <p class="text-muted mb-3">{{ property.street_address }}, {{ property.suburb }}, {{ property.city }}</p>
 
-      <div class="d-flex gap-3 mb-3 flex-wrap">
-        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
-          <i class="fas fa-bed fs-4 mb-1"></i>
-          <span>{{ property.bedrooms }} Bedroom{{ property.bedrooms|pluralize }}</span>
+      <!-- Property Features Grid -->
+      <div class="row g-2 mb-4">
+        <div class="col-6 col-sm-3">
+          <div class="border rounded p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center">
+            <i class="fas fa-bed fs-4 mb-2 text-primary"></i>
+            <span class="small">{{ property.bedrooms }} Bedroom{{ property.bedrooms|pluralize }}</span>
+          </div>
         </div>
-        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
-          <i class="fas fa-bath fs-4 mb-1"></i>
-          <span>{{ property.bathrooms }} Bathroom{{ property.bathrooms|pluralize }}</span>
+        <div class="col-6 col-sm-3">
+          <div class="border rounded p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center">
+            <i class="fas fa-bath fs-4 mb-2 text-primary"></i>
+            <span class="small">{{ property.bathrooms }} Bathroom{{ property.bathrooms|pluralize }}</span>
+          </div>
         </div>
-        <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
-          <i class="fas fa-ruler-combined fs-4 mb-1"></i>
-          <span>{{ property.area }} m²</span>
+        <div class="col-6 col-sm-3">
+          <div class="border rounded p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center">
+            <i class="fas fa-ruler-combined fs-4 mb-2 text-primary"></i>
+            <span class="small">{{ property.area }} m²</span>
+          </div>
         </div>
         {% if property.parking_spaces %}
-          <div class="border rounded p-2 text-center w-25 d-flex flex-column align-items-center">
-            <i class="fas fa-car fs-4 mb-1"></i>
-            <span>{{ property.parking_spaces }} Parking</span>
+          <div class="col-6 col-sm-3">
+            <div class="border rounded p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center">
+              <i class="fas fa-car fs-4 mb-2 text-primary"></i>
+              <span class="small">{{ property.parking_spaces }} Parking</span>
+            </div>
           </div>
         {% endif %}
       </div>
 
-      <h5>{{ property.property_type|title }} Description</h5>
-      <p>{{ property.description }}</p>
+      <h5 class="mb-3">{{ property.property_type|title }} Description</h5>
+      <p class="mb-4">{{ property.description }}</p>
 
       <!-- Amenities -->
-      <h5>Offered Amenities</h5>
-      <div class="amenities-container">
+      <h5 class="mb-3">Offered Amenities</h5>
+      <div class="amenities-container mb-3">
         {% for amenity in amenities %}
-          <span class="amenity-item border rounded-pill px-3 py-1 bg-light d-flex align-items-center gap-1 {% if forloop.counter > 6 %}d-none{% endif %}">
+          <span class="amenity-item border rounded-pill px-3 py-2 bg-light d-flex align-items-center gap-2 {% if forloop.counter > 6 %}d-none{% endif %}">
             <i class="fas fa-{{ amenity.icon|default:'check' }} text-primary"></i>
-            {{ amenity.name }}
+            <span class="small">{{ amenity.name }}</span>
           </span>
         {% endfor %}
       </div>
 
       {% if amenities|length > 6 %}
-        <button id="toggleAmenitiesBtn" class="btn btn-sm btn-outline-secondary mt-2">
+        <button id="toggleAmenitiesBtn" class="btn btn-sm btn-outline-secondary mb-4">
           Show All Amenities ({{ amenities|length|add:"-6" }} more)
         </button>
       {% endif %}
 
       <!-- 🗺️ Map Section -->
-      <h5 class="mt-4">Property Location</h5>
-    <p> </p>
-      <div id="map" style="height: 350px;" class="rounded shadow-sm mb-4"></div>
+      <h5 class="mb-3">Property Location</h5>
+      <div id="map" style="height: clamp(250px, 40vh, 350px);" class="rounded shadow-sm mb-4"></div>
     </div>
 
     <!-- Right Column -->
-    <div class="col-md-4">
+    <div class="col-lg-4 col-md-12">
+      <!-- Host Information Card -->
       <div class="card mb-3 shadow-sm">
         <div class="card-body text-center">
           {% if property.owner.profile_photo and property.owner.profile_photo.url %}
-            <img src="{{ property.owner.profile_photo.url }}" alt="Host" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+            <img src="{{ property.owner.profile_photo.url }}" alt="Host" class="rounded-circle mb-3" style="width: clamp(60px, 12vw, 80px); height: clamp(60px, 12vw, 80px); object-fit: cover;">
           {% else %}
-            <div class="text-muted small">No profile image</div>
+            <div class="text-muted small mb-3">No profile image</div>
           {% endif %}
-          <p class="mb-1">Listed by:</p>
-          <strong>{{ property.owner.username }}</strong>
+          <p class="mb-1 small text-muted">Listed by:</p>
+          <strong class="d-block mb-3">{{ property.owner.username }}</strong>
         </div>
       </div>
 
-      <div class="card shadow-sm">
+      <!-- Contact & Price Card -->
+      <div class="card shadow-sm sticky-top" style="top: 1rem;">
         <div class="card-body">
-          <h4>{{ property.currency }} {{ property.price }}</h4>
+          <h4 class="text-primary mb-3">{{ property.currency }} {{ property.price }}</h4>
           <hr>
-          <a href="#" class="btn btn-dark w-100 mb-2">Contact Details</a>
-          <p class="mb-1"><strong>Contact Email:</strong><br>{{ property.contact_email }}</p>
-          <p class="mb-0"><strong>Phone:</strong><br>{{ property.contact_phone }}</p>
+          <button class="btn btn-dark w-100 mb-3" onclick="toggleContactInfo()">Contact Details</button>
+          <div id="contactInfo" class="d-none">
+            <div class="mb-3">
+              <strong class="d-block mb-1">Contact Email:</strong>
+              <span class="text-muted">{{ property.contact_email }}</span>
+            </div>
+            <div class="mb-0">
+              <strong class="d-block mb-1">Phone:</strong>
+              <span class="text-muted">{{ property.contact_phone }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -126,7 +143,12 @@
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <img id="modalImage" src="" class="img-fluid rounded">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <img id="modalImage" src="" class="img-fluid rounded w-100">
+      </div>
     </div>
   </div>
 </div>
@@ -135,13 +157,17 @@
 <div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Property Gallery</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
       <div class="modal-body">
-        <div class="row g-2">
-          <div class="col-md-4">
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-4">
             <img src="{{ property.main_image.url }}" class="img-fluid rounded" alt="Main Image">
           </div>
           {% for image in interior_images %}
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-4">
               <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Interior {{ forloop.counter }}">
             </div>
           {% endfor %}
@@ -176,6 +202,20 @@
       ? 'Show Fewer Amenities'
       : 'Show All Amenities ({{ amenities|length|add:"-6" }} more)';
   });
+
+  // Toggle contact information
+  function toggleContactInfo() {
+    const contactInfo = document.getElementById('contactInfo');
+    const button = document.querySelector('button[onclick="toggleContactInfo()"]');
+
+    if (contactInfo.classList.contains('d-none')) {
+      contactInfo.classList.remove('d-none');
+      button.textContent = 'Hide Contact Details';
+    } else {
+      contactInfo.classList.add('d-none');
+      button.textContent = 'Contact Details';
+    }
+  }
 </script>
 
 <!-- Leaflet -->
@@ -197,7 +237,7 @@
         .bindPopup("{{ property.title|escapejs }}")
         .openPopup();
     } else {
-      document.getElementById('map').innerHTML = "<p class='text-muted'>Location not available.</p>";
+      document.getElementById('map').innerHTML = "<div class='d-flex align-items-center justify-content-center h-100'><p class='text-muted mb-0'>Location not available.</p></div>";
     }
   });
 </script>
@@ -209,8 +249,63 @@
   .amenities-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .amenity-item {
+    transition: all 0.3s ease;
+  }
+
+  .amenity-item:hover {
+    background-color: var(--brick-orange) !important;
+    color: white !important;
+    transform: translateY(-1px);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .amenities-container {
+      gap: 0.25rem;
+    }
+
+    .amenity-item {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem !important;
+    }
+
+    .sticky-top {
+      position: relative !important;
+      top: 0 !important;
+    }
+  }
+
+  @media (min-width: 577px) and (max-width: 768px) {
+    .amenity-item {
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .sticky-top {
+      top: 1rem !important;
+    }
+  }
+
+  /* Ensure proper spacing on mobile */
+  .row.g-2 > div {
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .row.g-2 > div {
+      margin-bottom: 0.75rem;
+    }
   }
 </style>
 {% endblock %}
