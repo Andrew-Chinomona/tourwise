@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Value, CharField, Q
 from django.db.models.functions import Concat
-
+from django.urls import reverse
 
 def signup_view(request):
     if request.method == 'POST':
@@ -32,7 +32,6 @@ def signup_view(request):
     return render(request, 'accounts/signup.html', {'form': form})
 
 
-
 def login_view(request):
     form = CustomLoginForm(request.POST or None)
     error = None
@@ -52,21 +51,24 @@ def login_view(request):
 
     return render(request, 'accounts/login.html', {'form': form, 'error': error})
 
-#this section will handle logout
+
+# this section will handle logout
 def logout_view(request):
     logout(request)
     return redirect('home')
+
 
 def home_view(request):
     two_weeks_ago = timezone.now() - timedelta(days=14)
 
     # Get recent listings
-    recent_listings = Property.objects.filter(is_paid=True ,created_at__gte=two_weeks_ago).order_by('-created_at')[:8]
+    recent_listings = Property.objects.filter(is_paid=True, created_at__gte=two_weeks_ago).order_by('-created_at')[:8]
 
     # Get featured listings
-    priority_listings = list(Property.objects.filter( is_paid =True,listing_type='priority').order_by('-created_at')[:8])
+    priority_listings = list(Property.objects.filter(is_paid=True, listing_type='priority').order_by('-created_at')[:8])
     if len(priority_listings) < 8:
-        fallback = Property.objects.filter(is_paid=True,listing_type='normal').order_by('-created_at')[:8 - len(priority_listings)]
+        fallback = Property.objects.filter(is_paid=True, listing_type='normal').order_by('-created_at')[
+                   :8 - len(priority_listings)]
         featured_listings = priority_listings + list(fallback)
     else:
         featured_listings = priority_listings
@@ -85,7 +87,7 @@ def home_view(request):
     return render(request, 'accounts/home.html', context)
 
 
-#this is the host dashboard and it will show all the of the hosts' lisitings and CRUD operations
+# this is the host dashboard and it will show all the of the hosts' lisitings and CRUD operations
 @login_required()
 def host_dashboard(request):
     if request.user.user_type != 'host':
@@ -118,6 +120,7 @@ def host_dashboard(request):
         'draft_payments': draft_payments,
         'form': form
     })
+
 
 def search_results_view(request):
     query = request.GET.get('location')
@@ -152,6 +155,7 @@ def search_results_view(request):
         'max_price': max_price
     })
 
+
 def become_host_view(request):
     if request.user.is_authenticated:
         # Prefill for existing user
@@ -181,3 +185,52 @@ def become_host_view(request):
             form = SignupForm(initial={'user_type': 'host'})
 
         return render(request, 'accounts/become_host.html', {'form': form, 'is_editing': False})
+
+
+def step_search_view(request):
+    """Step-by-step search flow"""
+    step = request.GET.get('step', '1')
+
+    if request.method == 'POST':
+        if step == '1':
+            # Step 1: Location
+            location = request.POST.get('location')
+            if location:
+                request.session['search_location'] = location
+                return redirect('step_search') + '?step=2'
+        elif step == '2':
+            # Step 2: Property Type
+            property_type = request.POST.get('property_type')
+            if property_type:
+                request.session['search_property_type'] = property_type
+                return redirect('step_search') + '?step=3'
+        elif step == '3':
+            # Step 3: Max Price (optional)
+            max_price = request.POST.get('max_price')
+            location = request.session.get('search_location', '')
+            property_type = request.session.get('search_property_type', '')
+
+            # Build search URL
+            search_url = reverse('search_results') + f"?location={location}"
+            if property_type:
+                search_url += f"&property_type={property_type}"
+            if max_price:
+                search_url += f"&max_price={max_price}"
+
+            # Clear session
+            request.session.pop('search_location', None)
+            request.session.pop('search_property_type', None)
+
+            return redirect(search_url)
+
+    # Get saved values from session
+    saved_location = request.session.get('search_location', '')
+    saved_property_type = request.session.get('search_property_type', '')
+
+    context = {
+        'step': step,
+        'saved_location': saved_location,
+        'saved_property_type': saved_property_type,
+    }
+
+    return render(request, 'accounts/step_search.html', context)

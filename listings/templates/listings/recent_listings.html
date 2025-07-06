@@ -2,19 +2,23 @@
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">{{ title }}</h2>
+
+  <!-- Desktop Grid -->
   <div class="property-grid">
     {% for property in properties %}
       <div class="property-card">
         <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
           <div class="card card-custom h-100">
-            <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+            {% if property.main_image %}
+              <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+            {% endif %}
             <div class="card-body">
               <h5 class="card-title text-truncate">{{ property.title }}</h5>
               <p class="card-text text-muted">
                 {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
               </p>
               <p class="price-text">
-                {{ property.currency }} {{ property.price }}
+                {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
               </p>
             </div>
           </div>
@@ -30,9 +34,43 @@
       </div>
     {% endfor %}
   </div>
+
+  <!-- Mobile Carousel -->
+  <div class="carousel-container" id="recent-carousel">
+    <div class="carousel-track">
+      {% for property in properties %}
+        <div class="carousel-item">
+          <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
+            <div class="card card-custom">
+              {% if property.main_image %}
+                <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title text-truncate">{{ property.title }}</h5>
+                <p class="card-text text-muted">
+                  {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                </p>
+                <p class="price-text">
+                  {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="carousel-nav" id="recent-nav"></div>
+  </div>
 </div>
 
 <style>
+  :root {
+    --primary-color: #c15a2e;
+    --text-dark: #2f2f2f;
+    --text-muted: #7a6a5a;
+  }
+
+  /* Desktop Grid */
   .property-grid {
     display: grid;
     gap: 1.5rem;
@@ -53,49 +91,204 @@
     object-fit: cover;
   }
 
-  /* Responsive breakpoints */
+  .price-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+  }
+
+  /* Mobile Carousel - 1 card per row */
+  .carousel-container {
+    display: none;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin: 0;
+  }
+  .carousel-container::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel-track {
+    display: flex;
+    gap: 0;
+    padding: 0;
+    min-width: max-content;
+  }
+  .carousel-item {
+    flex: 0 0 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+  .carousel-item .card {
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  .carousel-item .card-img-top {
+    height: 180px;
+    object-fit: cover;
+  }
+  .carousel-item .card-body {
+    padding: 1rem;
+  }
+  .carousel-item .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    color: var(--text-dark);
+  }
+  .carousel-item .card-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .carousel-item .price-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+  }
+  @media (max-width: 768px) {
+    .property-grid {
+      display: none;
+    }
+    .carousel-container {
+      display: block !important;
+    }
+    .carousel-nav {
+      display: flex;
+    }
+  }
   @media (max-width: 576px) {
-    .property-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
+    .carousel-item .card-img-top {
+      height: 140px;
     }
-
-    .property-card .card-img-top {
-      height: 180px;
+    .carousel-item .card-body {
+      padding: 0.75rem;
     }
-  }
-
-  @media (min-width: 577px) and (max-width: 768px) {
-    .property-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
+    .carousel-item .card-title {
+      font-size: 1rem;
     }
-
-    .property-card .card-img-top {
-      height: 170px;
+    .carousel-item .card-text {
+      font-size: 0.8rem;
+    }
+    .carousel-item .price-text {
+      font-size: 1rem;
     }
   }
 
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .property-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+  /* Carousel Navigation */
+  .carousel-nav {
+    display: none;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .carousel-dot.active {
+    background: var(--primary-color);
+    transform: scale(1.2);
+  }
+
+  /* Responsive breakpoints */
+  @media (max-width: 360px) {
+    .carousel-item {
+      flex: 0 0 calc(33.333% - 0.4rem);
+      min-width: 90px;
+      max-width: 110px;
     }
 
-    .property-card .card-img-top {
-      height: 180px;
+    .carousel-track {
+      gap: 0.4rem;
+    }
+
+    .carousel-item .card-img-top {
+      height: 70px;
+    }
+
+    .carousel-item .card-body {
+      padding: 0.4rem;
+    }
+
+    .carousel-item .card-title {
+      font-size: 0.75rem;
+    }
+
+    .carousel-item .card-text {
+      font-size: 0.6rem;
+    }
+
+    .carousel-item .price-text {
+      font-size: 0.75rem;
     }
   }
 
-  @media (min-width: 1025px) {
-    .property-grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
-    }
-
-    .property-card .card-img-top {
-      height: 200px;
+  /* Desktop: hide carousel */
+  @media (min-width: 769px) {
+    .carousel-container {
+      display: none !important;
     }
   }
 </style>
+
+<script>
+  // Carousel functionality for 1 card per view
+  function initCarousel(carouselId, navId) {
+    const carousel = document.getElementById(carouselId);
+    const nav = document.getElementById(navId);
+    const track = carousel.querySelector('.carousel-track');
+    const items = track.querySelectorAll('.carousel-item');
+    if (items.length === 0) return;
+    // Always 1 item per view for mobile
+    const itemsPerView = 1;
+    const numDots = Math.ceil(items.length / itemsPerView);
+    nav.innerHTML = '';
+    for (let i = 0; i < numDots; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot';
+      if (i === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => {
+        const itemWidth = items[0].offsetWidth;
+        const scrollPosition = i * itemWidth;
+        track.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+        nav.querySelectorAll('.carousel-dot').forEach(d => d.classList.remove('active'));
+        dot.classList.add('active');
+      });
+      nav.appendChild(dot);
+    }
+    track.addEventListener('scroll', () => {
+      const scrollLeft = track.scrollLeft;
+      const itemWidth = items[0].offsetWidth;
+      const activeIndex = Math.round(scrollLeft / itemWidth);
+      nav.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === activeIndex);
+      });
+    });
+    window.addEventListener('resize', () => {
+      setTimeout(() => {
+        initCarousel(carouselId, navId);
+      }, 100);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    initCarousel('recent-carousel', 'recent-nav');
+  });
+</script>
 {% endblock %}

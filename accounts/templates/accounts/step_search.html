@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+  <style>
+    :root {
+      --primary-color: #c15a2e;
+      --secondary-color: #2f2f2f;
+      --accent-color: #e4d3b2;
+      --light-bg: #f9f5ef;
+      --text-dark: #2f2f2f;
+      --text-muted: #7a6a5a;
+    }
+
+    .search-container {
+      min-height: 100vh;
+      background: var(--light-bg);
+      padding: 2rem 1rem;
+    }
+
+    .search-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 2rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      gap: 0.5rem;
+    }
+
+    .step-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ddd;
+      transition: all 0.3s ease;
+    }
+
+    .step-dot.active {
+      background: var(--primary-color);
+      transform: scale(1.2);
+    }
+
+    .step-dot.completed {
+      background: var(--primary-color);
+      opacity: 0.7;
+    }
+
+    .step-title {
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      font-weight: 700;
+      color: var(--text-dark);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .step-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(193, 90, 46, 0.1);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(193, 90, 46, 0.1);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #a84b24;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(193, 90, 46, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--text-muted);
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .btn-secondary:hover {
+      background: var(--text-muted);
+      color: white;
+    }
+
+    .location-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid var(--primary-color);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .suggestion-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+    }
+
+    .suggestion-item:hover {
+      background: var(--light-bg);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .optional-text {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 576px) {
+      .search-container {
+        padding: 1rem;
+      }
+
+      .search-card {
+        padding: 1.5rem;
+        margin: 0;
+      }
+
+      .step-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="search-container">
+    <div class="search-card">
+      <!-- Step Indicator -->
+      <div class="step-indicator">
+        <div class="step-dot {% if step == '1' %}active{% elif step|add:'0' > 1 %}completed{% endif %}"></div>
+        <div class="step-dot {% if step == '2' %}active{% elif step|add:'0' > 2 %}completed{% endif %}"></div>
+        <div class="step-dot {% if step == '3' %}active{% endif %}"></div>
+      </div>
+
+      {% if step == '1' %}
+        <!-- Step 1: Location -->
+        <h2 class="step-title">Where are you looking?</h2>
+        <p class="step-subtitle">Enter a city or suburb to find properties in your area</p>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="location" class="form-label">Location</label>
+            <div class="input-wrapper">
+              <input type="text" 
+                     id="location" 
+                     name="location" 
+                     class="form-control" 
+                     placeholder="e.g., Harare, Avondale, Bulawayo"
+                     value="{{ saved_location }}"
+                     autocomplete="off"
+                     required>
+              <div id="location-suggestions" class="location-suggestions"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Continue to Property Type
+          </button>
+        </form>
+
+      {% elif step == '2' %}
+        <!-- Step 2: Property Type -->
+        <h2 class="step-title">What type of property?</h2>
+        <p class="step-subtitle">Select the type of property you're looking for</p>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="property_type" class="form-label">Property Type</label>
+            <select id="property_type" name="property_type" class="form-select" required>
+              <option value="">Select property type</option>
+              <option value="house" {% if saved_property_type == 'house' %}selected{% endif %}>House</option>
+              <option value="apartment" {% if saved_property_type == 'apartment' %}selected{% endif %}>Apartment</option>
+              <option value="airbnb" {% if saved_property_type == 'airbnb' %}selected{% endif %}>Airbnb</option>
+              <option value="room" {% if saved_property_type == 'room' %}selected{% endif %}>Room</option>
+              <option value="guesthouse" {% if saved_property_type == 'guesthouse' %}selected{% endif %}>Guesthouse</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Continue to Price
+          </button>
+        </form>
+
+        <a href="{% url 'step_search' %}?step=1" class="btn btn-secondary">
+          ← Back to Location
+        </a>
+
+      {% elif step == '3' %}
+        <!-- Step 3: Max Price -->
+        <h2 class="step-title">What's your budget?</h2>
+        <p class="step-subtitle">Enter your maximum budget (optional)</p>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="max_price" class="form-label">Maximum Price</label>
+            <input type="number" 
+                   id="max_price" 
+                   name="max_price" 
+                   class="form-control" 
+                   placeholder="e.g., 500"
+                   min="0">
+            <p class="optional-text">Leave blank to see all properties regardless of price</p>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Search Properties
+          </button>
+        </form>
+
+        <a href="{% url 'step_search' %}?step=2" class="btn btn-secondary">
+          ← Back to Property Type
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    // Location suggestions functionality
+    const locationInput = document.getElementById('location');
+    const suggestionsBox = document.getElementById('location-suggestions');
+
+    if (locationInput && suggestionsBox) {
+      locationInput.addEventListener('input', function () {
+        const query = locationInput.value.trim();
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.style.display = 'none';
+
+        if (query.length < 2) return;
+
+        fetch(`/listings/location-suggestions/?q=${encodeURIComponent(query)}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.length > 0) {
+              suggestionsBox.style.display = 'block';
+              data.forEach(location => {
+                const item = document.createElement('div');
+                item.classList.add('suggestion-item');
+                item.textContent = location;
+                item.addEventListener('click', () => {
+                  locationInput.value = location;
+                  suggestionsBox.style.display = 'none';
+                });
+                suggestionsBox.appendChild(item);
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching locations:', error);
+          });
+      });
+
+      locationInput.addEventListener('blur', () => {
+        setTimeout(() => {
+          suggestionsBox.style.display = 'none';
+        }, 150);
+      });
+    }
+  </script>
+{% endblock %} 

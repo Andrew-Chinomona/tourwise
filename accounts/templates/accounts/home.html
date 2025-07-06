@@ -3,219 +3,142 @@
 
 {% block extra_head %}
   <style>
+    :root {
+      --primary-color: #c15a2e;
+      --secondary-color: #2f2f2f;
+      --accent-color: #e4d3b2;
+      --light-bg: #f9f5ef;
+      --text-dark: #2f2f2f;
+      --text-muted: #7a6a5a;
+    }
+
+    /* Hero Section - Mobile First */
     .hero-section {
       position: relative;
-      height: clamp(500px, 80vh, 90vh);
-      min-height: 500px;
-      background: linear-gradient( rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.8), var(--muted-cream)),
-                  url('{% static "images/zim-property-hero.png" %}') no-repeat center center;
+      height: 100vh;
+      min-height: 600px;
+      background: linear-gradient(
+        rgba(0, 0, 0, 0.5),
+        rgba(0, 0, 0, 0.3)
+      ), url('{% static "images/zim-property-hero.png" %}') no-repeat center center;
       background-size: cover;
       display: flex;
       align-items: center;
+      justify-content: center;
       color: white;
-      padding: clamp(1rem, 4vw, 2rem);
+      padding: 1rem;
+      text-align: center;
     }
 
     .hero-content {
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
-      position: relative;
-      z-index: 2;
+      max-width: 1200px;
       width: 100%;
+      z-index: 2;
     }
 
     .hero-title {
-      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-size: clamp(2rem, 8vw, 4rem);
       font-weight: 700;
-      margin-bottom: clamp(1rem, 3vw, 1.5rem);
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      color: white;
-      line-height: 1.2;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      line-height: 1.1;
     }
 
     .hero-subtitle {
-      font-size: clamp(1rem, 3vw, 1.5rem);
-      margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
-      font-weight: 550;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      color: black;
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      margin-bottom: 2rem;
+      font-weight: 400;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
       line-height: 1.4;
+      opacity: 0.95;
     }
 
     .hero-buttons {
       display: flex;
-      gap: clamp(0.5rem, 2vw, 1rem);
+      gap: 1rem;
       justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 3rem;
     }
 
-    /* Updated Search Container */
-    .search-container {
-      background-color: white;
+    .btn-hero {
+      padding: 0.75rem 2rem;
       border-radius: 50px;
-      padding: 0.5rem 1rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      margin-top: clamp(2rem, 5vw, 3rem);
-      width: 100%;
-      max-width: 900px;
-      margin-left: auto;
-      margin-right: auto;
-      transition: all 0.3s ease;
-    }
-
-    .search-container:hover {
-      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-    }
-
-    /* Search Form Layout */
-    .search-form {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    /* Search Field Styling */
-    .search-field {
-      flex: 1;
-      min-width: 0;
-      position: relative;
-      padding: 0.5rem 0;
-    }
-
-    .search-field label {
-      display: block;
-      color: #6c757d;
       font-weight: 600;
-      font-size: 0.75rem;
-      margin-bottom: 0.25rem;
-      padding-left: 0.75rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
     }
 
-    .search-field input,
-    .search-field select {
-      width: 100%;
-      border: none;
-      padding: 0.5rem 0.75rem;
-      background: transparent;
-      color: var(--charcoal-text);
-      font-size: 0.875rem;
-      border-radius: 20px;
-      transition: all 0.2s ease;
-    }
-
-    .search-field input:focus,
-    .search-field select:focus {
-      outline: none;
-      background: rgba(0,0,0,0.03);
-    }
-
-    .search-field input:hover,
-    .search-field select:hover {
-      background: rgba(0,0,0,0.03);
-    }
-
-    /* Divider between fields */
-    .search-divider {
-      width: 1px;
-      height: 40px;
-      background: rgba(0,0,0,0.1);
-      margin: 0 0.25rem;
-    }
-
-    /* Search Button */
-    .search-btn {
-      background-color: var(--brick-orange);
-      border: none;
-      border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .btn-hero-primary {
+      background: var(--primary-color);
       color: white;
+      border-color: var(--primary-color);
+    }
+
+    .btn-hero-primary:hover {
+      background: #a84b24;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(193, 90, 46, 0.3);
+    }
+
+    .btn-hero-outline {
+      background: transparent;
+      color: white;
+      border-color: white;
+    }
+
+    .btn-hero-outline:hover {
+      background: white;
+      color: var(--text-dark);
+      transform: translateY(-2px);
+    }
+
+    /* New Search Button */
+    .search-pill {
+      background: white;
+      border: none;
+      border-radius: 50px;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       transition: all 0.3s ease;
       cursor: pointer;
-      flex-shrink: 0;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
     }
 
-    .search-btn:hover {
-      background-color: #a14825;
-      transform: scale(1.05);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    .search-pill:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+      color: var(--text-dark);
+      text-decoration: none;
     }
 
-    /* Mobile Responsiveness */
-    @media (max-width: 768px) {
-      .search-container {
-        border-radius: 25px;
-        padding: 0.75rem;
-      }
-
-      .search-form {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .search-field {
-        width: 100%;
-        padding: 0.25rem 0;
-      }
-
-      .search-divider {
-        display: none;
-      }
-
-      .search-btn {
-        margin-top: 0.5rem;
-        width: 48px;
-        height: 48px;
-        align-self: center;
-      }
-    }
-
-    /* Location suggestions styling */
-    #location-suggestions {
-      top: 100%;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      display: none;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      max-height: 200px;
-      overflow-y: auto;
-      margin-top: 0.25rem;
-    }
-
-    .list-group-item-action:hover {
-      background-color: var(--soft-beige);
-    }
-
-    /* Listings section */
+    /* Listings Section */
     .listings-section {
-      background-color: var(--muted-cream);
-      padding: clamp(2rem, 5vw, 3rem) 0;
+      background: var(--light-bg);
+      padding: 3rem 0;
     }
 
     .section-title {
-      color: var(--charcoal-text);
+      color: var(--text-dark);
       font-weight: 700;
-      margin-bottom: clamp(1.5rem, 4vw, 2rem);
-      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin-bottom: 2rem;
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      text-align: center;
     }
 
-    .featured-card {
-      border: 2px solid #ffc107 !important;
-    }
-
-    /* Responsive property grid */
+    /* Desktop Grid */
     .property-grid {
       display: grid;
-      gap: clamp(1rem, 3vw, 1.5rem);
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      grid-template-columns: repeat(4, 1fr);
     }
 
     .property-card {
@@ -228,26 +151,156 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
 
+    .property-card .card {
+      border: none;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .property-card .card:hover {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
     .property-card .card-img-top {
-      height: clamp(160px, 25vw, 200px);
+      height: 200px;
       object-fit: cover;
     }
 
-    /* Mobile First Responsive Design */
-    @media (max-width: 576px) {
+    .property-card .card-body {
+      padding: 1.25rem;
+    }
+
+    .property-card .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .property-card .card-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .price-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    .featured-card {
+      border: 2px solid #ffc107 !important;
+    }
+
+    /* Mobile Carousel - Updated for 1 card per row */
+    .carousel-container {
+      display: none;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      margin: 0;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 0;
+      padding: 0;
+      min-width: max-content;
+    }
+
+    .carousel-item {
+      flex: 0 0 100%;
+      min-width: 100%;
+      max-width: 100%;
+    }
+
+    .carousel-item .card {
+      height: 100%;
+      border: none;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .carousel-item .card-img-top {
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .carousel-item .card-body {
+      padding: 1rem;
+    }
+
+    .carousel-item .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+      color: var(--text-dark);
+    }
+
+    .carousel-item .card-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .carousel-item .price-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    /* Carousel Navigation */
+    .carousel-nav {
+      display: none;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ddd;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-dot.active {
+      background: var(--primary-color);
+      transform: scale(1.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
       .hero-section {
-        height: 70vh;
-        min-height: 400px;
+        height: 80vh;
+        min-height: 500px;
         padding: 1rem;
       }
 
       .hero-title {
-        font-size: 2rem;
-        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
       }
 
       .hero-subtitle {
-        font-size: 1rem;
+        font-size: 1.1rem;
         margin-bottom: 1.5rem;
       }
 
@@ -255,80 +308,164 @@
         flex-direction: column;
         align-items: center;
         gap: 0.75rem;
+        margin-bottom: 2rem;
       }
 
+      .btn-hero {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+      }
+
+      .search-pill {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+
+      /* Hide desktop grid, show carousel */
       .property-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+        display: none;
+      }
+
+      .carousel-container {
+        display: block !important;
+      }
+
+      .carousel-nav {
+        display: flex;
       }
 
       .listings-section {
-        padding: 1.5rem 0;
+        padding: 2rem 0;
       }
 
       .section-title {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-      }
-    }
-
-    @media (min-width: 577px) and (max-width: 768px) {
-      .hero-section {
-        height: 80vh;
-        min-height: 500px;
-      }
-
-      .hero-title {
-        font-size: 2.5rem;
-      }
-
-      .hero-subtitle {
-        font-size: 1.2rem;
-      }
-
-      .property-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
       }
     }
 
     @media (min-width: 769px) and (max-width: 1024px) {
-      .hero-section {
-        height: 85vh;
-        min-height: 600px;
-      }
-
-      .hero-title {
-        font-size: 3rem;
-      }
-
-      .hero-subtitle {
-        font-size: 1.3rem;
-      }
-
       .property-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
+        gap: 1.25rem;
       }
     }
 
-    @media (min-width: 1025px) {
+    /* Mobile-specific adjustments for different screen sizes */
+    @media (max-width: 576px) {
       .hero-section {
-        height: 90vh;
-        min-height: 600px;
+        height: 70vh;
+        min-height: 400px;
       }
 
       .hero-title {
-        font-size: 3.5rem;
+        font-size: 2rem;
       }
 
       .hero-subtitle {
-        font-size: 1.5rem;
+        font-size: 1rem;
       }
 
-      .property-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+      .carousel-item .card-img-top {
+        height: 140px;
+      }
+
+      .carousel-item .card-body {
+        padding: 0.75rem;
+      }
+
+      .carousel-item .card-title {
+        font-size: 1rem;
+      }
+
+      .carousel-item .card-text {
+        font-size: 0.8rem;
+      }
+
+      .carousel-item .price-text {
+        font-size: 1rem;
+      }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 360px) {
+      .carousel-item {
+        flex: 0 0 calc(33.333% - 0.4rem);
+        min-width: 90px;
+        max-width: 110px;
+      }
+
+      .carousel-track {
+        gap: 0.4rem;
+      }
+
+      .carousel-item .card-img-top {
+        height: 70px;
+      }
+
+      .carousel-item .card-body {
+        padding: 0.4rem;
+      }
+
+      .carousel-item .card-title {
+        font-size: 0.75rem;
+      }
+
+      .carousel-item .card-text {
+        font-size: 0.6rem;
+      }
+
+      .carousel-item .price-text {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* Show More Button */
+    .show-more-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-block;
+      margin-top: 2rem;
+    }
+
+    .show-more-btn:hover {
+      background: #a84b24;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(193, 90, 46, 0.3);
+      text-decoration: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state h4 {
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+
+    /* Desktop: hide carousel */
+    @media (min-width: 769px) {
+      .carousel-container {
+        display: none !important;
+      }
+    }
+    /* Mobile: show carousel */
+    @media (max-width: 768px) {
+      .carousel-container {
+        display: block !important;
       }
     }
   </style>
@@ -342,51 +479,13 @@
       <p class="hero-subtitle">Trustworthy, hassle-free property search and listing experience</p>
 
       <div class="hero-buttons">
-        <a href="#search-section" class="btn btn-primary-custom">Discover Properties</a>
-        <a href="{% url 'become_host' %}" class="btn btn-primary-custom">Become a Host</a>
-      </div>
-
-      <!-- Search Bar -->
-      <div class="search-container" id="search-section">
-        <form method="get" action="{% url 'search_results' %}" class="search-form">
-          <!-- Location Input with Suggestions -->
-          <div class="search-field">
-            <label for="location-input">Location</label>
-            <input type="text"
-                   name="location"
-                   id="location-input"
-                   autocomplete="off"
-                   placeholder="Start typing a city or suburb...">
-            <ul id="location-suggestions"
-                class="list-group position-absolute w-100 bg-white shadow-sm"></ul>
-          </div>
-
-          <div class="search-divider"></div>
-
-          <!-- Property Type -->
-          <div class="search-field">
-            <label for="property-type">Type</label>
-            <select name="property_type" id="property-type">
-              <option value="">All Types</option>
-              <option value="house">House</option>
-              <option value="apartment">Apartment</option>
-              <option value="airbnb">Airbnb</option>
-            </select>
-          </div>
-
-          <div class="search-divider"></div>
-
-          <!-- Max Price -->
-          <div class="search-field">
-            <label for="max-price">Max Price</label>
-            <input type="number" name="max_price" id="max-price" placeholder="e.g. 500">
-          </div>
-
-          <!-- Submit Button -->
-          <button type="submit" class="search-btn">
-            <i class="bi bi-search"></i>
-          </button>
-        </form>
+        <a href="{% url 'step_search' %}" class="search-pill">
+          <i class="bi bi-search"></i>
+          Start Search
+        </a>
+        <a href="{% url 'become_host' %}" class="btn-hero btn-hero-outline">
+          Become a Host
+        </a>
       </div>
     </div>
   </section>
@@ -396,110 +495,174 @@
     <div class="container">
       <!-- Recent Listings -->
       <h3 class="section-title">Recent Listings</h3>
+
+      <!-- Desktop Grid -->
       <div class="property-grid">
         {% for property in recent_listings %}
           <div class="property-card">
-            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
-              <div class="card card-custom h-100">
-                {% if property.main_image  %}
-                  <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
-                {% endif %}
-                <div class="card-body">
-                  <h5 class="card-title text-truncate">{{ property.title }}</h5>
-                  <p class="card-text text-muted">
-                    {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
-                  </p>
-                  <p class="price-text">
-                    {{ property.currency }} {{ property.price }}
-                  </p>
-                </div>
-              </div>
-            </a>
-          </div>
-        {% empty %}
-          <div class="col-12">
-            <p class="text-center text-muted">No recent listings available.</p>
-          </div>
-        {% endfor %}
-      </div>
-
-      <div class="text-center mb-5">
-        <a href="{% url 'recent_listings' %}" class="btn btn-outline-custom">Show More</a>
-      </div>
-
-      <!-- Featured Listings -->
-      <h3 class="section-title">Featured Listings</h3>
-      <div class="property-grid">
-        {% for property in featured_listings %}
-          <div class="property-card">
-            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none text-dark">
-              <div class="card card-custom featured-card h-100">
+            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
+              <div class="card">
                 {% if property.main_image %}
                   <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
                 {% endif %}
                 <div class="card-body">
                   <h5 class="card-title text-truncate">{{ property.title }}</h5>
-                  <p class="card-text text-muted">
+                  <p class="card-text">
                     {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
                   </p>
                   <p class="price-text">
-                    {{ property.currency }} {{ property.price }}
+                    {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
                   </p>
                 </div>
               </div>
             </a>
           </div>
         {% empty %}
-          <div class="col-12">
-            <p class="text-center text-muted">No featured listings yet.</p>
+          <div class="empty-state">
+            <h4>No Recent Listings</h4>
+            <p>Check back soon for new properties!</p>
           </div>
         {% endfor %}
       </div>
 
-      <div class="text-center mb-5">
-        <a href="{% url 'featured_listings' %}" class="btn btn-outline-custom">Show More</a>
+      <!-- Mobile Carousel -->
+      <div class="carousel-container" id="recent-carousel">
+        <div class="carousel-track">
+          {% for property in recent_listings %}
+            <div class="carousel-item">
+              <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
+                <div class="card">
+                  {% if property.main_image %}
+                    <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+                  {% endif %}
+                  <div class="card-body">
+                    <h5 class="card-title text-truncate">{{ property.title }}</h5>
+                    <p class="card-text">
+                      {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                    </p>
+                    <p class="price-text">
+                      {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="carousel-nav" id="recent-nav"></div>
+      </div>
+
+      <div class="text-center">
+        <a href="{% url 'recent_listings' %}" class="show-more-btn">Show More Recent Listings</a>
+      </div>
+
+      <!-- Featured Listings -->
+      <h3 class="section-title">Featured Listings</h3>
+
+      <!-- Desktop Grid -->
+      <div class="property-grid">
+        {% for property in featured_listings %}
+          <div class="property-card">
+            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
+              <div class="card featured-card">
+                {% if property.main_image %}
+                  <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title text-truncate">{{ property.title }}</h5>
+                  <p class="card-text">
+                    {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                  </p>
+                  <p class="price-text">
+                    {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="empty-state">
+            <h4>No Featured Listings</h4>
+            <p>Premium properties will appear here!</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Mobile Carousel -->
+      <div class="carousel-container" id="featured-carousel">
+        <div class="carousel-track">
+          {% for property in featured_listings %}
+            <div class="carousel-item">
+              <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
+                <div class="card featured-card">
+                  {% if property.main_image %}
+                    <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+                  {% endif %}
+                  <div class="card-body">
+                    <h5 class="card-title text-truncate">{{ property.title }}</h5>
+                    <p class="card-text">
+                      {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                    </p>
+                    <p class="price-text">
+                      {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="carousel-nav" id="featured-nav"></div>
+      </div>
+
+      <div class="text-center">
+        <a href="{% url 'featured_listings' %}" class="show-more-btn">Show More Featured Listings</a>
       </div>
     </div>
   </div>
 
   <script>
-    const input = document.getElementById('location-input');
-    const suggestionsBox = document.getElementById('location-suggestions');
-
-    input.addEventListener('input', function () {
-      const query = input.value.trim();
-      suggestionsBox.innerHTML = '';
-      suggestionsBox.style.display = 'none';
-
-      if (query.length < 2) return;
-
-      fetch(`/api/locations/?q=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            suggestionsBox.style.display = 'block';
-            data.forEach(location => {
-              const item = document.createElement('li');
-              item.classList.add('list-group-item', 'list-group-item-action');
-              item.textContent = location;
-              item.style.cursor = 'pointer';
-              item.addEventListener('click', () => {
-                input.value = location;
-                suggestionsBox.style.display = 'none';
-              });
-              suggestionsBox.appendChild(item);
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching locations:', error);
+    // Carousel functionality for 1 card per view
+    function initCarousel(carouselId, navId) {
+      const carousel = document.getElementById(carouselId);
+      const nav = document.getElementById(navId);
+      const track = carousel.querySelector('.carousel-track');
+      const items = track.querySelectorAll('.carousel-item');
+      if (items.length === 0) return;
+      // Always 1 item per view for mobile
+      const itemsPerView = 1;
+      const numDots = Math.ceil(items.length / itemsPerView);
+      nav.innerHTML = '';
+      for (let i = 0; i < numDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot';
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => {
+          const itemWidth = items[0].offsetWidth;
+          const scrollPosition = i * itemWidth;
+          track.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+          nav.querySelectorAll('.carousel-dot').forEach(d => d.classList.remove('active'));
+          dot.classList.add('active');
         });
-    });
-
-    input.addEventListener('blur', () => {
-      setTimeout(() => {
-        suggestionsBox.style.display = 'none';
-      }, 150);
+        nav.appendChild(dot);
+      }
+      track.addEventListener('scroll', () => {
+        const scrollLeft = track.scrollLeft;
+        const itemWidth = items[0].offsetWidth;
+        const activeIndex = Math.round(scrollLeft / itemWidth);
+        nav.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+          dot.classList.toggle('active', index === activeIndex);
+        });
+      });
+      window.addEventListener('resize', () => {
+        setTimeout(() => {
+          initCarousel(carouselId, navId);
+        }, 100);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      initCarousel('recent-carousel', 'recent-nav');
+      initCarousel('featured-carousel', 'featured-nav');
     });
   </script>
 {% endblock %}
