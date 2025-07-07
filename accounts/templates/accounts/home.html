@@ -344,6 +344,23 @@
         font-size: 1.75rem;
         margin-bottom: 1.5rem;
       }
+
+      .mobile-hero-btns {
+        flex-direction: row !important;
+        justify-content: center;
+        align-items: center !important;
+        gap: 0.5rem;
+      }
+      .search-pill {
+        margin-bottom: 0 !important;
+      }
+      .start-chat-btn {
+        margin-bottom: 0 !important;
+      }
+      .new-sticker {
+        top: -10px;
+        right: -10px;
+      }
     }
 
     @media (min-width: 769px) and (max-width: 1024px) {
@@ -545,6 +562,105 @@
         display: none !important;
       }
     }
+
+    .start-chat-btn {
+      position: relative;
+      display: inline-block;
+    }
+    .new-sticker {
+      position: absolute;
+      top: -10px;
+      right: -18px;
+      background: yellow;
+      color: #111;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+        {#border-color: black;#}
+      letter-spacing: 1px;
+      z-index: 2;
+      text-transform: uppercase;
+      border: 2px solid black;
+    }
+
+    /* Mobile-Only Second Hero Section */
+    .mobile-hero-2 {
+      background: linear-gradient(135deg,#fff 0%, #e4d3b2 0%, #c15a2e 95%);
+      padding: 2.5rem 1.25rem 2rem 1.25rem;
+      border-radius: 0 0 32px 32px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 32px rgba(193,90,46,0.08);
+      position: relative;
+      z-index: 5;
+      text-align: center;
+    }
+    .mobile-hero-2-content {
+      max-width: 420px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .mobile-hero-2-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.5px;
+    }
+    .mobile-hero-2-msg {
+      font-size: 1.05rem;
+      color: black;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    .mobile-hero-2-sub {
+      font-size: 0.95rem;
+      color: white;
+      margin-bottom: 1.1rem;
+    }
+    .mobile-hero-2-chat {
+      font-size: 1rem;
+      padding: 0.55rem 1.5rem;
+      border-radius: 24px;
+      font-weight: 700;
+      margin-top: 0.5rem;
+    }
+    /* Reduce size of Start Search and Start Chat on mobile */
+    .mobile-btn-sm {
+      font-size: 1rem !important;
+      padding: 0.55rem 1.5rem !important;
+      border-radius: 24px !important;
+      font-weight: 700;
+    }
+    @media (max-width: 768px) {
+      .mobile-hero-2 {
+        display: block;
+      }
+      .start-chat-btn {
+        display: none !important;
+      }
+      .mobile-btn-sm {
+        font-size: 1rem !important;
+        padding: 0.55rem 1.5rem !important;
+        border-radius: 24px !important;
+          border-color: antiquewhite;
+          width: 180px;
+      }
+      .search-pill {
+        font-size: 1rem !important;
+        padding: 0.55rem 1.5rem !important;
+        border-radius: 24px !important;
+          width: 180px;
+      }
+    }
+    @media (min-width: 769px) {
+      .mobile-hero-2 {
+        display: none !important;
+      }
+    }
   </style>
 {% endblock %}
 
@@ -554,10 +670,9 @@
     <div class="hero-content">
       <h1 class="hero-title">Find Your Perfect Home in Zimbabwe</h1>
       <p class="hero-subtitle">Trustworthy, hassle-free property search and listing experience</p>
-
-      <div class="hero-buttons">
+      <div class="hero-buttons flex-column flex-md-row d-flex d-md-block align-items-center align-items-md-start mobile-hero-btns">
         <!-- Mobile: Keep step search button -->
-        <a href="{% url 'step_search' %}" class="search-pill d-md-none">
+        <a href="{% url 'step_search' %}" class="search-pill d-md-none me-2 mb-0 mobile-btn-sm">
           <i class="bi bi-search"></i>
           Start Search
         </a>
@@ -565,11 +680,25 @@
         <button type="button" class="btn-hero btn-hero-primary d-none d-md-inline-block" id="discover-btn">
           Discover
         </button>
-        <!-- Start Chat button (all devices) -->
-        <a href="#" class="btn-hero btn-hero-outline ms-0 ms-md-2">
+        <!-- Start Chat button (all devices, hidden on mobile) -->
+        <a href="#" class="btn-hero btn-hero-outline ms-0 ms-md-2 position-relative start-chat-btn d-none d-md-inline-block d-flex align-items-center justify-content-center mb-0">
           Start Chat
+          <span class="new-sticker">NEW</span>
         </a>
       </div>
+    </div>
+  </section>
+
+  <!-- Mobile-Only Second Hero Section -->
+  <section class="mobile-hero-2 d-block d-md-none">
+    <div class="mobile-hero-2-content">
+      <h2 class="mobile-hero-2-title">Not sure where to start?</h2>
+      <p class="mobile-hero-2-msg">Chat with us and we'll help you find the perfect place!</p>
+      <div class="mobile-hero-2-sub">Instant help. Real listings. Zero stress.</div>
+      <a href="#" class="btn-hero btn-hero-primary position-relative mobile-btn-sm mobile-hero-2-chat">
+        Start Chat
+        <span class="new-sticker">NEW</span>
+      </a>
     </div>
   </section>
 
