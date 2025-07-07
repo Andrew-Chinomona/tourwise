@@ -3,6 +3,38 @@
 
 {% block content %}
 <div class="container mt-4">
+  <!-- 🖼 Mobile Image Gallery -->
+  <div class="mobile-image-gallery d-md-none mb-3">
+    <div class="gallery-scroll">
+      <div class="gallery-card">
+        <img src="{{ property.main_image.url }}" alt="Main Image" class="gallery-img" onclick="openLightbox(this.src)">
+      </div>
+      {% for image in interior_images %}
+        <div class="gallery-card">
+          <img src="{{ image.image.url }}" alt="Interior {{ forloop.counter }}" class="gallery-img" onclick="openLightbox(this.src)">
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <!-- Lightbox Overlay for Mobile Gallery -->
+  <div id="mobileLightbox" class="mobile-lightbox-overlay" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Full Image" class="mobile-lightbox-img">
+    <span class="mobile-lightbox-close">&times;</span>
+  </div>
+  <!-- Mobile Title & Location -->
+  <div class="d-md-none mb-3 px-1">
+    <h3 class="property-title-mobile mb-1">{{ property.title|title }}</h3>
+    <div class="property-location-mobile mb-2">{{ property.street_address|title }}, {{ property.suburb|title }}, {{ property.city|title }}</div>
+    <div class="property-icons-mobile d-flex gap-3 mb-3">
+      <span class="icon-pill"><i class="fas fa-bed brand-orange"></i> {{ property.bedrooms }} Bedroom{{ property.bedrooms|pluralize }}</span>
+      <span class="icon-pill"><i class="fas fa-bath brand-orange"></i> {{ property.bathrooms }} Bathroom{{ property.bathrooms|pluralize }}</span>
+      <span class="icon-pill"><i class="fas fa-ruler-combined brand-orange"></i> {{ property.area }} m²</span>
+      {% if property.parking_spaces %}
+        <span class="icon-pill"><i class="fas fa-car brand-orange"></i> {{ property.parking_spaces }} Parking</span>
+      {% endif %}
+    </div>
+  </div>
+
   <!-- 🖼 Image Gallery -->
   <div class="row mb-4" style="height: clamp(300px, 50vh, 400px); overflow: hidden;">
     <div class="col-lg-8 col-md-12 h-100 pe-1 mb-2 mb-lg-0">
@@ -77,11 +109,11 @@
         {% endif %}
       </div>
 
-      <h5 class="mb-3">{{ property.property_type|title }} Description</h5>
+      <h5 class="mb-3 section-heading">{{ property.property_type|title }} Description</h5>
       <p class="mb-4">{{ property.description }}</p>
 
       <!-- Amenities -->
-      <h5 class="mb-3">Offered Amenities</h5>
+      <h5 class="mb-3 section-heading">Offered Amenities</h5>
       <div class="amenities-container mb-3">
         {% for amenity in amenities %}
           <span class="amenity-item border rounded-pill px-3 py-2 bg-light d-flex align-items-center gap-2 {% if forloop.counter > 6 %}d-none{% endif %}">
@@ -92,13 +124,11 @@
       </div>
 
       {% if amenities|length > 6 %}
-        <button id="toggleAmenitiesBtn" class="btn btn-sm btn-outline-secondary mb-4">
-          Show All Amenities ({{ amenities|length|add:"-6" }} more)
-        </button>
+        <button id="toggleAmenitiesBtn" class="btn btn-brand-accent mb-4">Show All Amenities ({{ amenities|length|add:"-6" }} more)</button>
       {% endif %}
 
       <!-- 🗺️ Map Section -->
-      <h5 class="mb-3">Property Location</h5>
+      <h5 class="mb-3 section-heading">Property Location</h5>
       <div id="map" style="height: clamp(250px, 40vh, 350px);" class="rounded shadow-sm mb-4"></div>
     </div>
 
@@ -120,9 +150,9 @@
       <!-- Contact & Price Card -->
       <div class="card shadow-sm sticky-top" style="top: 1rem;">
         <div class="card-body">
-          <h4 class="text-primary mb-3">{{ property.currency }} {{ property.price }}</h4>
+          <h4 class="mb-3"><span class="currency-black">{{ property.currency }} {{ property.price }}</span></h4>
           <hr>
-          <button class="btn btn-dark w-100 mb-3" onclick="toggleContactInfo()">Contact Details</button>
+          <button class="btn btn-contact-mobile d-md-none" onclick="toggleContactInfo()">Contact Details</button>
           <div id="contactInfo" class="d-none">
             <div class="mb-3">
               <strong class="d-block mb-1">Contact Email:</strong>
@@ -216,6 +246,20 @@
       button.textContent = 'Contact Details';
     }
   }
+
+  // Lightbox for mobile gallery
+  function openLightbox(src) {
+    var overlay = document.getElementById('mobileLightbox');
+    var img = document.getElementById('lightboxImg');
+    overlay.classList.add('show');
+    img.src = src;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    var overlay = document.getElementById('mobileLightbox');
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
 </script>
 
 <!-- Leaflet -->
@@ -306,6 +350,190 @@
     .row.g-2 > div {
       margin-bottom: 0.75rem;
     }
+  }
+
+  .brand-orange { color: #c15a2e !important; }
+  .btn-brand-orange {
+    background: #c15a2e;
+    color: #fff !important;
+    border: 2px solid #c15a2e;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-brand-orange:hover, .btn-brand-orange:focus {
+    background: #a84b24;
+    color: #fff !important;
+    border-color: #a84b24;
+  }
+  .btn-brand-accent {
+    background: #e4d3b2;
+    color: #2f2f2f !important;
+    border: 2px solid #e4d3b2;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-brand-accent:hover, .btn-brand-accent:focus {
+    background: #c15a2e;
+    color: #fff !important;
+    border-color: #c15a2e;
+  }
+  @media (max-width: 768px) {
+    .mobile-image-gallery {
+      width: 100vw;
+      margin-left: -16px;
+      margin-right: -16px;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .gallery-scroll {
+      display: flex;
+      flex-direction: row;
+      gap: 1.1rem;
+      overflow-x: auto;
+      padding: 0.5rem 1.2rem 0.5rem 1.2rem;
+      scroll-snap-type: x mandatory;
+    }
+    .gallery-card {
+      flex: 0 0 auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.08);
+      background: #fff;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 18px;
+      display: block;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .gallery-img:active {
+      transform: scale(0.97);
+    }
+    .mobile-lightbox-overlay {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.2s;
+    }
+    .mobile-lightbox-overlay.show {
+      display: flex;
+    }
+    .mobile-lightbox-img {
+      max-width: 92vw;
+      max-height: 80vh;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      background: #fff;
+    }
+    .mobile-lightbox-close {
+      position: absolute;
+      top: 1.2rem;
+      right: 2rem;
+      font-size: 2.5rem;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      z-index: 2100;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .property-title-mobile {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #2f2f2f;
+      text-transform: capitalize;
+      margin-bottom: 0.2rem;
+    }
+    .property-location-mobile {
+      font-size: 1rem;
+      color: #7a6a5a;
+      text-transform: capitalize;
+      margin-bottom: 0.2rem;
+    }
+    .property-icons-mobile {
+      font-size: 0.95rem;
+      color: #c15a2e;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+    .icon-pill {
+      background: #f3ecdf;
+      border-radius: 16px;
+      padding: 0.3rem 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+      color: #c15a2e;
+      font-size: 0.95rem;
+    }
+    /* Hide original gallery and info on mobile */
+    .row.mb-4, .row > .col-lg-8 > h3, .row > .col-lg-8 > p.text-muted, .row > .col-lg-8 > .row.g-2 { display: none !important; }
+    /* Brand color for amenities button */
+    #toggleAmenitiesBtn {
+      background: #e4d3b2;
+      color: #2f2f2f;
+      border: 2px solid #e4d3b2;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+      font-size: 0.85rem;
+      padding: 0.35rem 1.1rem;
+      min-height: 32px;
+      line-height: 1.1;
+    }
+    #toggleAmenitiesBtn:hover, #toggleAmenitiesBtn:focus {
+      background: #c15a2e;
+      color: #fff;
+      border-color: #c15a2e;
+    }
+    /* Brand color for contact button */
+    .btn-contact-mobile {
+      background: #c15a2e;
+      color: #fff !important;
+      border: 2px solid #c15a2e;
+      border-radius: 50px;
+      font-weight: 600;
+      width: 100%;
+      margin-bottom: 1rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-contact-mobile:hover, .btn-contact-mobile:focus {
+      background: #a84b24;
+      color: #fff !important;
+      border-color: #a84b24;
+    }
+  }
+
+  .currency-black {
+    color: #2f2f2f !important;
+    font-weight: 600;
+  }
+
+  .section-heading {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2f2f2f;
+    margin-bottom: 0.7rem;
+    letter-spacing: 0.01em;
   }
 </style>
 {% endblock %}

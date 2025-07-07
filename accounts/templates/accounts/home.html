@@ -577,11 +577,10 @@
       font-weight: 700;
       padding: 2px 8px;
       border-radius: 12px;
-        {#border-color: black;#}
       letter-spacing: 1px;
       z-index: 2;
       text-transform: uppercase;
-      border: 2px solid black;
+      border: 2px solid #fff;
     }
 
     /* Mobile-Only Second Hero Section */
@@ -659,6 +658,178 @@
     @media (min-width: 769px) {
       .mobile-hero-2 {
         display: none !important;
+      }
+    }
+
+    /* Mobile CSS Scroll Snap Carousel */
+    @media (max-width: 768px) {
+      .card-row {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        gap: 1rem;
+        padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .card-row .card, .card-row .property-link {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        width: 250px;
+        height: 250px;
+        min-width: 250px;
+        max-width: 250px;
+        min-height: 250px;
+        max-height: 250px;
+        border-radius: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        background: #fff;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        position: relative;
+        transition: box-shadow 0.2s;
+      }
+      .card-row .card:hover, .card-row .property-link:hover {
+        box-shadow: 0 4px 16px rgba(193,90,46,0.15);
+        text-decoration: none;
+        color: inherit;
+      }
+      .card-row .card-img-top {
+        width: 100%;
+        height: 110px;
+        object-fit: cover;
+        border-radius: 18px 18px 0 0;
+        flex-shrink: 0;
+      }
+      .card-row .card-body {
+        flex: 1 1 auto;
+        padding: 0.75rem 1rem 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        overflow: hidden;
+      }
+      .card-row .card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+        color: var(--text-dark);
+        text-transform: capitalize;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .card-row .card-text {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin-bottom: 0.3rem;
+        text-transform: capitalize;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .card-row .price-text {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .show-more-btn.show-more-mobile {
+        width: 120px;
+        font-size: 1rem;
+        padding: 0.5rem 0.5rem;
+        border-radius: 20px;
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.7rem !important;
+        display: inline-block;
+      }
+      .mb-mobile-section-spacer {
+        margin-bottom: 1.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* Hide old featured carousel */
+      #featured-carousel, #featured-nav {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .card-row .card, .card-row .property-link {
+        width: 250px;
+        height: 250px;
+        min-width: 250px;
+        max-width: 250px;
+        min-height: 250px;
+        max-height: 250px;
+        border-radius: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        background: #fff;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        position: relative;
+        transition: box-shadow 0.2s;
+        padding: 0;
+      }
+      .card-img-mobile-container {
+        width: 100%;
+        height: 70%;
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px 18px 0 0;
+        flex-shrink: 0;
+      }
+      .card-img-top-mobile {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 18px 18px 0 0;
+        display: block;
+      }
+      .card-content-mobile {
+        height: 30%;
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+        padding: 0.3rem 0.6rem 0.3rem 0.6rem;
+        font-size: 0.68rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #fff;
+        margin: 0;
+        flex-grow: 0;
+        flex-shrink: 0;
+        text-align: center;
+      }
+      .card-title-mobile, .card-text-mobile, .price-text-mobile {
+        text-align: center;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   </style>
@@ -754,36 +925,31 @@
         {% endfor %}
       </div>
 
-      <!-- Mobile Carousel -->
-      <div class="carousel-container" id="recent-carousel">
-        <div class="carousel-track">
-          {% for property in recent_listings %}
-            <div class="carousel-item">
-              <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
-                <div class="card">
-                  {% if property.main_image %}
-                    <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
-                  {% endif %}
-                  <div class="card-body">
-                    <h5 class="card-title text-truncate">{{ property.title }}</h5>
-                    <p class="card-text">
-                      {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
-                    </p>
-                    <p class="price-text">
-                      {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
-                    </p>
-                  </div>
-                </div>
-              </a>
+      <!-- Mobile CSS Scroll Snap Carousel for Recent Listings -->
+      <div class="card-row d-md-none">
+        {% for property in recent_listings %}
+          <a href="{% url 'property_detail' property.id %}" class="card property-card property-link">
+            {% if property.main_image %}
+              <div class="card-img-mobile-container">
+                <img src="{{ property.main_image.url }}" alt="{{ property.title|title }}" class="card-img-top-mobile">
+              </div>
+            {% endif %}
+            <div class="card-content-mobile">
+              <h5 class="card-title card-title-mobile text-truncate">{{ property.property_type|title }} in {{ property.suburb|title }}</h5>
+              <p class="card-text card-text-mobile">
+                {{ property.street_address|title }}
+              </p>
+              <p class="price-text price-text-mobile">
+                {% if property.currency %}{{ property.currency.symbol }} {{ property.currency.code }}{% endif %} {{ property.price }}
+              </p>
             </div>
-          {% endfor %}
-        </div>
-        <div class="carousel-nav" id="recent-nav"></div>
+          </a>
+        {% endfor %}
       </div>
-
-      <div class="text-center">
-        <a href="{% url 'recent_listings' %}" class="show-more-btn">Show More Recent Listings</a>
+      <div class="text-center d-md-none">
+        <a href="{% url 'recent_listings' %}" class="show-more-btn show-more-mobile">Show More</a>
       </div>
+      <div class="mb-mobile-section-spacer d-md-none"></div>
 
       <!-- Featured Listings -->
       <h3 class="section-title">Featured Listings</h3>
@@ -817,36 +983,31 @@
         {% endfor %}
       </div>
 
-      <!-- Mobile Carousel -->
-      <div class="carousel-container" id="featured-carousel">
-        <div class="carousel-track">
-          {% for property in featured_listings %}
-            <div class="carousel-item">
-              <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
-                <div class="card featured-card">
-                  {% if property.main_image %}
-                    <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
-                  {% endif %}
-                  <div class="card-body">
-                    <h5 class="card-title text-truncate">{{ property.title }}</h5>
-                    <p class="card-text">
-                      {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
-                    </p>
-                    <p class="price-text">
-                      {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
-                    </p>
-                  </div>
-                </div>
-              </a>
+      <!-- Mobile CSS Scroll Snap Carousel for Featured Listings -->
+      <div class="card-row d-md-none">
+        {% for property in featured_listings %}
+          <a href="{% url 'property_detail' property.id %}" class="card property-card property-link">
+            {% if property.main_image %}
+              <div class="card-img-mobile-container">
+                <img src="{{ property.main_image.url }}" alt="{{ property.title|title }}" class="card-img-top-mobile">
+              </div>
+            {% endif %}
+            <div class="card-content-mobile">
+              <h5 class="card-title card-title-mobile text-truncate">{{ property.property_type|title }} in {{ property.suburb|title }}</h5>
+              <p class="card-text card-text-mobile">
+                {{ property.street_address|title }}
+              </p>
+              <p class="price-text price-text-mobile">
+                {% if property.currency %}{{ property.currency.symbol }} {{ property.currency.code }}{% endif %} {{ property.price }}
+              </p>
             </div>
-          {% endfor %}
-        </div>
-        <div class="carousel-nav" id="featured-nav"></div>
+          </a>
+        {% endfor %}
       </div>
-
-      <div class="text-center">
-        <a href="{% url 'featured_listings' %}" class="show-more-btn">Show More Featured Listings</a>
+      <div class="text-center d-md-none">
+        <a href="{% url 'featured_listings' %}" class="show-more-btn show-more-mobile">Show More</a>
       </div>
+      <div class="mb-mobile-section-spacer d-md-none"></div>
     </div>
   </div>
 
@@ -863,48 +1024,6 @@
           }
         });
       }
-    });
-    // Carousel functionality for 1 card per view
-    function initCarousel(carouselId, navId) {
-      const carousel = document.getElementById(carouselId);
-      const nav = document.getElementById(navId);
-      const track = carousel.querySelector('.carousel-track');
-      const items = track.querySelectorAll('.carousel-item');
-      if (items.length === 0) return;
-      // Always 1 item per view for mobile
-      const itemsPerView = 1;
-      const numDots = Math.ceil(items.length / itemsPerView);
-      nav.innerHTML = '';
-      for (let i = 0; i < numDots; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'carousel-dot';
-        if (i === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => {
-          const itemWidth = items[0].offsetWidth;
-          const scrollPosition = i * itemWidth;
-          track.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-          nav.querySelectorAll('.carousel-dot').forEach(d => d.classList.remove('active'));
-          dot.classList.add('active');
-        });
-        nav.appendChild(dot);
-      }
-      track.addEventListener('scroll', () => {
-        const scrollLeft = track.scrollLeft;
-        const itemWidth = items[0].offsetWidth;
-        const activeIndex = Math.round(scrollLeft / itemWidth);
-        nav.querySelectorAll('.carousel-dot').forEach((dot, index) => {
-          dot.classList.toggle('active', index === activeIndex);
-        });
-      });
-      window.addEventListener('resize', () => {
-        setTimeout(() => {
-          initCarousel(carouselId, navId);
-        }, 100);
-      });
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      initCarousel('recent-carousel', 'recent-nav');
-      initCarousel('featured-carousel', 'featured-nav');
     });
   </script>
 {% endblock %}
