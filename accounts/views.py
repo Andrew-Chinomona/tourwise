@@ -9,6 +9,7 @@ from django.db.models import Value, CharField, Q
 from django.db.models.functions import Concat
 from django.urls import reverse
 
+
 def signup_view(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
@@ -197,13 +198,13 @@ def step_search_view(request):
             location = request.POST.get('location')
             if location:
                 request.session['search_location'] = location
-                return redirect('step_search') + '?step=2'
+                return redirect(f'{reverse("step_search")}?step=2')
         elif step == '2':
             # Step 2: Property Type
             property_type = request.POST.get('property_type')
             if property_type:
                 request.session['search_property_type'] = property_type
-                return redirect('step_search') + '?step=3'
+                return redirect(f'{reverse("step_search")}?step=3')
         elif step == '3':
             # Step 3: Max Price (optional)
             max_price = request.POST.get('max_price')
@@ -211,11 +212,11 @@ def step_search_view(request):
             property_type = request.session.get('search_property_type', '')
 
             # Build search URL
-            search_url = reverse('search_results') + f"?location={location}"
+            search_url = reverse('search_results') + f'?location={location}'
             if property_type:
-                search_url += f"&property_type={property_type}"
+                search_url += f'&property_type={property_type}'
             if max_price:
-                search_url += f"&max_price={max_price}"
+                search_url += f'&max_price={max_price}'
 
             # Clear session
             request.session.pop('search_location', None)

@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">{{ title }}</h2>
@@ -11,6 +13,8 @@
           <div class="card card-custom h-100">
             {% if property.main_image %}
               <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+            {% else %}
+              <img src="{% static 'images/default-property.jpg' %}" alt="Default property image" class="card-img-top">
             {% endif %}
             <div class="card-body">
               <h5 class="card-title text-truncate">{{ property.title }}</h5>
@@ -44,11 +48,13 @@
             <div class="card card-custom">
               {% if property.main_image %}
                 <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+              {% else %}
+                <img src="{% static 'images/default-property.jpg' %}" alt="Default property image" class="card-img-top">
               {% endif %}
               <div class="card-body">
                 <h5 class="card-title text-truncate">{{ property.title }}</h5>
                 <p class="card-text text-muted">
-                  {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                  {{ property.street_address | title}}, {{ property.suburb | title }}, {{ property.city|title }}
                 </p>
                 <p class="price-text">
                   {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
@@ -57,9 +63,19 @@
             </div>
           </a>
         </div>
+      {% empty %}
+        <div class="carousel-item">
+          <div class="text-center py-3">
+            <i class="bi bi-house fs-1 text-muted mb-2"></i>
+            <h5 class="text-muted">No listings found.</h5>
+            <p class="text-muted">Check back later for new properties.</p>
+          </div>
+        </div>
       {% endfor %}
     </div>
-    <div class="carousel-nav" id="recent-nav"></div>
+    {% if properties %}
+      <div class="carousel-nav" id="recent-nav"></div>
+    {% endif %}
   </div>
 </div>
 
@@ -75,6 +91,7 @@
     display: grid;
     gap: 1.5rem;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-bottom: 2rem;
   }
 
   .property-card {
@@ -84,11 +101,21 @@
 
   .property-card:hover {
     transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .property-card .card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: 100%;
   }
 
   .property-card .card-img-top {
-    height: clamp(160px, 25vw, 200px);
+    height: 200px;
     object-fit: cover;
+    width: 100%;
   }
 
   .price-text {
@@ -98,96 +125,51 @@
     margin: 0;
   }
 
-  /* Mobile Carousel - 1 card per row */
+  /* Mobile Carousel - Improved for better mobile display */
   .carousel-container {
     display: none;
+    width: 100%;
     overflow-x: auto;
-    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: 0;
+    padding-bottom: 1rem;
   }
+
   .carousel-container::-webkit-scrollbar {
     display: none;
   }
+
   .carousel-track {
     display: flex;
-    gap: 0;
-    padding: 0;
-    min-width: max-content;
+    gap: 1rem;
+    padding: 0 1rem;
   }
+
   .carousel-item {
-    flex: 0 0 100%;
-    min-width: 100%;
-    max-width: 100%;
+    flex: 0 0 calc(100% - 2rem);
+    scroll-snap-align: start;
+    min-width: calc(100% - 2rem);
   }
+
   .carousel-item .card {
     height: 100%;
     border: none;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
   }
+
   .carousel-item .card-img-top {
-    height: 180px;
+    height: 200px;
     object-fit: cover;
-  }
-  .carousel-item .card-body {
-    padding: 1rem;
-  }
-  .carousel-item .card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
-    color: var(--text-dark);
-  }
-  .carousel-item .card-text {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
-  }
-  .carousel-item .price-text {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin: 0;
-  }
-  @media (max-width: 768px) {
-    .property-grid {
-      display: none;
-    }
-    .carousel-container {
-      display: block !important;
-    }
-    .carousel-nav {
-      display: flex;
-    }
-  }
-  @media (max-width: 576px) {
-    .carousel-item .card-img-top {
-      height: 140px;
-    }
-    .carousel-item .card-body {
-      padding: 0.75rem;
-    }
-    .carousel-item .card-title {
-      font-size: 1rem;
-    }
-    .carousel-item .card-text {
-      font-size: 0.8rem;
-    }
-    .carousel-item .price-text {
-      font-size: 1rem;
-    }
+    width: 100%;
   }
 
   /* Carousel Navigation */
   .carousel-nav {
-    display: none;
+    display: flex;
     justify-content: center;
     gap: 0.5rem;
     margin-top: 1rem;
@@ -207,36 +189,34 @@
     transform: scale(1.2);
   }
 
-  /* Responsive breakpoints */
-  @media (max-width: 360px) {
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .property-grid {
+      display: none;
+    }
+
+    .carousel-container {
+      display: block !important;
+    }
+
     .carousel-item {
-      flex: 0 0 calc(33.333% - 0.4rem);
-      min-width: 90px;
-      max-width: 110px;
+      flex: 0 0 calc(100% - 2rem);
+    }
+  }
+
+  @media (max-width: 576px) {
+    .carousel-item .card-img-top {
+      height: 180px;
+    }
+
+    .carousel-item {
+      flex: 0 0 calc(100% - 1rem);
+      min-width: calc(100% - 1rem);
     }
 
     .carousel-track {
-      gap: 0.4rem;
-    }
-
-    .carousel-item .card-img-top {
-      height: 70px;
-    }
-
-    .carousel-item .card-body {
-      padding: 0.4rem;
-    }
-
-    .carousel-item .card-title {
-      font-size: 0.75rem;
-    }
-
-    .carousel-item .card-text {
-      font-size: 0.6rem;
-    }
-
-    .carousel-item .price-text {
-      font-size: 0.75rem;
+      gap: 0.5rem;
+      padding: 0 0.5rem;
     }
   }
 
@@ -249,45 +229,84 @@
 </style>
 
 <script>
-  // Carousel functionality for 1 card per view
-  function initCarousel(carouselId, navId) {
-    const carousel = document.getElementById(carouselId);
-    const nav = document.getElementById(navId);
-    const track = carousel.querySelector('.carousel-track');
-    const items = track.querySelectorAll('.carousel-item');
-    if (items.length === 0) return;
-    // Always 1 item per view for mobile
-    const itemsPerView = 1;
-    const numDots = Math.ceil(items.length / itemsPerView);
-    nav.innerHTML = '';
-    for (let i = 0; i < numDots; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'carousel-dot';
-      if (i === 0) dot.classList.add('active');
-      dot.addEventListener('click', () => {
-        const itemWidth = items[0].offsetWidth;
-        const scrollPosition = i * itemWidth;
-        track.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-        nav.querySelectorAll('.carousel-dot').forEach(d => d.classList.remove('active'));
-        dot.classList.add('active');
+  // Improved Carousel functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    function initCarousel(carouselId, navId) {
+      const carousel = document.getElementById(carouselId);
+      const nav = document.getElementById(navId);
+      if (!carousel || !nav) return;
+
+      const track = carousel.querySelector('.carousel-track');
+      const items = track.querySelectorAll('.carousel-item');
+      if (items.length === 0) return;
+
+      // Create dots based on number of items
+      nav.innerHTML = '';
+      items.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot';
+        if (index === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => {
+          scrollToItem(index);
+        });
+        nav.appendChild(dot);
       });
-      nav.appendChild(dot);
+
+      function scrollToItem(index) {
+        const item = items[index];
+        if (!item) return;
+
+        const containerWidth = carousel.offsetWidth;
+        const itemLeft = item.offsetLeft;
+        const itemWidth = item.offsetWidth;
+        const scrollPosition = itemLeft - (containerWidth - itemWidth) / 2;
+
+        track.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
+
+        // Update active dot
+        nav.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+      }
+
+      // Handle scroll events to update active dot
+      let isScrolling;
+      track.addEventListener('scroll', () => {
+        clearTimeout(isScrolling);
+        isScrolling = setTimeout(() => {
+          const scrollPosition = track.scrollLeft + track.offsetWidth / 2;
+          let activeIndex = 0;
+          let minDistance = Infinity;
+
+          items.forEach((item, index) => {
+            const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+            const distance = Math.abs(scrollPosition - itemCenter);
+            if (distance < minDistance) {
+              minDistance = distance;
+              activeIndex = index;
+            }
+          });
+
+          nav.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+            dot.classList.toggle('active', index === activeIndex);
+          });
+        }, 100);
+      });
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        const activeDot = nav.querySelector('.carousel-dot.active');
+        if (activeDot) {
+          const activeIndex = Array.from(nav.children).indexOf(activeDot);
+          scrollToItem(activeIndex);
+        }
+      });
     }
-    track.addEventListener('scroll', () => {
-      const scrollLeft = track.scrollLeft;
-      const itemWidth = items[0].offsetWidth;
-      const activeIndex = Math.round(scrollLeft / itemWidth);
-      nav.querySelectorAll('.carousel-dot').forEach((dot, index) => {
-        dot.classList.toggle('active', index === activeIndex);
-      });
-    });
-    window.addEventListener('resize', () => {
-      setTimeout(() => {
-        initCarousel(carouselId, navId);
-      }, 100);
-    });
-  }
-  document.addEventListener('DOMContentLoaded', () => {
+
+    // Initialize the carousel
     initCarousel('recent-carousel', 'recent-nav');
   });
 </script>

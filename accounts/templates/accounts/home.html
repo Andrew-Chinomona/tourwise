@@ -468,6 +468,83 @@
         display: block !important;
       }
     }
+
+    /* Pill-style search bar for desktop/tablet */
+    .search-bar-wrapper {
+      width: 100%;
+      justify-content: center;
+      margin-top: -2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      z-index: 10;
+    }
+    .pill-search-bar {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 50px;
+      box-shadow: 0 4px 24px rgba(193, 90, 46, 0.08);
+      padding: 0.5rem 1.5rem;
+      gap: 0.5rem;
+      min-width: 350px;
+      max-width: 700px;
+      width: 100%;
+    }
+    .pill-input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 30px;
+      flex: 2 1 0%;
+      color: var(--text-dark);
+    }
+    .pill-input-short {
+      max-width: 120px;
+      flex: 1 1 0%;
+    }
+    .pill-select {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 30px;
+      color: var(--text-dark);
+      flex: 1 1 0%;
+      min-width: 120px;
+    }
+    .pill-search-btn {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pill-search-btn:hover {
+      background: #a84b24;
+      color: #fff;
+    }
+    @media (max-width: 768px) {
+      .search-bar-wrapper {
+        display: none !important;
+      }
+    }
+    @media (min-width: 769px) {
+      .search-bar-wrapper {
+        display: flex !important;
+      }
+      .search-pill {
+        display: none !important;
+      }
+    }
   </style>
 {% endblock %}
 
@@ -479,19 +556,42 @@
       <p class="hero-subtitle">Trustworthy, hassle-free property search and listing experience</p>
 
       <div class="hero-buttons">
-        <a href="{% url 'step_search' %}" class="search-pill">
+        <!-- Mobile: Keep step search button -->
+        <a href="{% url 'step_search' %}" class="search-pill d-md-none">
           <i class="bi bi-search"></i>
           Start Search
         </a>
-        <a href="{% url 'become_host' %}" class="btn-hero btn-hero-outline">
-          Become a Host
+        <!-- Desktop/Tablet: Discover button -->
+        <button type="button" class="btn-hero btn-hero-primary d-none d-md-inline-block" id="discover-btn">
+          Discover
+        </button>
+        <!-- Start Chat button (all devices) -->
+        <a href="#" class="btn-hero btn-hero-outline ms-0 ms-md-2">
+          Start Chat
         </a>
       </div>
     </div>
   </section>
 
+  <!-- Desktop/Tablet: Pill-style search bar -->
+  <div class="search-bar-wrapper d-none d-md-flex">
+    <form action="{% url 'search_results' %}" method="get" class="pill-search-bar mx-auto">
+      <input type="text" name="location" class="pill-input" placeholder="Search by city or suburb...">
+      <select name="property_type" class="pill-select">
+        <option value="">Type</option>
+        <option value="house">House</option>
+        <option value="apartment">Apartment</option>
+        <option value="airbnb">Airbnb</option>
+        <option value="room">Room</option>
+        <option value="guesthouse">Guesthouse</option>
+      </select>
+      <input type="number" name="max_price" class="pill-input pill-input-short" placeholder="Max Price">
+      <button type="submit" class="pill-search-btn"><i class="bi bi-search"></i> Search</button>
+    </form>
+  </div>
+
   <!-- Listings Section -->
-  <div class="listings-section">
+  <div class="listings-section" id="recent-listings-section">
     <div class="container">
       <!-- Recent Listings -->
       <h3 class="section-title">Recent Listings</h3>
@@ -622,6 +722,19 @@
   </div>
 
   <script>
+    // Smooth scroll for Discover button
+    document.addEventListener('DOMContentLoaded', function() {
+      var discoverBtn = document.getElementById('discover-btn');
+      if (discoverBtn) {
+        discoverBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var target = document.getElementById('recent-listings-section');
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+    });
     // Carousel functionality for 1 card per view
     function initCarousel(carouselId, navId) {
       const carousel = document.getElementById(carouselId);
