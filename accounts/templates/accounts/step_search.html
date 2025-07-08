@@ -147,36 +147,6 @@
       color: white;
     }
 
-    .location-suggestions {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border: 2px solid var(--primary-color);
-      border-top: none;
-      border-radius: 0 0 12px 12px;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 1000;
-      display: none;
-    }
-
-    .suggestion-item {
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background 0.2s ease;
-    }
-
-    .suggestion-item:hover {
-      background: var(--light-bg);
-    }
-
-    .suggestion-item:last-child {
-      border-bottom: none;
-    }
-
     .input-wrapper {
       position: relative;
     }
@@ -185,6 +155,34 @@
       font-size: 0.875rem;
       color: var(--text-muted);
       margin-top: 0.5rem;
+    }
+
+    /* Google Places Autocomplete Styling */
+    .pac-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border: 2px solid var(--primary-color);
+      margin-top: 4px;
+    }
+
+    .pac-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .pac-item:hover {
+      background: var(--light-bg);
+    }
+
+    .pac-item:last-child {
+      border-bottom: none;
+    }
+
+    .pac-item-query {
+      font-weight: 600;
     }
 
     @media (max-width: 576px) {
@@ -224,15 +222,14 @@
           <div class="form-group">
             <label for="location" class="form-label">Location</label>
             <div class="input-wrapper">
-              <input type="text" 
-                     id="location" 
-                     name="location" 
-                     class="form-control" 
+              <input type="text"
+                     id="location"
+                     name="location"
+                     class="form-control"
                      placeholder="e.g., Harare, Avondale, Bulawayo"
                      value="{{ saved_location }}"
                      autocomplete="off"
                      required>
-              <div id="location-suggestions" class="location-suggestions"></div>
             </div>
           </div>
 
@@ -278,10 +275,10 @@
           {% csrf_token %}
           <div class="form-group">
             <label for="max_price" class="form-label">Maximum Price</label>
-            <input type="number" 
-                   id="max_price" 
-                   name="max_price" 
-                   class="form-control" 
+            <input type="number"
+                   id="max_price"
+                   name="max_price"
+                   class="form-control"
                    placeholder="e.g., 500"
                    min="0">
             <p class="optional-text">Leave blank to see all properties regardless of price</p>
@@ -299,46 +296,27 @@
     </div>
   </div>
 
+  <!-- Google Places API Script -->
+  <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places"></script>
   <script>
-    // Location suggestions functionality
-    const locationInput = document.getElementById('location');
-    const suggestionsBox = document.getElementById('location-suggestions');
+    function initAutocomplete() {
+      const locationInput = document.getElementById('location');
+      if (locationInput) {
+        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+          types: ['(cities)'],
+          componentRestrictions: { country: 'ZW' } // Restrict to Zimbabwe
+        });
 
-    if (locationInput && suggestionsBox) {
-      locationInput.addEventListener('input', function () {
-        const query = locationInput.value.trim();
-        suggestionsBox.innerHTML = '';
-        suggestionsBox.style.display = 'none';
-
-        if (query.length < 2) return;
-
-        fetch(`/listings/location-suggestions/?q=${encodeURIComponent(query)}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.length > 0) {
-              suggestionsBox.style.display = 'block';
-              data.forEach(location => {
-                const item = document.createElement('div');
-                item.classList.add('suggestion-item');
-                item.textContent = location;
-                item.addEventListener('click', () => {
-                  locationInput.value = location;
-                  suggestionsBox.style.display = 'none';
-                });
-                suggestionsBox.appendChild(item);
-              });
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching locations:', error);
-          });
-      });
-
-      locationInput.addEventListener('blur', () => {
-        setTimeout(() => {
-          suggestionsBox.style.display = 'none';
-        }, 150);
-      });
+        autocomplete.addListener('place_changed', function() {
+          const place = autocomplete.getPlace();
+          if (place.formatted_address) {
+            locationInput.value = place.formatted_address;
+          }
+        });
+      }
     }
+
+    // Initialize autocomplete when DOM is ready
+    document.addEventListener('DOMContentLoaded', initAutocomplete);
   </script>
-{% endblock %} 
+{% endblock %}

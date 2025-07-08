@@ -95,7 +95,7 @@ def add_property_step3(request):
     return render(request, 'listings/add_property_step3.html', {
         'form': form,
         'property': property_obj,
-        'OPEN_CAGE_API_KEY': settings.OPENCAGE_API_KEY
+        'GOOGLE_API_KEY': settings.GOOGLE_API_KEY
     })
 
 
@@ -355,17 +355,19 @@ def location_suggestions(request):
         return JsonResponse([], safe=False)
 
     matches = Property.objects.filter(
-        Q(city__icontains=query) | Q(suburb__icontains=query),
-        is_paid=True  # Only suggest from paid listings
-    ).values_list('city', 'suburb')
+        (Q(city__icontains=query) | Q(suburb__icontains=query) | Q(street_address__icontains=query)),
+        is_paid=True
+    ).values_list('city', 'suburb', 'street_address')
 
     # Use a set to avoid duplicate strings
     suggestions = set()
-    for city, suburb in matches:
-        if query.lower() in city.lower():
+    for city, suburb, street in matches:
+        if city and query.lower() in city.lower():
             suggestions.add(city.strip())
         if suburb and query.lower() in suburb.lower():
             suggestions.add(suburb.strip())
+        if street and query.lower() in street.lower():
+            suggestions.add(street.strip())
 
     return JsonResponse(sorted(suggestions), safe=False)
 

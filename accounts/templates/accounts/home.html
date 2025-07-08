@@ -875,8 +875,10 @@
 
   <!-- Desktop/Tablet: Pill-style search bar -->
   <div class="search-bar-wrapper d-none d-md-flex">
-    <form action="{% url 'search_results' %}" method="get" class="pill-search-bar mx-auto">
-      <input type="text" name="location" class="pill-input" placeholder="Search by city or suburb...">
+    <form action="{% url 'search_results' %}" method="get" class="pill-search-bar mx-auto position-relative" autocomplete="off">
+      <gmpx-place-autocomplete>
+        <input type="text" name="location" id="desktop-location-input" class="pill-input" placeholder="Search by city, suburb, or street..." autocomplete="off">
+      </gmpx-place-autocomplete>
       <select name="property_type" class="pill-select">
         <option value="">Type</option>
         <option value="house">House</option>
@@ -1026,4 +1028,21 @@
       }
     });
   </script>
+{% endblock %}
+
+{% block extra_js %}
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places"></script>
+<script async defer src="https://unpkg.com/@googlemaps/places-autocomplete-element@^0.3"></script>
+<script>
+  // Optionally, you can listen for the place change event and set the input value for form submission
+  const autocompleteEl = document.querySelector('gmpx-place-autocomplete');
+  if (autocompleteEl) {
+    autocompleteEl.addEventListener('gmpx-placeautocomplete-placechange', (event) => {
+      const input = autocompleteEl.querySelector('input');
+      if (event.detail && event.detail.place && event.detail.place.formatted_address) {
+        input.value = event.detail.place.formatted_address;
+      }
+    });
+  }
+</script>
 {% endblock %}

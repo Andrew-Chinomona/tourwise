@@ -8,6 +8,7 @@ from datetime import timedelta
 from django.db.models import Value, CharField, Q
 from django.db.models.functions import Concat
 from django.urls import reverse
+from django.conf import settings
 
 
 def signup_view(request):
@@ -82,7 +83,8 @@ def home_view(request):
     context = {
         'recent_listings': recent_listings,
         'featured_listings': featured_listings,
-        'locations': locations
+        'locations': locations,
+        'GOOGLE_API_KEY': settings.GOOGLE_API_KEY,
     }
 
     return render(request, 'accounts/home.html', context)
@@ -232,6 +234,7 @@ def step_search_view(request):
         'step': step,
         'saved_location': saved_location,
         'saved_property_type': saved_property_type,
+        'GOOGLE_API_KEY': settings.GOOGLE_API_KEY,
     }
 
     return render(request, 'accounts/step_search.html', context)
