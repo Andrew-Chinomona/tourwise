@@ -876,9 +876,8 @@
   <!-- Desktop/Tablet: Pill-style search bar -->
   <div class="search-bar-wrapper d-none d-md-flex">
     <form action="{% url 'search_results' %}" method="get" class="pill-search-bar mx-auto position-relative" autocomplete="off">
-      <gmpx-place-autocomplete>
-        <input type="text" name="location" id="desktop-location-input" class="pill-input" placeholder="Search by city, suburb, or street..." autocomplete="off">
-      </gmpx-place-autocomplete>
+      <input type="text" name="location" id="desktop-location-input" class="pill-input" placeholder="Search by city, suburb, or street..." autocomplete="off">
+      <div id="desktop-location-suggestions" class="location-suggestions"></div>
       <select name="property_type" class="pill-select">
         <option value="">Type</option>
         <option value="house">House</option>
@@ -1031,18 +1030,149 @@
 {% endblock %}
 
 {% block extra_js %}
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places"></script>
-<script async defer src="https://unpkg.com/@googlemaps/places-autocomplete-element@^0.3"></script>
+<script defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places"></script>
 <script>
-  // Optionally, you can listen for the place change event and set the input value for form submission
-  const autocompleteEl = document.querySelector('gmpx-place-autocomplete');
-  if (autocompleteEl) {
-    autocompleteEl.addEventListener('gmpx-placeautocomplete-placechange', (event) => {
-      const input = autocompleteEl.querySelector('input');
-      if (event.detail && event.detail.place && event.detail.place.formatted_address) {
-        input.value = event.detail.place.formatted_address;
+(function() {
+  if (window.matchMedia('(min-width: 768px)').matches) {
+    let autocompleteService, placesService, mapForPlaces;
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('desktop-location-input');
+      const suggestionsBox = document.getElementById('desktop-location-suggestions');
+      let predictions = [];
+      let selectedIndex = -1;
+
+      // Create a dummy map for PlacesService
+      mapForPlaces = new google.maps.Map(document.createElement('div'));
+      autocompleteService = new google.maps.places.AutocompleteService();
+      placesService = new google.maps.places.PlacesService(mapForPlaces);
+
+      function highlightMatch(text, query) {
+        const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+        return text.replace(re, '<span class="highlight">$1</span>');
       }
+
+      input.addEventListener('input', function() {
+        const query = input.value.trim();
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.style.display = 'none';
+        predictions = [];
+        selectedIndex = -1;
+        if (query.length < 2) return;
+        autocompleteService.getPlacePredictions({
+          input: query,
+          types: ['(regions)'],
+          componentRestrictions: { country: 'ZW' }
+        }, function(preds, status) {
+          if (status === google.maps.places.PlacesServiceStatus.OK && preds && preds.length) {
+            predictions = preds;
+            suggestionsBox.style.display = 'block';
+            suggestionsBox.innerHTML = '';
+            predictions.forEach((pred, idx) => {
+              const item = document.createElement('div');
+              item.classList.add('suggestion-item');
+              item.innerHTML = highlightMatch(pred.description, query);
+              item.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                selectPrediction(idx);
+              });
+              suggestionsBox.appendChild(item);
+            });
+          } else {
+            suggestionsBox.style.display = 'none';
+          }
+        });
+      });
+
+      input.addEventListener('keydown', function(e) {
+        if (!predictions.length) return;
+        if (e.key === 'ArrowDown') {
+          selectedIndex = (selectedIndex + 1) % predictions.length;
+          updateSelection();
+          e.preventDefault();
+        } else if (e.key === 'ArrowUp') {
+          selectedIndex = (selectedIndex - 1 + predictions.length) % predictions.length;
+          updateSelection();
+          e.preventDefault();
+        } else if (e.key === 'Enter') {
+          if (selectedIndex >= 0 && selectedIndex < predictions.length) {
+            selectPrediction(selectedIndex);
+            e.preventDefault();
+          }
+        }
+      });
+
+      function updateSelection() {
+        const items = suggestionsBox.querySelectorAll('.suggestion-item');
+        items.forEach((item, idx) => {
+          if (idx === selectedIndex) {
+            item.classList.add('active');
+            item.scrollIntoView({ block: 'nearest' });
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+
+      function selectPrediction(idx) {
+        const pred = predictions[idx];
+        if (!pred) return;
+        input.value = pred.description;
+        suggestionsBox.style.display = 'none';
+        // Get place details
+        placesService.getDetails({ placeId: pred.place_id, fields: ['address_components', 'geometry', 'name'] }, function(place, status) {
+          if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+            // You can extract suburb, city, coordinates here if needed
+            // let suburb = '', city = '', lat = '', lng = '';
+            // ...
+          }
+        });
+      }
+
+      document.addEventListener('click', function(e) {
+        if (!suggestionsBox.contains(e.target) && e.target !== input) {
+          suggestionsBox.style.display = 'none';
+        }
+      });
     });
   }
+})();
 </script>
+<style>
+@media (min-width: 768px) {
+  .location-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e4d3b2;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  }
+  .suggestion-item {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+    font-size: 1.1rem;
+  }
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:hover, .suggestion-item.active {
+    background: #f9f5ef;
+    color: #c15a2e;
+  }
+  .highlight {
+    background: #ffe5d0;
+    color: #c15a2e;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+}
+</style>
 {% endblock %}
