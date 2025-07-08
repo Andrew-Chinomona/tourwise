@@ -461,6 +461,9 @@
     @media (min-width: 769px) {
       #mobile-dropdown-menu { display: none !important; }
     }
+    @media (min-width: 769px) {
+      #mobile-dropdown-btn { display: none !important; }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -487,9 +490,9 @@
         </button>
       {% endif %}
       <!-- Hide Bootstrap toggler and collapse on mobile -->
-      <button class="navbar-toggler d-none d-md-block d-lg-block" type="button" id="mobile-menu-btn" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+{#      <button class="navbar-toggler d-none d-md-block d-lg-block" type="button" id="mobile-menu-btn" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">#}
+{#        <span class="navbar-toggler-icon"></span>#}
+{#      </button>#}
       <div class="collapse navbar-collapse d-none d-md-block d-lg-block" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center">
           {% if not user.is_authenticated or user.user_type != 'host' %}
