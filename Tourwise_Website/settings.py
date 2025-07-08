@@ -11,19 +11,23 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%3$^sknytyjgqsmrjjxa@ml@zdpcm^8#546p!dz9&^@h4d-ln('
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['0f63f11be79f.ngrok-free.app', 'localhost', '127.0.0.1']
 
@@ -34,9 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
 ]
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -67,8 +69,7 @@ ROOT_URLCONF = 'Tourwise_Website.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,30 +83,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Tourwise_Website.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'tourwise_db',        # The DB you just created
-        'USER': 'postgres',           # Default superuser
-        'PASSWORD': 'drew@postgresql2025',  # The password you used during install
-        'HOST': 'localhost',
-        'PORT': '5433',
+        'NAME': os.getenv('DB_NAME', 'tourwise_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5433'),
     }
 }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -121,28 +113,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-import os
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# Add these settings after MEDIA_ROOT
 
 # Maximum size for uploaded files (10MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB in bytes
@@ -150,34 +134,29 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB in bytes
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.EmailOrPhoneBackend',  # 👈 custom
+    'accounts.backends.EmailOrPhoneBackend',  # custom
     'django.contrib.auth.backends.ModelBackend',  # fallback
 ]
 
-from dotenv import load_dotenv
-load_dotenv()
-
-# Remove OPENCAGE_API_KEY and add Google API key
-GOOGLE_API_KEY = 'AIzaSyCxP09PWA8jD_rcnr6J9I46qvBAUDm8FHA'
-
+# API Keys
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Paynow Settings
-PAYNOW_INTEGRATION_ID = '21331'
-PAYNOW_INTEGRATION_KEY = '7cfce23b-0e43-4329-bc28-883ac466ab05'
-PAYNOW_RETURN_URL = 'http://127.0.0.1/payments/complete/'
-PAYNOW_RESULT_URL = 'http://127.0.0.1/payments/update/'
-PAYNOW_MODE = 'test'  # Change to 'live' for production
+PAYNOW_INTEGRATION_ID = os.getenv('PAYNOW_INTEGRATION_ID', '21331')
+PAYNOW_INTEGRATION_KEY = os.getenv('PAYNOW_INTEGRATION_KEY')
+PAYNOW_RETURN_URL = os.getenv('PAYNOW_RETURN_URL', 'http://127.0.0.1/payments/complete/')
+PAYNOW_RESULT_URL = os.getenv('PAYNOW_RESULT_URL', 'http://127.0.0.1/payments/update/')
+PAYNOW_MODE = os.getenv('PAYNOW_MODE', 'test')
 
 # Development-specific settings
 if DEBUG:
     # Use localhost URLs for development
-    PAYNOW_RETURN_URL = 'http://localhost:8000/payments/complete/'
-    PAYNOW_RESULT_URL = 'http://localhost:8000/payments/update/'
+    PAYNOW_RETURN_URL = os.getenv('DEV_PAYNOW_RETURN_URL', 'http://localhost:8000/payments/complete/')
+    PAYNOW_RESULT_URL = os.getenv('DEV_PAYNOW_RESULT_URL', 'http://localhost:8000/payments/update/')
 
     # Enable detailed logging for Paynow
     LOGGING = {
@@ -195,3 +174,15 @@ if DEBUG:
             },
         },
     }
+
+    # Validation for required environment variables
+    REQUIRED_ENV_VARS = [
+        'GOOGLE_API_KEY',
+        'SECRET_KEY',
+        'DB_PASSWORD',
+        'PAYNOW_INTEGRATION_KEY',
+    ]
+
+    missing_vars = [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]
+    if missing_vars:
+        raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
