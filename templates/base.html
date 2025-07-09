@@ -475,6 +475,23 @@
         padding-top: 40px !important;
       }
     }
+    .mobile-user-dropdown-menu {
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 140px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(44,44,44,0.13);
+      padding: 0.5rem 0.2rem;
+      position: absolute;
+      top: 48px;
+      right: 0;
+      z-index: 2000;
+    }
+    @media (min-width: 769px) {
+      .mobile-user-dropdown-menu { display: none !important; }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -489,11 +506,30 @@
   </div>
   <!-- Navigation Bar -->
   <nav class="navbar navbar-expand-lg navbar-custom">
-    <div class="container-fluid">
+    <div class="container-fluid position-relative">
       <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
         <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="me-2">
         <span class="fw-bold">Tourwise</span>
       </a>
+      <!-- MOBILE HEADER LOGIC -->
+      <div class="d-flex align-items-center ms-auto d-lg-none d-md-none" style="position: absolute; right: 1rem; top: 0.5rem;">
+        {% if user.is_authenticated and user.user_type == 'host' %}
+          <div id="mobile-user-menu-trigger" style="cursor:pointer;">
+            {% if user.profile_photo %}
+              <img src="{{ user.profile_photo.url }}" class="rounded-circle" alt="Profile Photo" style="width:36px;height:36px;object-fit:cover;">
+            {% else %}
+              <img src="{% static 'images/user.png' %}" class="rounded-circle" alt="Default User" style="width:36px;height:36px;object-fit:cover;">
+            {% endif %}
+          </div>
+          <div id="mobile-user-dropdown" class="mobile-user-dropdown-menu" style="display:none;position:absolute;top:48px;right:0;z-index:2000;background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(44,44,44,0.13);min-width:140px;">
+            <a href="{% url 'host_dashboard' %}" class="dropdown-link">Profile</a>
+            <a href="{% url 'logout' %}" class="dropdown-link">Logout</a>
+          </div>
+        {% elif user.is_authenticated and user.user_type == 'tenant' %}
+          <a href="{% url 'become_host' %}" class="btn btn-outline-custom btn-sm">Become a Host</a>
+        {% endif %}
+      </div>
+      <!-- END MOBILE HEADER LOGIC -->
       <!-- Custom Mobile Menu Button (only for logged-out users) -->
       {% if not user.is_authenticated %}
         <button id="mobile-dropdown-btn" class="btn btn-outline-custom d-block d-lg-none d-md-none" type="button">
@@ -673,6 +709,23 @@
       window.addEventListener('resize', function() {
         if (window.innerWidth > 768) menu.classList.remove('show');
       });
+    });
+
+    // Mobile user dropdown toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      var trigger = document.getElementById('mobile-user-menu-trigger');
+      var dropdown = document.getElementById('mobile-user-dropdown');
+      if (trigger && dropdown) {
+        trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', function(e) {
+          if (!dropdown.contains(e.target) && e.target !== trigger) {
+            dropdown.style.display = 'none';
+          }
+        });
+      }
     });
   </script>
 {% block extra_js %}{% endblock %}
