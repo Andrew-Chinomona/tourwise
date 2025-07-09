@@ -77,6 +77,46 @@
       <div class="carousel-nav" id="recent-nav"></div>
     {% endif %}
   </div>
+
+  <!-- Mobile Card List (one per row, with image carousel) -->
+  <div class="mobile-listings">
+    {% for property in properties %}
+      <a href="{% url 'property_detail' property.id %}" class="mobile-card-link">
+        <div class="mobile-property-card">
+          <div class="mobile-card-img-carousel">
+            <div class="mobile-img-scroll" id="gallery-{{ property.id }}">
+              {% if property.main_image %}
+                <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="mobile-card-img">
+              {% endif %}
+              {% for img in property.images.all %}
+                {% if not property.main_image or img.image.url != property.main_image.url %}
+                  <img src="{{ img.image.url }}" alt="{{ property.title }}" class="mobile-card-img">
+                {% endif %}
+              {% empty %}
+                {% if not property.main_image %}
+                  <img src="{% static 'images/default-property.jpg' %}" alt="Default property image" class="mobile-card-img">
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="mobile-card-pagination" id="dots-{{ property.id }}"></div>
+          </div>
+        </div>
+        <div class="mobile-card-details">
+          <div class="mobile-card-title">{{ property.title }}</div>
+          <div class="mobile-card-location">{{ property.suburb|title }}, {{ property.city|title }}</div>
+          <div class="mobile-card-price">
+            {% if property.currency %}<span class="mobile-card-currency">{{ property.currency.symbol }} {{ property.currency.code }}</span>{% endif %} {{ property.price }}
+          </div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="text-center py-5">
+        <i class="bi bi-house fs-1 text-muted mb-3"></i>
+        <h5 class="text-muted">No listings found.</h5>
+        <p class="text-muted">Check back later for new properties.</p>
+      </div>
+    {% endfor %}
+  </div>
 </div>
 
 <style>
@@ -226,6 +266,164 @@
       display: none !important;
     }
   }
+
+  /* Mobile property card list */
+  .mobile-listings {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .property-grid, .carousel-container { display: none !important; }
+    .mobile-listings {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+    }
+    .mobile-card-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    .mobile-card-link:active, .mobile-card-link:focus, .mobile-card-link:hover {
+      box-shadow: 0 4px 16px rgba(193,90,46,0.10);
+      text-decoration: none;
+      color: inherit;
+    }
+    .mobile-property-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      height: 92vw;
+      width: 92vw;
+      max-width: 420px;
+      max-height: 420px;
+      background: #fff8f2;
+      border-radius: 2.2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      border: 1px solid #e4d3b2;
+      overflow: hidden;
+      margin: 0 auto;
+      transition: box-shadow 0.2s;
+    }
+    .mobile-card-img-carousel {
+      width: 92vw;
+      height: 92vw;
+      max-width: 420px;
+      max-height: 420px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: #f9f5ef;
+      border-radius: 2.2rem;
+      position: relative;
+    }
+    .mobile-img-scroll {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+      width: 92vw;
+      height: 92vw;
+      max-width: 420px;
+      max-height: 420px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      border-radius: 2.2rem;
+    }
+    .mobile-img-scroll::-webkit-scrollbar { display: none; }
+    .mobile-card-img {
+      width: 92vw;
+      height: 92vw;
+      max-width: 420px;
+      max-height: 420px;
+      object-fit: cover;
+      border-radius: 2.2rem;
+      background: #eee;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s;
+    }
+    .mobile-card-details {
+      width: 92vw;
+      max-width: 420px;
+      margin: 0 auto 0.5rem auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.97rem;
+      color: var(--text-dark);
+      padding-left: 0.1rem;
+      padding-right: 0.1rem;
+      text-align: center;
+    }
+    .mobile-card-title {
+      font-weight: 600;
+      font-size: 1.08rem;
+      margin-bottom: 0.2rem;
+      color: var(--text-dark);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+    }
+    .mobile-card-location {
+      color: var(--text-muted);
+      font-size: 0.96rem;
+      margin-bottom: 0.2rem;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+    }
+    .mobile-card-price {
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 1.04rem;
+      width: 100%;
+    }
+    .mobile-card-currency {
+      color: #c15a2e;
+      font-size: 0.93em;
+      margin-right: 0.25em;
+    }
+    .mobile-card-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4em;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 12px;
+      margin: 0 auto;
+      width: 100%;
+      min-height: 18px;
+      pointer-events: none;
+      z-index: 3;
+      background: none;
+    }
+    .mobile-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e4d3b2;
+      transition: background 0.2s, transform 0.2s;
+      display: inline-block;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .mobile-dot.active {
+      background: #c15a2e;
+      transform: scale(1.2);
+    }
+  }
 </style>
 
 <script>
@@ -308,6 +506,34 @@
 
     // Initialize the carousel
     initCarousel('recent-carousel', 'recent-nav');
+  });
+
+  // --- Mobile gallery pagination dots ---
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.mobile-img-scroll').forEach(function(scrollEl) {
+      const galleryId = scrollEl.id;
+      if (!galleryId) return;
+      const propertyId = galleryId.replace('gallery-', '');
+      const images = scrollEl.querySelectorAll('.mobile-card-img');
+      const dotsContainer = document.getElementById('dots-' + propertyId);
+      if (!dotsContainer || images.length < 2) return;
+      // Create dots
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < images.length; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'mobile-dot' + (i === 0 ? ' active' : '');
+        dotsContainer.appendChild(dot);
+      }
+      // Update dots on scroll
+      scrollEl.addEventListener('scroll', function() {
+        const scrollLeft = scrollEl.scrollLeft;
+        const imgWidth = images[0].offsetWidth;
+        const idx = Math.round(scrollLeft / imgWidth);
+        dotsContainer.querySelectorAll('.mobile-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === idx);
+        });
+      });
+    });
   });
 </script>
 {% endblock %}
