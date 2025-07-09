@@ -45,20 +45,11 @@ class PropertyStep2Form(forms.Form):
 
 
 class PropertyStep3Form(forms.Form):
-    city = forms.CharField(
-        max_length=100,
-        label="City",
+    city_suburb = forms.CharField(
+        max_length=200,
+        label="City & Suburb",
         widget=forms.TextInput(attrs={
-            'placeholder': 'e.g. Harare',
-            'class': 'form-control'
-        })
-    )
-    suburb = forms.CharField(
-        max_length=100,
-        label="Suburb",
-        required=False,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'e.g. Avondale',
+            'placeholder': 'e.g. Ashdown Park, Harare',
             'class': 'form-control'
         })
     )
@@ -72,6 +63,7 @@ class PropertyStep3Form(forms.Form):
     )
     latitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
     longitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
+    google_maps_url = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
 class PropertyStep4Form(forms.Form):

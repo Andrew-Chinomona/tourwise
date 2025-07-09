@@ -73,23 +73,42 @@ def add_property_step3(request):
     if request.method == 'POST':
         form = PropertyStep3Form(request.POST)
         if form.is_valid():
-            property_obj.city = form.cleaned_data['city']
-            property_obj.suburb = form.cleaned_data['suburb']
+            # Parse city and suburb from combined input
+            city_suburb = form.cleaned_data['city_suburb']
+            city = ''
+            suburb = ''
+            if ',' in city_suburb:
+                parts = [p.strip() for p in city_suburb.split(',')]
+                if len(parts) >= 2:
+                    suburb = parts[0]
+                    city = parts[1]
+                else:
+                    city = parts[0]
+            else:
+                city = city_suburb.strip()
+            property_obj.city = city
+            property_obj.suburb = suburb
             property_obj.street_address = form.cleaned_data['street_address']
             property_obj.latitude = form.cleaned_data.get('latitude')
             property_obj.longitude = form.cleaned_data.get('longitude')
-            # property_obj.save()
+            property_obj.google_maps_url = form.cleaned_data.get('google_maps_url')
             property_obj.generate_title()
             property_obj.current_step = 3
             property_obj.save()
             return redirect('add_property_step4')
     else:
+        # Combine city and suburb for initial value
+        city_suburb = ''
+        if property_obj.suburb and property_obj.city:
+            city_suburb = f"{property_obj.suburb}, {property_obj.city}"
+        elif property_obj.city:
+            city_suburb = property_obj.city
         form = PropertyStep3Form(initial={
-            'city': property_obj.city,
-            'suburb': property_obj.suburb,
+            'city_suburb': city_suburb,
             'street_address': property_obj.street_address,
             'latitude': property_obj.latitude,
             'longitude': property_obj.longitude,
+            'google_maps_url': property_obj.google_maps_url,
         })
 
     return render(request, 'listings/add_property_step3.html', {

@@ -46,6 +46,7 @@ class Property(models.Model):
     city = models.CharField(max_length=100, blank=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+    google_maps_url = models.URLField(blank=True, null=True, help_text="Google Maps link for confirmed location")
 
     #Media
     main_image = models.ImageField(upload_to='property_main_images/', null=True, blank=True)
