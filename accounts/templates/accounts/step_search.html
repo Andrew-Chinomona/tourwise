@@ -378,7 +378,7 @@
         this.input.addEventListener('keydown', this.handleKeydown.bind(this));
         this.input.addEventListener('focus', this.handleFocus.bind(this));
         this.input.addEventListener('blur', this.handleBlur.bind(this));
-        
+
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
           if (!this.input.contains(e.target) && !this.suggestions.contains(e.target)) {
@@ -389,7 +389,7 @@
 
       handleInput(e) {
         const query = e.target.value.trim();
-        
+
         // Clear previous timer
         if (this.debounceTimer) {
           clearTimeout(this.debounceTimer);
@@ -543,11 +543,11 @@
         }, (place, status) => {
           if (status === google.maps.places.PlacesServiceStatus.OK) {
             this.selectedPlace = place;
-            
+
             // Extract suburb and city from address components
             let suburb = '';
             let city = '';
-            
+
             if (place.address_components) {
               place.address_components.forEach(component => {
                 const types = component.types;
@@ -563,13 +563,13 @@
 
             // Use the formatted address or construct from components
             let displayValue = place.formatted_address || prediction.description;
-            
+
             // Store additional data in hidden fields or data attributes if needed
             this.input.value = displayValue;
             this.input.dataset.placeId = prediction.place_id;
             this.input.dataset.suburb = suburb;
             this.input.dataset.city = city;
-            
+
             if (place.geometry && place.geometry.location) {
               this.input.dataset.lat = place.geometry.location.lat();
               this.input.dataset.lng = place.geometry.location.lng();
@@ -591,7 +591,7 @@
       hideSuggestions() {
         this.suggestions.classList.remove('show');
         this.selectedIndex = -1;
-        
+
         // Remove active states
         const suggestions = this.suggestions.querySelectorAll('.suggestion-item');
         suggestions.forEach(item => item.classList.remove('active'));
@@ -602,7 +602,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       const locationInput = document.getElementById('location');
       const suggestionsContainer = document.getElementById('location-suggestions');
-      
+
       if (locationInput && suggestionsContainer && typeof google !== 'undefined') {
         new ZimbabweLocationAutocomplete(locationInput, suggestionsContainer);
       }

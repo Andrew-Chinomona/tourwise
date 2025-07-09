@@ -1060,7 +1060,7 @@
         if (query.length < 2) return;
         autocompleteService.getPlacePredictions({
           input: query,
-          types: ['(regions)'],
+          types: ['geocode'],
           componentRestrictions: { country: 'ZW' }
         }, function(preds, status) {
           if (status === google.maps.places.PlacesServiceStatus.OK && preds && preds.length) {
