@@ -26,7 +26,7 @@
 
     <!-- Right Container: Profile Picture -->
     <div class="col-lg-6 col-md-12 ps-lg-2">
-      <div class="card shadow h-100" style="border-radius: 1rem; background-color: white; border-color: #e4d3b2;">
+      <div class="card shadow h-100 profile-photo-card" style="border-radius: 1rem; background-color: white; border-color: #e4d3b2;">
         <div class="card-body d-flex flex-column h-100">
           <div class="row flex-grow-1 align-items-center">
             <!-- Image Display (Left) -->
@@ -41,17 +41,27 @@
                 <div class="text-muted small text-center" style="color: #7a6a5a;">No profile photo</div>
               {% endif %}
             </div>
-
-            <!-- Upload Form (Right) -->
+            <!-- Upload & Delete Buttons (Right) -->
             <div class="col-md-7 col-12">
               <h5 class="card-title mb-3 text-center" style="color: #2f2f2f; font-size: clamp(1rem, 2.5vw, 1.1rem);">Profile Picture</h5>
-              <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-2">
-                  <input type="file" name="profile_photo" class="form-control form-control-sm" style="border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);">
-                </div>
-                <button type="submit" class="btn btn-sm w-100 rounded-3" style="background-color: #c15a2e; color: white; font-size: clamp(0.875rem, 2vw, 1rem);">Upload</button>
-              </form>
+              <div class="d-flex flex-column align-items-center justify-content-center gap-2 profile-actions-vertical">
+                <form method="post" enctype="multipart/form-data" class="mb-0 w-100">
+                  {% csrf_token %}
+                  <div class="mb-2">
+                    <input type="file" name="profile_photo" class="form-control form-control-sm" style="border-color: #e4d3b2; font-size: clamp(0.875rem, 2vw, 1rem);">
+                  </div>
+                  <button type="submit" class="btn btn-sm rounded-pill w-100 profile-upload-btn" style="background-color: #c15a2e; color: white; font-size: clamp(0.875rem, 2vw, 1rem);">Upload</button>
+                </form>
+                {% if user.profile_photo %}
+                <form method="post" action="{% url 'delete_profile_photo' %}" class="mb-0 w-100">
+                  {% csrf_token %}
+                  <button type="button" class="btn btn-outline-danger btn-sm rounded-pill w-100 profile-delete-btn" title="Delete Profile Picture" style="margin-top: 0.5rem;">
+{#                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="vertical-align: middle; margin-right: 0.5em;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>#}
+                    Delete Profile Picture
+                  </button>
+                </form>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
@@ -222,5 +232,115 @@
       margin-bottom: 1.5rem;
     }
   }
+
+  /* Mobile profile actions row */
+  @media (max-width: 768px) {
+    .mobile-profile-actions {
+      flex-direction: row !important;
+      gap: 0.75rem !important;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .mobile-delete-btn {
+      min-width: 38px;
+      min-height: 38px;
+      font-size: 1.1rem;
+      border-radius: 50%;
+      border: 2px solid #dc3545;
+      color: #dc3545;
+      background: #fff;
+      transition: background 0.2s, color 0.2s;
+    }
+    .mobile-delete-btn:hover, .mobile-delete-btn:focus {
+      background: #dc3545;
+      color: #fff;
+    }
+  }
+  .profile-photo-card {
+    position: relative;
+  }
+  .profile-photo-delete-form {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+    margin: 0;
+  }
+  .profile-photo-delete-btn {
+    min-width: 38px;
+    min-height: 38px;
+    font-size: 1.1rem;
+    border-radius: 50%;
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(220,53,69,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .profile-photo-delete-btn:hover, .profile-photo-delete-btn:focus {
+    background: #dc3545;
+    color: #fff;
+  }
+  @media (max-width: 768px) {
+    .profile-photo-delete-form {
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+    .profile-photo-delete-btn {
+      min-width: 36px;
+      min-height: 36px;
+      font-size: 1rem;
+    }
+  }
+  .profile-actions-vertical {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    width: 100%;
+  }
+  .profile-upload-btn, .profile-delete-btn {
+    border-radius: 999px !important;
+    font-weight: 500;
+    padding-left: 1.5em;
+    padding-right: 1.5em;
+    min-height: 38px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: background 0.2s, color 0.2s;
+  }
+  .profile-upload-btn {
+    background: #c15a2e;
+    color: #fff;
+    border: none;
+  }
+  .profile-upload-btn:hover, .profile-upload-btn:focus {
+    background: #a84b24;
+    color: #fff;
+  }
+  .profile-delete-btn {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    background: #fff;
+  }
+  .profile-delete-btn:hover, .profile-delete-btn:focus {
+    background: #dc3545;
+    color: #fff;
+  }
 </style>
+<script>
+// Confirm deletion for profile photo delete button
+  document.addEventListener('DOMContentLoaded', function() {
+    var deleteBtn = document.querySelector('.profile-delete-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to delete your profile picture?')) {
+          this.closest('form').submit();
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

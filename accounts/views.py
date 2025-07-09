@@ -9,6 +9,7 @@ from django.db.models import Value, CharField, Q
 from django.db.models.functions import Concat
 from django.urls import reverse
 from django.conf import settings
+from django.contrib import messages
 
 
 def signup_view(request):
@@ -238,3 +239,14 @@ def step_search_view(request):
     }
 
     return render(request, 'accounts/step_search.html', context)
+
+
+@login_required()
+def delete_profile_photo(request):
+    user = request.user
+    if user.profile_photo:
+        user.profile_photo.delete(save=False)
+        user.profile_photo = None
+        user.save()
+        messages.success(request, "Profile photo deleted.")
+    return redirect('host_dashboard')
