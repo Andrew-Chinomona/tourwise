@@ -501,6 +501,39 @@ document.querySelectorAll('#profile-drawer a').forEach(link => {
     profileOverlay.classList.remove('open');
   });
 });
+
+// New Chat Button Logic
+const newChatBtn = document.getElementById('new-chat-btn');
+if (newChatBtn) {
+  newChatBtn.addEventListener('click', function() {
+    // Clear chat messages
+    while (chatMessages.firstChild) {
+      chatMessages.removeChild(chatMessages.firstChild);
+    }
+    // Clear input
+    chatInput.value = '';
+    chatInput.style.height = '44px';
+    // Optionally, focus input
+    chatInput.focus();
+    // Optionally, show a visual indicator (e.g., fade in/out 'New chat started')
+    const notice = document.createElement('div');
+    notice.textContent = 'New chat started';
+    notice.className = 'text-center text-xs text-gray-500 my-2 animate-fade-in';
+    chatMessages.appendChild(notice);
+    setTimeout(() => {
+      if (notice.parentNode) notice.parentNode.removeChild(notice);
+    }, 1200);
+  });
+}
 </script>
+<style>
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s;
+}
+</style>
 </body>
 </html>
