@@ -354,6 +354,20 @@
       </ul>
     </div>
     {% endif %}
+    <!-- Account Section (for logged-in users: only Go to Profile) -->
+    {% if user.is_authenticated %}
+    <div class="border-t border-gray-200 pt-4">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</h3>
+      <ul class="space-y-2">
+        <li>
+          <a href="{% if user.user_type == 'host' %}{% url 'host_dashboard' %}{% else %}{% url 'tenant_dashboard' %}{% endif %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Go to Profile
+          </a>
+        </li>
+      </ul>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Overlay for profile drawer -->
@@ -384,7 +398,7 @@
     </div>
     <!-- Input area -->
     <form id="chat-form" class="tw-input-bar" autocomplete="off" onsubmit="return false;">
-      <textarea id="chat-input" rows="1" class="tw-input-text" placeholder="Type your message..." data-profile-url="{% if user.profile.profile_picture.url %}{{ user.profile.profile_picture.url }}{% else %}/static/images/default-profile-icon.png{% endif %}"></textarea>
+      <textarea id="chat-input" rows="1" class="tw-input-text" placeholder="Type your message..." data-profile-url="{% if user.profile_photo.url %}{{ user.profile_photo.url }}{% else %}/static/images/default-profile-icon.png{% endif %}"></textarea>
       <button type="submit" class="tw-send-btn">Send</button>
     </form>
   </div>

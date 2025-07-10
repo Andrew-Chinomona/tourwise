@@ -250,3 +250,9 @@ def delete_profile_photo(request):
         user.save()
         messages.success(request, "Profile photo deleted.")
     return redirect('host_dashboard')
+
+
+def tenant_dashboard(request):
+    from django.contrib.auth.decorators import login_required
+    from django.shortcuts import render
+    return render(request, 'accounts/tenant_dashboard.html')
