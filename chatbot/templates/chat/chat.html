@@ -306,15 +306,39 @@
       }
     }
     @media (min-width: 769px) {
-      .tw-input-bar {
-        position: absolute;
-        left: 50%;
-        bottom: 32px;
-        transform: translateX(-50%);
+      .tw-chat-main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        height: 100vh;
+        min-height: 100vh;
+        width: 100vw;
+        margin-top: 64px;
+        background: var(--tw-bg);
+        position: relative;
+      }
+      .tw-chat-desktop-container {
         width: 100%;
-        max-width: 600px;
+        max-width: 800px;
+        flex: 1 1 auto;
+        background: var(--tw-bg);
+        border-radius: 24px;
+        box-shadow: 0 2px 16px rgba(44,44,44,0.10);
+        margin: 40px 0 0 0; /* Increased top margin for header padding */
+        padding: 32px 24px 32px 24px; /* More padding inside container */
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .tw-input-bar {
+        position: static;
+        margin-top: 16px; /* Reduce space between chat container and message box */
+        margin-bottom: 32px; /* Add space from end of screen */
+        width: 100%;
+        max-width: 800px;
         background: var(--tw-light);
-        border-radius: 9999px;
+        border-radius: 16px;
         box-shadow: 0 2px 16px rgba(44,44,44,0.10);
         display: flex;
         align-items: center;
@@ -322,9 +346,22 @@
         gap: 0.5rem;
         z-index: 40;
       }
+      .tw-chat-messages {
+        position: static;
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        scroll-behavior: smooth;
+      }
       .tw-input-text {
         background: var(--tw-neutral);
-        border-radius: 9999px;
+        border-radius: 16px;
         border: none;
         padding: 12px 16px;
         font-size: 1rem;
@@ -335,12 +372,13 @@
         color: #2f2f2f;
         box-shadow: none;
         flex: 1;
+        overflow-y: auto;
       }
       .tw-send-btn {
         background: var(--tw-primary);
         color: #fff;
         border: none;
-        border-radius: 9999px;
+        border-radius: 16px;
         padding: 10px 22px;
         font-weight: 600;
         font-size: 1rem;
@@ -474,11 +512,13 @@
 
   <!-- Main chat area -->
   <div class="tw-chat-main">
-    <!-- Chat messages -->
-    <div id="chat-messages" class="tw-chat-messages">
-      <!-- Messages will be appended here -->
+    <!-- Desktop chat container (now above input bar) -->
+    <div class="tw-chat-desktop-container d-none d-md-flex">
+      <div id="chat-messages" class="tw-chat-messages">
+        <!-- Messages will be appended here -->
+      </div>
     </div>
-    <!-- Input area -->
+    <!-- Input area (desktop: now below chat container) -->
     <form id="chat-form" class="tw-input-bar" autocomplete="off" onsubmit="return false;">
       <textarea id="chat-input" rows="1" class="tw-input-text" placeholder="Type your message..." data-profile-url="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}/static/images/default-profile-icon.png{% endif %}"></textarea>
       <button type="submit" class="tw-send-btn">Send</button>
