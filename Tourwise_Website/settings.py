@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'behave_django',
     'widget_tweaks',
     'currencies',
+    'chatbot'
 ]
 
 MIDDLEWARE = [

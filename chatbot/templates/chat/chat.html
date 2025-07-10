@@ -1,0 +1,340 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tourwise Chat</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="icon" href="{% static 'images/logo-black.png' %}" type="image/png">
+  <style>
+    :root {
+      --tw-primary: #c15a2e;
+      --tw-bg: #f9f5ef;
+      --tw-light: #fff;
+      --tw-neutral: #f5f5f5;
+      --tw-shadow: 0 4px 24px rgba(193, 90, 46, 0.08);
+      --tw-radius: 22px;
+    }
+    body {
+      background: var(--tw-bg);
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    .tw-chat-root {
+      display: flex;
+      height: 100vh;
+      background: var(--tw-bg);
+    }
+    .tw-chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--tw-bg);
+      position: relative;
+      min-width: 0;
+    }
+    .tw-mobile-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+      pointer-events: none;
+      background: transparent;
+    }
+    .tw-header-pill {
+      background: var(--tw-light);
+      border-radius: 32px;
+      box-shadow: 0 2px 12px rgba(193,90,46,0.10);
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.5rem 1.5rem 0.5rem 1.2rem;
+      min-width: 160px;
+      max-width: 90vw;
+      margin: 0 auto;
+      pointer-events: auto;
+    }
+    .tw-header-logo {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.08);
+    }
+    .tw-header-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--tw-primary);
+      letter-spacing: 0.5px;
+    }
+    .tw-header-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--tw-light);
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.10);
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 2;
+    }
+    .tw-header-btn-left {
+      left: 16px;
+    }
+    .tw-header-btn-right {
+      right: 16px;
+    }
+    .tw-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 80px 10px 90px 10px;
+      display: flex;
+      flex-direction: column;
+      background: var(--tw-bg);
+      scroll-behavior: smooth;
+      min-height: 0;
+    }
+    .tw-input-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      background: var(--tw-light);
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+      padding: 10px 10px 18px 10px;
+      box-shadow: 0 -2px 12px rgba(193,90,46,0.07);
+      z-index: 40;
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+    }
+    .tw-input-text {
+      flex: 1;
+      border-radius: 22px;
+      border: 1.5px solid #e4d3b2;
+      padding: 12px 16px;
+      font-size: 1rem;
+      min-height: 44px;
+      max-height: 120px;
+      resize: none;
+      outline: none;
+      background: var(--tw-neutral);
+      color: #2f2f2f;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.04);
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .tw-input-text:focus {
+      border-color: var(--tw-primary);
+      box-shadow: 0 0 0 2px #f9e7d7;
+    }
+    .tw-send-btn {
+      background: var(--tw-primary);
+      color: #fff;
+      border: none;
+      border-radius: 22px;
+      padding: 10px 22px;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.10);
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .tw-send-btn:hover, .tw-send-btn:focus {
+      background: #a84b24;
+    }
+    .tw-message {
+      max-width: 80vw;
+      padding: 10px 16px;
+      margin: 6px 0;
+      border-radius: 18px;
+      word-break: break-word;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.06);
+      display: inline-block;
+      position: relative;
+    }
+    .tw-message.user {
+      align-self: flex-end;
+      background: var(--tw-primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .tw-message.bot {
+      align-self: flex-start;
+      background: #fff;
+      color: #2f2f2f;
+      border-bottom-left-radius: 4px;
+      border: 1.5px solid #e4d3b2;
+    }
+    @media (max-width: 768px) {
+      .tw-chat-root {
+        flex-direction: column;
+        height: 100vh;
+        min-height: 100vh;
+        background: var(--tw-bg);
+      }
+      #sidebar {
+        display: none !important;
+      }
+      .tw-chat-main {
+        height: 100vh;
+        min-height: 100vh;
+        width: 100vw;
+        padding: 0;
+        background: var(--tw-bg);
+      }
+      .tw-mobile-header {
+        display: flex;
+      }
+      .tw-chat-messages {
+        padding: 80px 8px 90px 8px;
+        max-width: 100vw;
+      }
+      .tw-input-bar {
+        width: 100vw;
+        left: 0;
+        right: 0;
+        border-radius: 0 0 0 0;
+        padding-bottom: 18px;
+      }
+      .tw-input-text {
+        font-size: 1rem;
+        min-height: 44px;
+        max-height: 120px;
+      }
+      .tw-send-btn {
+        font-size: 1rem;
+        padding: 10px 18px;
+      }
+      .tw-message {
+        max-width: 85vw;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="tw-chat-root">
+  <!-- Mobile Floating Pill Header -->
+  <div class="tw-mobile-header d-md-none">
+    <button class="tw-header-btn tw-header-btn-left" id="sidebar-toggle-mobile" aria-label="Open sidebar">
+      <svg width="22" height="22" fill="none" stroke="#c15a2e" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="tw-header-pill">
+      <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="tw-header-logo">
+      <span class="tw-header-title">Tourwise</span>
+    </div>
+    <button class="tw-header-btn tw-header-btn-right" id="new-chat-btn" aria-label="New chat">
+      <svg width="22" height="22" fill="none" stroke="#c15a2e" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+    </button>
+  </div>
+
+  <!-- Sidebar (hidden on mobile, as before) -->
+  <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col p-4 transition-transform duration-200 ease-in-out md:translate-x-0 -translate-x-full fixed md:static z-30 h-full md:h-auto d-none d-md-flex" style="min-width: 220px;">
+    <div class="flex flex-col items-center mb-8">
+      {% if user.profile.profile_picture.url %}
+        <img src="{{ user.profile.profile_picture.url }}" alt="Profile" class="w-16 h-16 rounded-full shadow mb-2">
+      {% else %}
+        <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        </div>
+      {% endif %}
+      <div class="text-gray-700 font-semibold">{{ user.get_full_name|default:user.username }}</div>
+    </div>
+    <div class="flex-1">
+      <div class="text-xs text-gray-400 text-center mt-8">Recent conversations coming soon</div>
+    </div>
+  </aside>
+
+  <!-- Overlay for mobile sidebar toggle -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
+
+  <!-- Main chat area -->
+  <div class="tw-chat-main">
+    <!-- Chat messages -->
+    <div id="chat-messages" class="tw-chat-messages">
+      <!-- Messages will be appended here -->
+    </div>
+    <!-- Input area -->
+    <form id="chat-form" class="tw-input-bar" autocomplete="off" onsubmit="return false;">
+      <textarea id="chat-input" rows="1" class="tw-input-text" placeholder="Type your message..." data-profile-url="{% if user.profile.profile_picture.url %}{{ user.profile.profile_picture.url }}{% else %}/static/images/default-profile-icon.png{% endif %}"></textarea>
+      <button type="submit" class="tw-send-btn">Send</button>
+    </form>
+  </div>
+</div>
+<script>
+// Sidebar toggle for mobile
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebar-toggle-mobile');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+if (sidebarToggle) {
+  sidebarToggle.onclick = function() {
+    if (sidebar) sidebar.classList.toggle('-translate-x-full');
+    if (sidebarOverlay) sidebarOverlay.classList.toggle('hidden');
+  };
+}
+if (sidebarOverlay) {
+  sidebarOverlay.onclick = function() {
+    if (sidebar) sidebar.classList.add('-translate-x-full');
+    sidebarOverlay.classList.add('hidden');
+  };
+}
+
+// Chat message sending logic
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+
+function appendMessage(text, sender) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'tw-message ' + sender;
+  msgDiv.textContent = text;
+  chatMessages.appendChild(msgDiv);
+  msgDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+chatForm.addEventListener('submit', function() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+  appendMessage(text, 'user');
+  chatInput.value = '';
+  chatInput.style.height = '44px';
+  // TODO: Send to backend and append bot response
+  setTimeout(() => appendMessage('This is a bot reply (replace with real backend call).', 'bot'), 800);
+});
+
+// Enter to send, Shift+Enter for newline
+chatInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    chatForm.dispatchEvent(new Event('submit'));
+  }
+});
+
+// Auto-grow textarea
+chatInput.addEventListener('input', function() {
+  chatInput.style.height = '44px';
+  chatInput.style.height = (chatInput.scrollHeight) + 'px';
+});
+</script>
+</body>
+</html>
