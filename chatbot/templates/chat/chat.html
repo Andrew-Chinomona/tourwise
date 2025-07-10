@@ -318,9 +318,23 @@
         background: var(--tw-bg);
         position: relative;
       }
+      .tw-chat-desktop-container {
+        width: 100%;
+        max-width: 800px;
+        flex: 1 1 auto;
+        background: var(--tw-bg);
+        border-radius: 24px;
+        box-shadow: 0 2px 16px rgba(44,44,44,0.10);
+        margin: 56px 0 0 0; /* More space from header */
+        padding: 24px 18px 24px 18px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
       .tw-input-bar {
         position: static;
-        margin-top: 80px;
+        margin-top: 12px; /* Less space between chat container and message box */
+        margin-bottom: 48px; /* More space from end of screen */
         width: 100%;
         max-width: 800px;
         background: var(--tw-light);
@@ -331,19 +345,6 @@
         padding: 10px 18px 10px 18px;
         gap: 0.5rem;
         z-index: 40;
-      }
-      .tw-chat-desktop-container {
-        width: 100%;
-        max-width: 800px;
-        flex: 1 1 auto;
-        background: var(--tw-bg);
-        border-radius: 24px;
-        box-shadow: 0 2px 16px rgba(44,44,44,0.10);
-        margin: 32px 0 0 0;
-        padding: 24px 18px 24px 18px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
       }
       .tw-chat-messages {
         position: static;
@@ -638,7 +639,8 @@ function typeBotMessage(message, container, className = 'bot', totalDuration = 5
 window.addEventListener('DOMContentLoaded', function() {
   // Only show if chat is empty
   if (chatMessages && chatMessages.children.length === 0) {
-    typeBotMessage(welcomeMessage, chatMessages, 'bot', 500);
+    const isMobile = window.innerWidth < 769;
+    typeBotMessage(welcomeMessage, chatMessages, 'bot', isMobile ? 250 : 500);
   }
 });
 
@@ -654,7 +656,8 @@ if (newChatBtn) {
     chatInput.style.height = '44px';
     chatInput.focus();
     // Show welcome message with typing animation
-    typeBotMessage(welcomeMessage, chatMessages, 'bot', 500);
+    const isMobile = window.innerWidth < 769;
+    typeBotMessage(welcomeMessage, chatMessages, 'bot', isMobile ? 250 : 500);
   });
 }
 </script>
