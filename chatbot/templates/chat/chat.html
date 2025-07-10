@@ -49,8 +49,8 @@
       align-items: center;
       justify-content: center;
       height: 64px;
-      pointer-events: none;
-      background: transparent;
+      background: var(--tw-bg); /* Match chat background */
+      /* pointer-events: none;  Remove this so header is interactive */
     }
     .tw-header-pill {
       background: var(--tw-light);
@@ -105,7 +105,7 @@
     .tw-chat-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 80px 10px 90px 10px;
+      padding: 80px 10px 90px 10px; /* Top padding matches header height */
       display: flex;
       flex-direction: column;
       background: var(--tw-bg);
@@ -206,7 +206,7 @@
         display: flex;
       }
       .tw-chat-messages {
-        padding: 80px 8px 90px 8px;
+        padding: 80px 8px 90px 8px; /* Top padding matches header height */
         max-width: 100vw;
       }
       .tw-input-bar {
