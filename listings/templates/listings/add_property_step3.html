@@ -393,7 +393,7 @@
     border: none;
   }
 
-  /* Autocomplete suggestions styling */
+/* Updated Autocomplete suggestions styling */
   .location-suggestions {
     position: absolute;
     top: 100%;
@@ -409,6 +409,14 @@
     display: none;
     box-shadow: 0 4px 16px rgba(0,0,0,0.10);
   }
+
+  /* Add relative positioning to the parent div of each input */
+  .mb-3 {
+    position: relative;
+  }
+.location-suggestions {
+  margin-top: -2px; /* This makes it snug against the input */
+}
   .suggestion-item {
     padding: 0.75rem 1.25rem;
     cursor: pointer;
