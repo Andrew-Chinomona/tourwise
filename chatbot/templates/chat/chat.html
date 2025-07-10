@@ -360,8 +360,10 @@
       <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</h3>
       <ul class="space-y-2">
         <li>
-          <a href="{% if user.user_type == 'host' %}{% url 'host_dashboard' %}{% else %}{% url 'tenant_dashboard' %}{% endif %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          <a href="{% if user.user_type == 'host' %}{% url 'host_dashboard' %}{% else %}{% url 'tenant_dashboard' %}{% endif %}"
+             class="block w-full text-center font-semibold rounded-full py-2 px-6 transition-colors duration-200 shadow-sm"
+             style="background: var(--tw-primary); color: #fff;"
+             onmouseover="this.style.background='#a84b24'" onmouseout="this.style.background='var(--tw-primary)'">
             Go to Profile
           </a>
         </li>
