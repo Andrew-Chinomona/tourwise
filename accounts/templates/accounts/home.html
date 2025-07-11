@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load clean_location %}
 
 {% block extra_head %}
   <style>
@@ -909,7 +910,7 @@
                 <div class="card-body">
                   <h5 class="card-title text-truncate">{{ property.title }}</h5>
                   <p class="card-text">
-                    {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                    {{ property|clean_location }}
                   </p>
                   <p class="price-text">
                     {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
@@ -967,7 +968,7 @@
                 <div class="card-body">
                   <h5 class="card-title text-truncate">{{ property.title }}</h5>
                   <p class="card-text">
-                    {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                    {{ property|clean_location }}
                   </p>
                   <p class="price-text">
                     {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}

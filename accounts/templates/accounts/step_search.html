@@ -284,6 +284,9 @@
                      value="{{ saved_location }}"
                      autocomplete="off"
                      required>
+              <input type="hidden" name="street_address" id="id_street_address">
+              <input type="hidden" name="suburb" id="id_suburb">
+              <input type="hidden" name="city" id="id_city">
               <div class="location-suggestions" id="location-suggestions"></div>
             </div>
           </div>
@@ -544,18 +547,18 @@
           if (status === google.maps.places.PlacesServiceStatus.OK) {
             this.selectedPlace = place;
 
-            // Extract suburb and city from address components
-            let suburb = '';
-            let city = '';
-
+            // Extract street, suburb, city from address components
+            let street = '', suburb = '', city = '';
             if (place.address_components) {
               place.address_components.forEach(component => {
                 const types = component.types;
-                if (types.includes('sublocality') || types.includes('neighborhood')) {
+                if (types.includes('route') || types.includes('premise')) {
+                  street = component.long_name;
+                }
+                if (types.includes('sublocality_level_1') || types.includes('neighborhood')) {
                   suburb = component.long_name;
-                } else if (types.includes('locality')) {
-                  city = component.long_name;
-                } else if (types.includes('administrative_area_level_1') && !city) {
+                }
+                if (types.includes('locality')) {
                   city = component.long_name;
                 }
               });
@@ -566,6 +569,9 @@
 
             // Store additional data in hidden fields or data attributes if needed
             this.input.value = displayValue;
+            document.getElementById('id_street_address').value = street;
+            document.getElementById('id_suburb').value = suburb;
+            document.getElementById('id_city').value = city;
             this.input.dataset.placeId = prediction.place_id;
             this.input.dataset.suburb = suburb;
             this.input.dataset.city = city;

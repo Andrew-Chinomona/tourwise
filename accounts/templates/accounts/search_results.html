@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load clean_location %}
 
 {% block content %}
 <div class="container mt-5">
@@ -19,7 +20,7 @@
             <div class="card-body">
               <h5 class="card-title text-truncate">{{ property.title }}</h5>
               <p class="card-text text-muted">
-                {{ property.street_address }}, {{ property.suburb }}, {{ property.city }}
+                {{ property|clean_location }}
               </p>
               <p class="price-text">
                 {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
@@ -54,7 +55,7 @@
               <div class="card-body">
                 <h5 class="card-title text-truncate">{{ property.title }}</h5>
                 <p class="card-text text-muted">
-                  {{ property.street_address | title}}, {{ property.suburb | title }}, {{ property.city|title }}
+                  {{ property|clean_location }}
                 </p>
                 <p class="price-text">
                   {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
