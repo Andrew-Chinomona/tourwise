@@ -443,6 +443,14 @@
     .animate-fade-in {
       animation: fade-in 0.5s;
     }
+    .tw-input-text::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+    .tw-input-text {
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
   </style>
 </head>
 <body>
