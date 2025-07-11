@@ -132,30 +132,60 @@ def search_results_view(request):
     max_price = request.GET.get('max_price', '')
 
     suburb = city = ''
-    # Try to extract suburb and city from location input (format: suburb, city, country or city, country)
+    # Improved location parsing: handle 'suburb, city, country' and 'city, country'
     if location:
         parts = [p.strip() for p in location.split(',')]
-        if len(parts) >= 2:
+        if len(parts) >= 3:
             suburb = parts[0]
             city = parts[1]
+            # country = parts[2] (ignored)
+        elif len(parts) == 2:
+            # Assume input is 'city, country' (no suburb)
+            city = parts[0]
+            # country = parts[1] (ignored)
         elif len(parts) == 1:
             city = parts[0]
 
     # Only show paid listings
     base_filter = {'is_paid': True}
-    if max_price:
-        try:
-            base_filter['price__lte'] = float(max_price)
-        except ValueError:
-            base_filter.pop('price__lte', None)
 
     # Helper to build filters without None values
     def build_filter(**kwargs):
-        return {k: v for k, v in kwargs.items() if v}
+        return {k: v for k, v in kwargs.items() if v is not None and v != ''}
+
+    # If only one field is provided, filter by that field
+    if location and not property_type and not max_price:
+        filters = base_filter.copy()
+        if suburb and city:
+            filters.update(build_filter(suburb__iexact=suburb, city__iexact=city))
+        elif city:
+            filters.update(build_filter(city__iexact=city))
+        properties = Property.objects.filter(**filters)
+        return render(request, 'accounts/search_results.html', {'properties': properties})
+    elif property_type and not location and not max_price:
+        filters = base_filter.copy()
+        filters.update(build_filter(property_type=property_type))
+        properties = Property.objects.filter(**filters)
+        return render(request, 'accounts/search_results.html', {'properties': properties})
+    elif max_price and not location and not property_type:
+        filters = base_filter.copy()
+        try:
+            price_val = float(max_price)
+            filters.update(build_filter(price__lte=price_val))
+        except ValueError:
+            pass
+        properties = Property.objects.filter(**filters)
+        return render(request, 'accounts/search_results.html', {'properties': properties})
 
     # 1. Exact match: suburb, city, type, price
     filters = base_filter.copy()
     filters.update(build_filter(suburb__iexact=suburb, city__iexact=city, property_type=property_type))
+    if max_price:
+        try:
+            price_val = float(max_price)
+            filters.update(build_filter(price__lte=price_val))
+        except ValueError:
+            pass
     props = Property.objects.filter(**filters)
     if suburb and city and property_type and max_price and props.exists():
         return render(request, 'accounts/search_results.html', {'properties': props, 'message': None})
@@ -163,14 +193,26 @@ def search_results_view(request):
     # 2. City-wide fallback: city, type, price
     filters = base_filter.copy()
     filters.update(build_filter(city__iexact=city, property_type=property_type))
+    if max_price:
+        try:
+            price_val = float(max_price)
+            filters.update(build_filter(price__lte=price_val))
+        except ValueError:
+            pass
     props = Property.objects.filter(**filters)
     if city and property_type and max_price and props.exists():
-        msg = f"We couldn’t find exact matches in {suburb}. But here are some {property_type}s in {city} under ${max_price}."
+        msg = f"We couldn’t find exact matches in {suburb or city}. But here are some {property_type}s in {city} under ${max_price}."
         return render(request, 'accounts/search_results.html', {'properties': props, 'message': msg})
 
     # 3. City-wide all types: city, price
     filters = base_filter.copy()
     filters.update(build_filter(city__iexact=city))
+    if max_price:
+        try:
+            price_val = float(max_price)
+            filters.update(build_filter(price__lte=price_val))
+        except ValueError:
+            pass
     props = Property.objects.filter(**filters)
     if city and max_price and props.exists():
         msg = f"We couldn’t find any {property_type}s in {city} under ${max_price}, but here are other property types in that price range."
