@@ -13,6 +13,7 @@ from django.contrib import messages
 
 
 def signup_view(request):
+    next_url = request.GET.get('next') or request.POST.get('next')
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -25,6 +26,8 @@ def signup_view(request):
 
             login(request, user)
 
+            if next_url:
+                return redirect(next_url)
             if user.user_type == 'host':
                 return redirect('host_dashboard')
             else:
@@ -32,10 +35,11 @@ def signup_view(request):
     else:
         form = SignupForm()
 
-    return render(request, 'accounts/signup.html', {'form': form})
+    return render(request, 'accounts/signup.html', {'form': form, 'next': next_url})
 
 
 def login_view(request):
+    next_url = request.GET.get('next') or request.POST.get('next')
     form = CustomLoginForm(request.POST or None)
     error = None
 
@@ -46,13 +50,15 @@ def login_view(request):
         user = authenticate(request, username=identifier, password=password)
         if user is not None:
             login(request, user)
+            if next_url:
+                return redirect(next_url)
             if user.user_type == 'host':
                 return redirect('host_dashboard')
             return redirect('home')
         else:
             error = "Invalid login credentials."
 
-    return render(request, 'accounts/login.html', {'form': form, 'error': error})
+    return render(request, 'accounts/login.html', {'form': form, 'error': error, 'next': next_url})
 
 
 # this section will handle logout
@@ -138,18 +144,12 @@ def search_results_view(request):
         if len(parts) >= 3:
             suburb = parts[0]
             city = parts[1]
-            # country = parts[2] (ignored)
         elif len(parts) == 2:
-            # Assume input is 'city, country' (no suburb)
             city = parts[0]
-            # country = parts[1] (ignored)
         elif len(parts) == 1:
             city = parts[0]
 
-    # Only show paid listings
     base_filter = {'is_paid': True}
-
-    # Helper to build filters without None values
     def build_filter(**kwargs):
         return {k: v for k, v in kwargs.items() if v is not None and v != ''}
 
@@ -161,11 +161,15 @@ def search_results_view(request):
         elif city:
             filters.update(build_filter(city__iexact=city))
         properties = Property.objects.filter(**filters)
+        if not properties.exists():
+            return render(request, 'accounts/no_results.html')
         return render(request, 'accounts/search_results.html', {'properties': properties})
     elif property_type and not location and not max_price:
         filters = base_filter.copy()
         filters.update(build_filter(property_type=property_type))
         properties = Property.objects.filter(**filters)
+        if not properties.exists():
+            return render(request, 'accounts/no_results.html')
         return render(request, 'accounts/search_results.html', {'properties': properties})
     elif max_price and not location and not property_type:
         filters = base_filter.copy()
@@ -175,6 +179,8 @@ def search_results_view(request):
         except ValueError:
             pass
         properties = Property.objects.filter(**filters)
+        if not properties.exists():
+            return render(request, 'accounts/no_results.html')
         return render(request, 'accounts/search_results.html', {'properties': properties})
 
     # 1. Exact match: suburb, city, type, price
@@ -219,10 +225,12 @@ def search_results_view(request):
         return render(request, 'accounts/search_results.html', {'properties': props, 'message': msg})
 
     # 4. No results
-    return render(request, 'accounts/no_results.html', {
-        'message': "We couldn’t find any properties matching your search.",
-        'show_ctas': True
-    })
+    return render(request, 'accounts/no_results.html')
+
+
+def _is_mobile(request):
+    ua = request.META.get('HTTP_USER_AGENT', '').lower()
+    return 'mobile' in ua or 'android' in ua or 'iphone' in ua
 
 
 def become_host_view(request):

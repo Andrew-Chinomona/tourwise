@@ -475,8 +475,8 @@
     </button>
     <div class="tw-header-pill">
       <a href="{% url 'home' %}" class="flex items-center gap-2 focus:outline-none" aria-label="Go to homepage">
-        <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="tw-header-logo">
-        <span class="tw-header-title">Tourwise</span>
+      <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="tw-header-logo">
+      <span class="tw-header-title">Tourwise</span>
       </a>
     </div>
     <button class="tw-header-btn tw-header-btn-right" id="new-chat-btn" aria-label="New chat">
@@ -530,13 +530,13 @@
       <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</h3>
       <ul class="space-y-2">
         <li>
-          <a href="{% url 'login' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
+          <a href="{% url 'login' %}?next={% url 'chat' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
             Login
           </a>
         </li>
         <li>
-          <a href="{% url 'signup' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
+          <a href="{% url 'signup' %}?next={% url 'chat' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Signup
           </a>
@@ -611,13 +611,13 @@
       <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</h3>
       <ul class="space-y-2">
         <li>
-          <a href="{% url 'login' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
+          <a href="{% url 'login' %}?next={% url 'chat' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
             Login
           </a>
         </li>
         <li>
-          <a href="{% url 'signup' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
+          <a href="{% url 'signup' %}?next={% url 'chat' %}" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Signup
           </a>
@@ -650,8 +650,8 @@
   <div class="tw-chat-main" id="chat-main">
     <!-- Desktop chat container -->
     <div class="tw-chat-desktop-container d-none d-md-flex" id="chat-desktop-container">
-      <div id="chat-messages" class="tw-chat-messages">
-        <!-- Messages will be appended here -->
+    <div id="chat-messages" class="tw-chat-messages">
+      <!-- Messages will be appended here -->
       </div>
     </div>
     <!-- Input area -->
