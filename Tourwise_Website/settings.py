@@ -29,10 +29,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-change-me')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['7c44c9db9830.ngrok-free.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['726aa8ff208f.ngrok-free.app', 'localhost', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://7c44c9db9830.ngrok-free.app/',
+    'https://726aa8ff208f.ngrok-free.app/',
     'https://*.ngrok-free.app',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
@@ -145,6 +145,7 @@ AUTHENTICATION_BACKENDS = [
 
 # API Keys
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 
 # Paynow Settings
 PAYNOW_INTEGRATION_ID = os.getenv('PAYNOW_INTEGRATION_ID', '21331')
@@ -182,6 +183,7 @@ if DEBUG:
         'SECRET_KEY',
         'DB_PASSWORD',
         'PAYNOW_INTEGRATION_KEY',
+        'GROQ_API_KEY'
     ]
 
     missing_vars = [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]

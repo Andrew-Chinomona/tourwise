@@ -833,6 +833,76 @@
         text-overflow: ellipsis;
       }
     }
+    @media (min-width: 769px) {
+      .property-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+      }
+      .property-card {
+        width: 300px;
+        min-width: 300px;
+        max-width: 300px;
+        height: 300px;
+        min-height: 300px;
+        max-height: 300px;
+        display: flex;
+        flex-direction: column;
+      }
+      .property-card .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        overflow: hidden; /* Ensures nothing escapes the card */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+      }
+      .property-card .card-img-top {
+        height: 180px; /* 60% of 300px */
+        min-height: 180px;
+        max-height: 180px;
+        width: 100%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border-radius: 12px 12px 0 0; /* Match card's top corners */
+        display: block;
+      }
+      .property-card:hover .card {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+      .property-card .card-body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem;
+        overflow: hidden;
+        text-align: center;
+      }
+      .property-card .card-title,
+      .property-card .card-text,
+      .property-card .price-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.92rem;
+        margin-bottom: 0.3rem;
+        text-align: center;
+      }
+      .property-card .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+      }
+      .property-card .price-text {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0;
+      }
+    }
   </style>
 {% endblock %}
 
@@ -858,6 +928,23 @@
           <span class="new-sticker">NEW</span>
         </a>
       </div>
+      <!-- Desktop/Tablet: Pill-style search bar (moved below buttons) -->
+      <div class="search-bar-wrapper d-none d-md-flex">
+        <form action="{% url 'search_results' %}" method="get" class="pill-search-bar mx-auto position-relative" autocomplete="off">
+          <input type="text" name="location" id="desktop-location-input" class="pill-input" placeholder="Search by city, suburb, or street..." autocomplete="off">
+          <div id="desktop-location-suggestions" class="location-suggestions"></div>
+          <select name="property_type" class="pill-select">
+            <option value="">Type</option>
+            <option value="house">House</option>
+            <option value="apartment">Apartment</option>
+            <option value="airbnb">Airbnb</option>
+            <option value="room">Room</option>
+            <option value="guesthouse">Guesthouse</option>
+          </select>
+          <input type="number" name="max_price" class="pill-input pill-input-short" placeholder="Max Price">
+          <button type="submit" class="pill-search-btn"><i class="bi bi-search"></i> Search</button>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -873,24 +960,6 @@
       </a>
     </div>
   </section>
-
-  <!-- Desktop/Tablet: Pill-style search bar -->
-  <div class="search-bar-wrapper d-none d-md-flex">
-    <form action="{% url 'search_results' %}" method="get" class="pill-search-bar mx-auto position-relative" autocomplete="off">
-      <input type="text" name="location" id="desktop-location-input" class="pill-input" placeholder="Search by city, suburb, or street..." autocomplete="off">
-      <div id="desktop-location-suggestions" class="location-suggestions"></div>
-      <select name="property_type" class="pill-select">
-        <option value="">Type</option>
-        <option value="house">House</option>
-        <option value="apartment">Apartment</option>
-        <option value="airbnb">Airbnb</option>
-        <option value="room">Room</option>
-        <option value="guesthouse">Guesthouse</option>
-      </select>
-      <input type="number" name="max_price" class="pill-input pill-input-short" placeholder="Max Price">
-      <button type="submit" class="pill-search-btn"><i class="bi bi-search"></i> Search</button>
-    </form>
-  </div>
 
   <!-- Listings Section -->
   <div class="listings-section" id="recent-listings-section">
@@ -925,6 +994,10 @@
             <p>Check back soon for new properties!</p>
           </div>
         {% endfor %}
+      </div>
+      <!-- Desktop Show More Button for Recent Listings -->
+      <div class="text-center d-none d-md-block" style="margin-top: 1.5rem;">
+        <a href="{% url 'recent_listings' %}" class="show-more-btn">Show More</a>
       </div>
 
       <!-- Mobile CSS Scroll Snap Carousel for Recent Listings -->
@@ -983,6 +1056,10 @@
             <p>Premium properties will appear here!</p>
           </div>
         {% endfor %}
+      </div>
+      <!-- Desktop Show More Button for Featured Listings -->
+      <div class="text-center d-none d-md-block" style="margin-top: 1.5rem;">
+        <a href="{% url 'featured_listings' %}" class="show-more-btn">Show More</a>
       </div>
 
       <!-- Mobile CSS Scroll Snap Carousel for Featured Listings -->
