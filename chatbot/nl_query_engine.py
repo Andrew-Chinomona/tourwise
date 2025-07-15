@@ -77,5 +77,5 @@ query_engine = CaseInsensitivePropertyTypeQueryEngine(llm=llm, sql_database=sql_
 
 def run_nl_query(natural_query):
     result = query_engine.query(natural_query)
-    print("SQL generated: ", result.metadata.get("sql_query", "[none]"))
+    # print("SQL generated: ", result.metadata.get("sql_query", "[none]"))
     return result
