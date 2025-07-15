@@ -46,30 +46,36 @@ sql_database = SQLDatabase(engine, include_tables=included_tables)
 class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
     def __init__(self, llm, sql_database, tables=None):
         super().__init__(llm=llm, sql_database=sql_database, tables=tables)
-        self.sql_database = sql_database  # ✅ save it yourself
+        self.sql_database = sql_database
 
     def query(self, natural_query, *args, **kwargs):
         result = super().query(natural_query, *args, **kwargs)
         sql = result.metadata.get("sql_query", "")
 
-        def repl(match):
-            value = match.group(1)
-            return f"LOWER(property_type) = '{value.lower()}'"
+        new_sql = sql  # start with the original query
 
-        new_sql = sql  # start with original SQL
+        # Rewrite property_type to lowercase
+        new_sql = re.sub(
+            r"(?:\b\w+\.)?property_type\s*=\s*'([^']+)'",
+            lambda m: f"LOWER(property_type) = '{m.group(1).lower()}'",
+            new_sql
+        )
 
-        for field in ["property_type", "city", "suburb"]:
+        # Rewrite city, suburb, street_address to Title Case (no LOWER())
+        for field in ["city", "suburb", "street_address"]:
             new_sql = re.sub(
                 rf"(?:\b\w+\.)?{field}\s*=\s*'([^']+)'",
-                lambda m: f"LOWER({field}) = '{m.group(1).lower()}'",
+                lambda m: f"{field} = '{m.group(1).title()}'",
                 new_sql
             )
 
         if new_sql != sql:
+            print("🔁 Final Rewritten SQL:", new_sql)  # Optional for debugging
             result.metadata["sql_query"] = new_sql
             result.response = self.sql_database.run_sql(new_sql)
 
         return result
+
 
 query_engine = CaseInsensitivePropertyTypeQueryEngine(llm=llm, sql_database=sql_database, tables=included_tables)
 
@@ -78,5 +84,5 @@ query_engine = CaseInsensitivePropertyTypeQueryEngine(llm=llm, sql_database=sql_
 
 def run_nl_query(natural_query):
     result = query_engine.query(natural_query)
-    # print("SQL generated: ", result.metadata.get("sql_query", "[none]"))
+    print("SQL generated: ", result.metadata.get("sql_query", "[none]"))
     return result
