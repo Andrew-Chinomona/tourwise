@@ -1,68 +1,65 @@
-import logging
-from rapidfuzz import fuzz
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from listings.models import Property, Amenity
-
-logger = logging.getLogger(__name__)
-
-@login_required
-def chat_view(request):
-    return render(request, 'chat/chat.html')
-
-import os
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from chatbot.mcp import extract_query_components
+from listings.models import Property
+from rapidfuzz import fuzz
+from django.shortcuts import render
 
-# Optional: use Groq or OpenAI based on environment
-ENVIRONMENT = os.getenv("CHAT_ENV", "dev")
+def chat_view(request):
+    """
+    Renders the chatbot UI page.
+    Only accessible to logged-in users.
+    """
+    # if not request.user.is_authenticated:
+    #     return render(request, "chat/not_logged_in.html")  # or redirect to login
 
-if ENVIRONMENT == "dev":
-    from groq import Groq
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-    MODEL_NAME = "llama3-8b-8192"
-else:
-    import openai
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    MODEL_NAME = "gpt-4"
-
+    return render(request, "chat/chat.html")
 @csrf_exempt
 def chatbot_api(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            user_message = data.get("message", "")
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST requests allowed'}, status=405)
 
-            if not user_message:
-                return JsonResponse({"error": "No message provided"}, status=400)
+    data = json.loads(request.body)
+    user_message = data.get("message", "")
 
-            # Call the LLM
-            if ENVIRONMENT == "dev":
-                response = client.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=[
-                        {"role": "system", "content": "You are a helpful property chatbot."},
-                        {"role": "user", "content": user_message}
-                    ],
-                    temperature=0.7,
-                )
-                reply = response.choices[0].message.content
-            else:
-                response = openai.ChatCompletion.create(
-                    model=MODEL_NAME,
-                    messages=[
-                        {"role": "system", "content": "You are a helpful property chatbot."},
-                        {"role": "user", "content": user_message}
-                    ],
-                    temperature=0.7,
-                )
-                reply = response["choices"][0]["message"]["content"]
+    # Step 1: NLP extract search components
+    filters = extract_query_components(user_message)
 
-            return JsonResponse({"reply": reply})
+    city = filters.get("city")
+    suburb = filters.get("suburb")
+    max_price = filters.get("max_price")
+    property_type = filters.get("property_type")
+    amenities = filters.get("amenities", [])
+    keywords = filters.get("keywords", [])
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-    else:
-        return JsonResponse({"error": "Invalid request method"}, status=405)
+    # Step 2: Query database
+    queryset = Property.objects.all()
+
+    if suburb:
+        queryset = queryset.filter(suburb__icontains=suburb)
+    elif city:
+        queryset = queryset.filter(city__icontains=city)
+
+    if max_price:
+        queryset = queryset.filter(price__lte=max_price)
+    if property_type:
+        queryset = queryset.filter(property_type__icontains=property_type)
+
+    results = []
+    for prop in queryset:
+        # Step 3: Fuzzy match with description and amenities
+        score = fuzz.partial_ratio(user_message, prop.description)
+        if score >= 60:
+            results.append({
+                "id": prop.id,
+                "title": prop.title,
+                "location": f"{prop.street_address}, {prop.suburb}, {prop.city}",
+                "price": prop.price,
+                "main_image": prop.main_image.url if prop.main_image else None,
+            })
+
+    if not results:
+        return JsonResponse({"message": "No perfect matches, try again."}, status=200)
+
+    return JsonResponse({"matches": results}, status=200)
