@@ -25,6 +25,7 @@
     }
     .bot {
       background-color: #f2f2f2;
+      white-space: pre-line; /* Enable line breaks */
     }
     .input-group {
       margin-top: 20px;
@@ -83,10 +84,22 @@
       })
       .then(res => res.json())
       .then(data => {
-        if (data.result) {
+        if (Array.isArray(data.result)) {
+          if (data.result.length === 0) {
+            appendMessage("No results found.", 'bot');
+          } else {
+            data.result.forEach((row) => {
+              let msg = `🏠 ${row.title || "Property"}\n📍 ${row.street_address || ""}, ${row.suburb || ""}, ${row.city || ""}`;
+              if (row.price) msg += `\n💰 $${row.price}`;
+              appendMessage(msg, 'bot');
+            });
+          }
+        } else if (typeof data.result === "string") {
           appendMessage(data.result, 'bot');
         } else if (data.error) {
           appendMessage("❌ " + data.error, 'bot');
+        } else {
+          appendMessage("Unexpected response format.", 'bot');
         }
       })
       .catch(() => {
@@ -111,4 +124,3 @@
   </script>
 </body>
 </html>
-
