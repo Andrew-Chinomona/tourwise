@@ -44,29 +44,30 @@ included_tables = ["listings_property",
 sql_database = SQLDatabase(engine, include_tables=included_tables)
 
 class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
+    def __init__(self, llm, sql_database, tables=None):
+        super().__init__(llm=llm, sql_database=sql_database, tables=tables)
+        self.sql_database = sql_database  # ✅ save it yourself
+
     def query(self, natural_query, *args, **kwargs):
-        # Call the parent to get the result object (which includes the SQL)
         result = super().query(natural_query, *args, **kwargs)
         sql = result.metadata.get("sql_query", "")
 
-        # Rewrite property_type comparisons to be case-insensitive
-        # Example: property_type = 'House'  -->  LOWER(property_type) = 'houses'
         def repl(match):
             value = match.group(1)
             return f"LOWER(property_type) = '{value.lower()}'"
 
-        new_sql = re.sub(
-            r"property_type\s*=\s*'([^']+)'",
-            lambda m: repl(m),
-            sql
-        )
+        new_sql = sql  # start with original SQL
 
-        # If the SQL was changed, update the result metadata and rerun the query
+        for field in ["property_type", "city", "suburb"]:
+            new_sql = re.sub(
+                rf"(?:\b\w+\.)?{field}\s*=\s*'([^']+)'",
+                lambda m: f"LOWER({field}) = '{m.group(1).lower()}'",
+                new_sql
+            )
+
         if new_sql != sql:
             result.metadata["sql_query"] = new_sql
-            # Actually run the new SQL against the database
-            # (You may need to expose a method to do this in your SQLDatabase class)
-            result.response = self._sql_database.run_sql(new_sql)
+            result.response = self.sql_database.run_sql(new_sql)
 
         return result
 
