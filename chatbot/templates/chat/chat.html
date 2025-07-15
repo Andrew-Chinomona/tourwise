@@ -57,70 +57,160 @@
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
+<script>
+function appendMessage(text, sender) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message ' + sender;
+  msgDiv.textContent = text;
+  document.getElementById('messages').appendChild(msgDiv);
+}
 
-  <script>
-    function appendMessage(text, sender) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message ' + sender;
-      msgDiv.textContent = text;
-      document.getElementById('messages').appendChild(msgDiv);
-    }
+function appendCard(property) {
+  const card = document.createElement('div');
+  card.style.border = "1px solid #ddd";
+  card.style.borderRadius = "8px";
+  card.style.margin = "10px 0";
+  card.style.padding = "10px";
+  card.style.display = "flex";
+  card.style.gap = "10px";
+  card.style.backgroundColor = "#f9f9f9";
 
-    function sendMessage() {
-      const input = document.getElementById('user-input');
-      const message = input.value.trim();
-      if (!message) return;
+  const img = document.createElement('img');
+  img.src = property.main_image || "{% static 'images/default-profile-icon.png' %}";
+  img.alt = property.title || "Property Image";
+  img.style.width = "100px";
+  img.style.height = "100px";
+  img.style.objectFit = "cover";
+  img.style.borderRadius = "6px";
 
-      appendMessage(message, 'user');
-      input.value = '';
+  const info = document.createElement('div');
+  info.innerHTML = `
+    <strong>${property.title || "Untitled Property"}</strong><br>
+    📍 ${property.street_address || ""}, ${property.suburb || ""}, ${property.city || ""}<br>
+    💰 $${property.price || "N/A"}
+  `;
 
-      fetch("/chatbot/sql/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-CSRFToken": getCookie('csrftoken'),
-        },
-        body: "message=" + encodeURIComponent(message),
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data.result)) {
-          if (data.result.length === 0) {
-            appendMessage("No results found.", 'bot');
-          } else {
-            data.result.forEach((row) => {
-              let msg = `🏠 ${row.title || "Property"}\n📍 ${row.street_address || ""}, ${row.suburb || ""}, ${row.city || ""}`;
-              if (row.price) msg += `\n💰 $${row.price}`;
-              appendMessage(msg, 'bot');
-            });
-          }
-        } else if (typeof data.result === "string") {
-          appendMessage(data.result, 'bot');
-        } else if (data.error) {
-          appendMessage("❌ " + data.error, 'bot');
-        } else {
-          appendMessage("Unexpected response format.", 'bot');
-        }
-      })
-      .catch(() => {
-        appendMessage("Something went wrong. Please try again.", 'bot');
-      });
-    }
+  card.appendChild(img);
+  card.appendChild(info);
+  document.getElementById('messages').appendChild(card);
+}
 
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-          cookie = cookie.trim();
-          if (cookie.startsWith(name + '=')) {
-            cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
-            break;
-          }
-        }
+function sendMessage() {
+  const input = document.getElementById('user-input');
+  const message = input.value.trim();
+  if (!message) return;
+
+  appendMessage(message, 'user');
+  input.value = '';
+
+  fetch("/chatbot/sql/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": getCookie('csrftoken'),
+    },
+    body: "message=" + encodeURIComponent(message),
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (Array.isArray(data.result)) {
+      if (data.result.length === 0) {
+        appendMessage("No results found.", 'bot');
+      } else {
+        data.result.forEach(appendCard);
       }
-      return cookieValue;
+    } else if (typeof data.result === "string") {
+      appendMessage(data.result, 'bot');
+    } else if (data.error) {
+      appendMessage("❌ " + data.error, 'bot');
+    } else {
+      appendMessage("Unexpected response format.", 'bot');
     }
-  </script>
+  })
+  .catch(() => {
+    appendMessage("Something went wrong. Please try again.", 'bot');
+  });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+
+{#  <script>#}
+{#    function appendMessage(text, sender) {#}
+{#      const msgDiv = document.createElement('div');#}
+{#      msgDiv.className = 'message ' + sender;#}
+{#      msgDiv.textContent = text;#}
+{#      document.getElementById('messages').appendChild(msgDiv);#}
+{#    }#}
+{##}
+{#    function sendMessage() {#}
+{#      const input = document.getElementById('user-input');#}
+{#      const message = input.value.trim();#}
+{#      if (!message) return;#}
+{##}
+{#      appendMessage(message, 'user');#}
+{#      input.value = '';#}
+{##}
+{#      fetch("/chatbot/sql/", {#}
+{#        method: "POST",#}
+{#        headers: {#}
+{#          "Content-Type": "application/x-www-form-urlencoded",#}
+{#          "X-CSRFToken": getCookie('csrftoken'),#}
+{#        },#}
+{#        body: "message=" + encodeURIComponent(message),#}
+{#      })#}
+{#      .then(res => res.json())#}
+{#      .then(data => {#}
+{#        if (Array.isArray(data.result)) {#}
+{#          if (data.result.length === 0) {#}
+{#            appendMessage("No results found.", 'bot');#}
+{#          } else {#}
+{#            data.result.forEach((row) => {#}
+{#              let msg = `🏠 ${row.title || "Property"}\n📍 ${row.street_address || ""}, ${row.suburb || ""}, ${row.city || ""}`;#}
+{#              if (row.price) msg += `\n💰 $${row.price}`;#}
+{#              appendMessage(msg, 'bot');#}
+{#            });#}
+{#          }#}
+{#        } else if (typeof data.result === "string") {#}
+{#          appendMessage(data.result, 'bot');#}
+{#        } else if (data.error) {#}
+{#          appendMessage("❌ " + data.error, 'bot');#}
+{#        } else {#}
+{#          appendMessage("Unexpected response format.", 'bot');#}
+{#        }#}
+{#      })#}
+{#      .catch(() => {#}
+{#        appendMessage("Something went wrong. Please try again.", 'bot');#}
+{#      });#}
+{#    }#}
+{##}
+{#    function getCookie(name) {#}
+{#      let cookieValue = null;#}
+{#      if (document.cookie && document.cookie !== '') {#}
+{#        const cookies = document.cookie.split(';');#}
+{#        for (let cookie of cookies) {#}
+{#          cookie = cookie.trim();#}
+{#          if (cookie.startsWith(name + '=')) {#}
+{#            cookieValue = decodeURIComponent(cookie.slice(name.length + 1));#}
+{#            break;#}
+{#          }#}
+{#        }#}
+{#      }#}
+{#      return cookieValue;#}
+{#    }#}
+{#  </script>#}
 </body>
 </html>

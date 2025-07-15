@@ -8,23 +8,22 @@ from listings.models import Property, Amenity
 from rapidfuzz import fuzz
 from chatbot.nl_query_engine import run_nl_query
 
-
 @require_POST
 @csrf_exempt
 def ai_sql_query(request):
     """
     Accepts a POST request with 'message' and returns a response from the LlamaIndex SQL query engine.
     Also performs fuzzy matching on property descriptions and amenities.
+    Enriches partial SQL data with full ORM data from Django.
     """
     user_input = request.POST.get("message", "").strip()
     if not user_input:
         return JsonResponse({"error": "No message provided"}, status=400)
 
     try:
-        # Run the natural language SQL query
         result = run_nl_query(user_input)
 
-        # Normalize the SQL response to list of dicts
+        # Normalize SQL response to list of dicts
         rows = []
         try:
             raw_result = result.response
@@ -35,20 +34,41 @@ def ai_sql_query(request):
 
             col_keys = result.metadata.get("col_keys", [])
             for tup in parsed:
+                row = {}
                 if isinstance(tup, tuple):
                     row = dict(zip(col_keys, tup))
-                    rows.append(row)
                 elif isinstance(tup, dict):
-                    rows.append(tup)
+                    row = tup
+
+                # ✅ Try to enrich with full data from database
+                try:
+                    prop = None
+                    if "id" in row:
+                        prop = Property.objects.get(id=row["id"])
+                    elif "title" in row:
+                        prop = Property.objects.filter(title__icontains=row["title"]).first()
+
+                    if prop:
+                        row["id"] = prop.id
+                        row["main_image"] = prop.main_image.url if prop.main_image else ""
+                        row["price"] = prop.price
+                        row["street_address"] = prop.street_address
+                        row["suburb"] = prop.suburb
+                        row["city"] = prop.city
+                        row["title"] = prop.title
+                        row["description"] = prop.description
+                except Property.DoesNotExist:
+                    pass
+
+                rows.append(row)
         except Exception as parse_err:
             print("❌ Error parsing SQL result:", parse_err)
             return JsonResponse({"error": "Failed to parse database results."}, status=500)
 
-        # If no results found, return message
         if not rows:
             return JsonResponse({"result": "No results found."}, status=200)
 
-        # Fuzzy match scoring based on description and amenities
+        # Fuzzy scoring
         scored = []
         for row in rows:
             description = row.get("description", "")
