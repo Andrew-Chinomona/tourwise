@@ -113,7 +113,22 @@ function sendMessage() {
   })
   .then(res => res.json())
   .then(data => {
-    if (Array.isArray(data.result)) {
+    // Handle new backend response structure
+    if (Array.isArray(data.result) && data.result.length > 1 && data.result[1].result && data.result[1].col_keys) {
+      const rows = data.result[1].result;
+      const colKeys = data.result[1].col_keys;
+      if (rows.length === 0) {
+        appendMessage("No results found.", 'bot');
+      } else {
+        rows.forEach(rowArr => {
+          let property = {};
+          colKeys.forEach((key, idx) => {
+            property[key] = rowArr[idx];
+          });
+          appendCard(property);
+        });
+      }
+    } else if (Array.isArray(data.result)) {
       if (data.result.length === 0) {
         appendMessage("No results found.", 'bot');
       } else {
@@ -147,70 +162,5 @@ function getCookie(name) {
   return cookieValue;
 }
 </script>
-
-{#  <script>#}
-{#    function appendMessage(text, sender) {#}
-{#      const msgDiv = document.createElement('div');#}
-{#      msgDiv.className = 'message ' + sender;#}
-{#      msgDiv.textContent = text;#}
-{#      document.getElementById('messages').appendChild(msgDiv);#}
-{#    }#}
-{##}
-{#    function sendMessage() {#}
-{#      const input = document.getElementById('user-input');#}
-{#      const message = input.value.trim();#}
-{#      if (!message) return;#}
-{##}
-{#      appendMessage(message, 'user');#}
-{#      input.value = '';#}
-{##}
-{#      fetch("/chatbot/sql/", {#}
-{#        method: "POST",#}
-{#        headers: {#}
-{#          "Content-Type": "application/x-www-form-urlencoded",#}
-{#          "X-CSRFToken": getCookie('csrftoken'),#}
-{#        },#}
-{#        body: "message=" + encodeURIComponent(message),#}
-{#      })#}
-{#      .then(res => res.json())#}
-{#      .then(data => {#}
-{#        if (Array.isArray(data.result)) {#}
-{#          if (data.result.length === 0) {#}
-{#            appendMessage("No results found.", 'bot');#}
-{#          } else {#}
-{#            data.result.forEach((row) => {#}
-{#              let msg = `🏠 ${row.title || "Property"}\n📍 ${row.street_address || ""}, ${row.suburb || ""}, ${row.city || ""}`;#}
-{#              if (row.price) msg += `\n💰 $${row.price}`;#}
-{#              appendMessage(msg, 'bot');#}
-{#            });#}
-{#          }#}
-{#        } else if (typeof data.result === "string") {#}
-{#          appendMessage(data.result, 'bot');#}
-{#        } else if (data.error) {#}
-{#          appendMessage("❌ " + data.error, 'bot');#}
-{#        } else {#}
-{#          appendMessage("Unexpected response format.", 'bot');#}
-{#        }#}
-{#      })#}
-{#      .catch(() => {#}
-{#        appendMessage("Something went wrong. Please try again.", 'bot');#}
-{#      });#}
-{#    }#}
-{##}
-{#    function getCookie(name) {#}
-{#      let cookieValue = null;#}
-{#      if (document.cookie && document.cookie !== '') {#}
-{#        const cookies = document.cookie.split(';');#}
-{#        for (let cookie of cookies) {#}
-{#          cookie = cookie.trim();#}
-{#          if (cookie.startsWith(name + '=')) {#}
-{#            cookieValue = decodeURIComponent(cookie.slice(name.length + 1));#}
-{#            break;#}
-{#          }#}
-{#        }#}
-{#      }#}
-{#      return cookieValue;#}
-{#    }#}
-{#  </script>#}
 </body>
 </html>

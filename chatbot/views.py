@@ -88,11 +88,10 @@ def ai_sql_query(request):
             total_score = desc_score * 0.6 + amenity_score * 0.4
             scored.append((total_score, row))
 
+        # Sort by score descending
         scored.sort(reverse=True, key=lambda x: x[0])
-        filtered = [row for score, row in scored if score > 40]
-        if not filtered:
-            filtered = [row for score, row in scored][:3]
-
+        # Return all results, sorted by score
+        filtered = [row for score, row in scored]
         return JsonResponse({"result": filtered}, status=200)
 
     except Exception as e:
