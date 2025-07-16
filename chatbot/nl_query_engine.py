@@ -49,30 +49,52 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
         self.sql_database = sql_database
 
     def query(self, natural_query, *args, **kwargs):
+        # Call the parent to get the result object (which includes the SQL)
         result = super().query(natural_query, *args, **kwargs)
         sql = result.metadata.get("sql_query", "")
 
-        new_sql = sql  # start with the original query
+        # --- Post-process SQL to ensure all required fields are always selected ---
+        required_fields = ["main_image", "price", "street_address", "suburb", "city"]
+        for field in required_fields:
+            if field not in sql.lower():
+                import re
+                select_match = re.match(r"(select\s+)(.+?)(\s+from\s+listings_property)", sql, re.IGNORECASE)
+                if select_match:
+                    select_cols = select_match.group(2)
+                    if "*" in select_cols:
+                        new_select = select_cols + f", {field}"
+                    else:
+                        new_select = select_cols + f", {field}"
+                    sql = select_match.group(1) + new_select + select_match.group(3) + sql[select_match.end(3):]
+                    result.metadata["sql_query"] = sql
+        # --- End post-process ---
 
-        # Rewrite property_type to lowercase
+        # Rewrite property_type comparisons to be case-insensitive (improved logic for table aliases)
         new_sql = re.sub(
-            r"(?:\b\w+\.)?property_type\s*=\s*'([^']+)'",
-            lambda m: f"LOWER(property_type) = '{m.group(1).lower()}'",
-            new_sql
+            r"(?:\b(\w+)\.)?property_type\s*=\s*'([^']+)'",
+            lambda m: f"LOWER({m.group(1) + '.' if m.group(1) else ''}property_type) = '{m.group(2).lower()}'",
+            sql
         )
-
-        # Rewrite city, suburb, street_address to Title Case (no LOWER())
-        for field in ["city", "suburb", "street_address"]:
-            new_sql = re.sub(
-                rf"(?:\b\w+\.)?{field}\s*=\s*'([^']+)'",
-                lambda m: f"{field} = '{m.group(1).title()}'",
-                new_sql
-            )
-
         if new_sql != sql:
-            print("🔁 Final Rewritten SQL:", new_sql)  # Optional for debugging
             result.metadata["sql_query"] = new_sql
             result.response = self.sql_database.run_sql(new_sql)
+
+        # --- Fetch property images for each property in the result (for mobile views) ---
+        # If result.response is a list of dicts, add property_images as a list of image paths
+        try:
+            from listings.models import PropertyImage
+            if isinstance(result.response, list):
+                for row in result.response:
+                    # Try to get property id from row (id or pk)
+                    prop_id = row.get("id")
+                    if prop_id:
+                        images = PropertyImage.objects.filter(property_id=prop_id).values_list("image", flat=True)
+                        # Store as list of relative paths
+                        row["property_images"] = list(images)
+        except Exception as e:
+            # If anything goes wrong, skip adding images (do not break main flow)
+            pass
+        # --- End property images logic ---
 
         return result
 

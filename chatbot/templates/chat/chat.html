@@ -66,6 +66,8 @@ function appendMessage(text, sender) {
 }
 
 function appendCard(property) {
+  // Debug: log property object
+  // console.log(property);
   const card = document.createElement('div');
   card.style.border = "1px solid #ddd";
   card.style.borderRadius = "8px";
@@ -75,19 +77,36 @@ function appendCard(property) {
   card.style.gap = "10px";
   card.style.backgroundColor = "#f9f9f9";
 
+  // --- Main image logic ---
+  // Use main_image from /media/property_main_images if present
+  let imageUrl = property.main_image;
+  if (imageUrl && !imageUrl.startsWith('http')) {
+    imageUrl = '/media/' + imageUrl;
+  }
+  // Fallback to default image if not present
   const img = document.createElement('img');
-  img.src = property.main_image || "{% static 'images/default-profile-icon.png' %}";
+  img.src = imageUrl || "{% static 'images/default-profile-icon.png' %}";
   img.alt = property.title || "Property Image";
   img.style.width = "100px";
   img.style.height = "100px";
   img.style.objectFit = "cover";
   img.style.borderRadius = "6px";
 
+  // --- Property images for mobile (future use) ---
+  // If property.property_images is present (array of image paths), use them for mobile views
+  // Example:
+  // if (Array.isArray(property.property_images)) {
+  //   property.property_images.forEach(imgPath => {
+  //     // Use '/media/' + imgPath for mobile carousel/gallery
+  //   });
+  // }
+
   const info = document.createElement('div');
-  // Handle price: show if present and not empty/null/undefined/zero
   let price = property.price;
-  if (price === undefined || price === null || price === "" || price === 0) {
+  if (price === undefined || price === null || price === "") {
     price = "N/A";
+  } else {
+    price = Number(price).toLocaleString();
   }
   info.innerHTML = `
     <strong>${property.title || "Untitled Property"}</strong><br>
