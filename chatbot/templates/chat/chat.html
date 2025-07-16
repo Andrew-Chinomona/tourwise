@@ -84,10 +84,15 @@ function appendCard(property) {
   img.style.borderRadius = "6px";
 
   const info = document.createElement('div');
+  // Handle price: show if present and not empty/null/undefined/zero
+  let price = property.price;
+  if (price === undefined || price === null || price === "" || price === 0) {
+    price = "N/A";
+  }
   info.innerHTML = `
     <strong>${property.title || "Untitled Property"}</strong><br>
     📍 ${property.street_address || ""}, ${property.suburb || ""}, ${property.city || ""}<br>
-    💰 $${property.price || "N/A"}
+    💰 $${price}
   `;
 
   card.appendChild(img);
