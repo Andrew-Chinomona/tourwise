@@ -5,9 +5,115 @@
   <meta charset="UTF-8">
   <title>Chatbot SQL Tester</title>
   <style>
+    html, body {
+      height: 100%;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
-      margin: 40px;
+      background: #fcf8f3;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    .tw-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px 10px 20px;
+      background: #fcf8f3;
+      /* box-shadow: 0 2px 12px rgba(193,90,46,0.04); */
+      border-radius: 0;
+      margin: 0;
+      height: 56px;
+    }
+    .tw-header-icon {
+      background: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.08);
+      cursor: pointer;
+      transition: box-shadow 0.2s, background 0.2s;
+      padding: 0;
+    }
+    .tw-header-icon:active, .tw-header-icon:focus {
+      box-shadow: 0 4px 16px rgba(193,90,46,0.16);
+      outline: none;
+    }
+    .tw-header-center {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      left: 0; right: 0;
+      pointer-events: none;
+    }
+    .tw-header-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: none;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.10);
+      padding: 6px 28px 6px 16px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #c15a2e;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: box-shadow 0.2s, background 0.2s;
+    }
+    .tw-header-pill:active, .tw-header-pill:focus {
+      box-shadow: 0 4px 16px rgba(193,90,46,0.16);
+      outline: none;
+    }
+    .tw-header-logo {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: white;
+    }
+    .tw-header-title {
+      color: #c15a2e;
+      font-weight: bold;
+      font-size: 1.2rem;
+      letter-spacing: 0.5px;
+    }
+    @media (max-width: 700px) {
+      body {
+        margin: 0;
+      }
+      .tw-header {
+        padding: 10px 8px 10px 8px;
+        margin-bottom: 16px;
+        border-radius: 0;
+        height: 56px;
+      }
+      .tw-header-logo {
+        height: 26px;
+        width: 26px;
+      }
+      .tw-header-pill {
+        font-size: 1rem;
+        padding: 4px 16px 4px 10px;
+      }
+      .tw-header-icon {
+        width: 36px;
+        height: 36px;
+      }
     }
     .chat-box {
       max-width: 600px;
@@ -25,7 +131,7 @@
     }
     .bot {
       background-color: #f2f2f2;
-      white-space: pre-line; /* Enable line breaks */
+      white-space: pre-line;
     }
     .input-group {
       margin-top: 20px;
@@ -45,19 +151,378 @@
       cursor: pointer;
       font-weight: bold;
     }
+    /* Responsive property card */
+    .property-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin: 10px 0;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      background-color: #f9f9f9;
+      align-items: center;
+      transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+    .property-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      transform: translateY(-2px) scale(1.01);
+    }
+    .property-card img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 600px) {
+      .property-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .property-card img {
+        width: 100%;
+        height: 180px;
+      }
+    }
+    /* Sidebar styles */
+    .tw-sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 260px;
+      background: #fff;
+      box-shadow: 2px 0 16px rgba(193,90,46,0.10);
+      z-index: 1000;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+    }
+    .tw-sidebar.open {
+      transform: translateX(0);
+    }
+    .tw-sidebar-close {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: #c15a2e;
+      align-self: flex-end;
+      margin: 12px 16px 0 0;
+      cursor: pointer;
+    }
+    .tw-sidebar-content {
+      padding: 24px 20px;
+    }
+    .tw-sidebar-content h3 {
+      color: #c15a2e;
+      margin-bottom: 16px;
+    }
+    .tw-sidebar-content ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .tw-sidebar-content li {
+      margin-bottom: 14px;
+    }
+    .tw-sidebar-content a {
+      color: #c15a2e;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.08rem;
+      transition: color 0.2s;
+    }
+    .tw-sidebar-content a:hover {
+      color: #a3471e;
+    }
+    /* Responsive header icons */
+    .tw-header-icon, .tw-header-pill {
+      min-width: 0;
+      min-height: 0;
+    }
+    @media (max-width: 700px) {
+      .tw-header {
+        padding: 6px 2vw 6px 2vw;
+      }
+      .tw-header-logo {
+        height: 22px;
+        width: 22px;
+      }
+      .tw-header-pill {
+        font-size: 0.95rem;
+        padding: 3px 10vw 3px 2vw;
+      }
+      .tw-header-icon {
+        width: 32px;
+        height: 32px;
+      }
+      .tw-sidebar {
+        width: 70vw;
+        min-width: 180px;
+        max-width: 320px;
+      }
+    }
+    .chat-container {
+      position: absolute;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: calc(100vh - 56px);
+      min-height: 0;
+      width: 100vw;
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    .chat-box {
+      width: 100%;
+      max-width: 900px;
+      background: none;
+      margin: 0 auto 0 auto;
+      padding: 0 32px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      /* Pin input to bottom, messages fill above */
+    }
+    #messages {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-height: 0;
+      margin: 0;
+      padding: 12px 0 10px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      gap: 8px;
+      /* Hide scrollbar arrows and minimize scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: #f2f2f2 #fcf8f3;
+    }
+    #messages::-webkit-scrollbar {
+      width: 8px;
+      background: transparent;
+    }
+    #messages::-webkit-scrollbar-thumb {
+      background: #f2f2f2;
+      border-radius: 8px;
+    }
+    #messages::-webkit-scrollbar-button {
+      display: none;
+      height: 0;
+      width: 0;
+    }
+    .message {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      max-width: 80%;
+      padding: 12px 18px;
+      border-radius: 18px;
+      margin: 2px 0;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.07);
+      word-break: break-word;
+      transition: background 0.2s, color 0.2s;
+      position: relative;
+      display: inline-block;
+    }
+    .message.user {
+      background: #c15a2e;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 6px;
+      border-top-right-radius: 18px;
+      border-top-left-radius: 18px;
+      border-bottom-left-radius: 18px;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.13);
+      text-align: left;
+    }
+    .message.bot {
+      background: #fff;
+      color: #111;
+      align-self: flex-start;
+      border-bottom-left-radius: 6px;
+      border-top-right-radius: 18px;
+      border-top-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.07);
+      text-align: left;
+    }
+    /* Modern input bar */
+    .input-group {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 16px 0 16px 0;
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+      width: 100%;
+      justify-content: center;
+    }
+    .input-group input[type="text"] {
+      flex: 1;
+      padding: 14px 18px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 24px 0 0 24px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.10);
+      outline: none;
+      color: #333;
+      transition: box-shadow 0.2s;
+    }
+    .input-group input[type="text"]:focus {
+      box-shadow: 0 4px 16px rgba(193,90,46,0.18);
+    }
+    .input-group button {
+      padding: 0 26px;
+      background-color: #c15a2e;
+      color: #fff;
+      border: none;
+      border-radius: 0 24px 24px 0;
+      font-weight: bold;
+      font-size: 1rem;
+      height: 48px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.10);
+      transition: background 0.2s, box-shadow 0.2s;
+      margin-left: -2px;
+    }
+    .input-group button:active, .input-group button:focus {
+      background: #a3471e;
+      box-shadow: 0 4px 16px rgba(193,90,46,0.18);
+      outline: none;
+    }
+    @media (max-width: 700px) {
+      .chat-box {
+        max-width: 100vw;
+        padding: 0 2vw;
+      }
+      .message {
+        font-size: 0.90rem;
+        padding: 10px 12px;
+        max-width: 95%;
+      }
+      .input-group input[type="text"] {
+        font-size: 0.98rem;
+        padding: 12px 12px;
+      }
+      .input-group button {
+        font-size: 0.98rem;
+        height: 42px;
+        padding: 0 16px;
+      }
+    }
+    .property-card-js {
+      width: 320px;
+      min-width: 0;
+      max-width: 100%;
+      height: auto;
+      min-height: 0;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      margin: 10px 0;
+      padding: 0;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.07);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .property-card-js:hover {
+      box-shadow: 0 4px 16px rgba(193,90,46,0.13);
+      transform: translateY(-2px) scale(1.01);
+    }
+    .property-card-img-section-js {
+      width: 100%;
+      height: 180px;
+      background: #f2f2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .property-card-img-js {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+      background: #f2f2f2;
+    }
+    @media (max-width: 600px) {
+      .property-card-js {
+        width: 98vw;
+        max-width: 98vw;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Sidebar -->
+  <div id="tw-sidebar" class="tw-sidebar">
+    <button class="tw-sidebar-close" onclick="closeSidebar()" aria-label="Close Sidebar">&times;</button>
+    <div class="tw-sidebar-content">
+      <h3>Menu</h3>
+      <ul>
+        <li><a href="/accounts/home/">Home</a></li>
+        <li><a href="/listings/">Listings</a></li>
+        <li><a href="/accounts/host_dashboard/">Host Dashboard</a></li>
+        <li><a href="/accounts/tenant_dashboard/">Tenant Dashboard</a></li>
+      </ul>
+    </div>
+  </div>
+  <!-- Header Bar -->
+  <header class="tw-header">
+    <button class="tw-header-icon tw-hamburger" aria-label="Menu" onclick="openSidebar()">
+      <!-- Hamburger SVG -->
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect y="6" width="28" height="3" rx="1.5" fill="#c15a2e"/>
+        <rect y="13" width="28" height="3" rx="1.5" fill="#c15a2e"/>
+        <rect y="20" width="28" height="3" rx="1.5" fill="#c15a2e"/>
+      </svg>
+    </button>
+    <div class="tw-header-center">
+      <button class="tw-header-pill" onclick="window.location.href='/accounts/home/'">
+        <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="tw-header-logo">
+        <span class="tw-header-title">Tourwise</span>
+      </button>
+    </div>
+    <button class="tw-header-icon tw-plus" aria-label="Add" onclick="startNewChat()">
+      <!-- Plus in circle SVG -->
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="14" r="13" fill="#fff" stroke="#c15a2e" stroke-width="2"/>
+        <rect x="13" y="8" width="2" height="12" rx="1" fill="#c15a2e"/>
+        <rect x="8" y="13" width="12" height="2" rx="1" fill="#c15a2e"/>
+      </svg>
+    </button>
+  </header>
+  <!-- End Header Bar -->
+  <div class="chat-container">
   <div class="chat-box" id="chat-box">
-    <h2>Tourwise NL-SQL Chatbot</h2>
     <div id="messages"></div>
-
     <div class="input-group">
       <input type="text" id="user-input" placeholder="e.g. Show me houses in Harare under $500" />
       <button onclick="sendMessage()">Send</button>
+      </div>
     </div>
   </div>
 <script>
+const WELCOME_MESSAGE = `👋 Hey there, welcome to Tourwise!\nI’m your virtual assistant, here to help you find your perfect home — stress-free and hassle-free. 🏡✨\nJust tell me what you're looking for, and I’ll do the searching for you.\nWhether you're after something specific or just browsing, I’ve got you covered.\nLet’s get started — your next home could be just one message away! 😊`;
+
 function appendMessage(text, sender) {
   const msgDiv = document.createElement('div');
   msgDiv.className = 'message ' + sender;
@@ -65,58 +530,79 @@ function appendMessage(text, sender) {
   document.getElementById('messages').appendChild(msgDiv);
 }
 
+// --- Tailwind-based Property Card Rendering ---
 function appendCard(property) {
-  // Debug: log property object
-  // console.log(property);
-  const card = document.createElement('div');
-  card.style.border = "1px solid #ddd";
-  card.style.borderRadius = "8px";
-  card.style.margin = "10px 0";
-  card.style.padding = "10px";
-  card.style.display = "flex";
-  card.style.gap = "10px";
-  card.style.backgroundColor = "#f9f9f9";
+  // Remove old grid if it exists (prevents stacking)
+  let grid = document.getElementById('property-grid');
+  if (!grid) {
+    grid = document.createElement('div');
+    grid.id = 'property-grid';
+    grid.style.display = 'flex';
+    grid.style.flexDirection = 'column';
+    grid.style.alignItems = 'flex-start';
+    grid.style.width = '100%';
+    document.getElementById('messages').appendChild(grid);
+  }
 
-  // --- Main image logic ---
-  // Use main_image from /media/property_main_images if present
+  // Card element
+  const card = document.createElement('article');
+  card.className = 'property-card-js';
+  card.title = property.title || 'Property';
+  card.onclick = () => {
+    window.location.href = `/listings/${property.id}/`;
+  };
+
+  // Image section
+  const imgSection = document.createElement('div');
+  imgSection.className = 'property-card-img-section-js';
+  const img = document.createElement('img');
   let imageUrl = property.main_image;
   if (imageUrl && !imageUrl.startsWith('http')) {
     imageUrl = '/media/' + imageUrl;
   }
-  // Fallback to default image if not present
-  const img = document.createElement('img');
-  img.src = imageUrl || "{% static 'images/default-profile-icon.png' %}";
-  img.alt = property.title || "Property Image";
-  img.style.width = "100px";
-  img.style.height = "100px";
-  img.style.objectFit = "cover";
-  img.style.borderRadius = "6px";
+  img.src = imageUrl || '/static/images/default-profile-icon.png';
+  img.alt = property.title || 'Property Image';
+  img.className = 'property-card-img-js';
+  imgSection.appendChild(img);
 
-  // --- Property images for mobile (future use) ---
-  // If property.property_images is present (array of image paths), use them for mobile views
-  // Example:
-  // if (Array.isArray(property.property_images)) {
-  //   property.property_images.forEach(imgPath => {
-  //     // Use '/media/' + imgPath for mobile carousel/gallery
-  //   });
-  // }
-
+  // Info section
   const info = document.createElement('div');
-  let price = property.price;
-  if (price === undefined || price === null || price === "") {
-    price = "N/A";
-  } else {
-    price = Number(price).toLocaleString();
-  }
-  info.innerHTML = `
-    <strong>${property.title || "Untitled Property"}</strong><br>
-    📍 ${property.street_address || ""}, ${property.suburb || ""}, ${property.city || ""}<br>
-    💰 $${price}
-  `;
+  info.style.display = 'flex';
+  info.style.flexDirection = 'column';
+  info.style.alignItems = 'center';
+  info.style.justifyContent = 'center';
+  info.style.padding = '10px 8px';
+  info.style.textAlign = 'center';
+  const title = document.createElement('h3');
+  title.style.fontWeight = '600';
+  title.style.fontSize = '1.08rem';
+  title.style.color = '#333';
+  title.style.margin = '0 0 2px 0';
+  title.title = property.title || '';
+  title.textContent = property.title || 'Untitled Property';
+  const location = document.createElement('p');
+  location.style.fontSize = '0.97rem';
+  location.style.color = '#888';
+  location.style.margin = '0 0 2px 0';
+  location.title = `${property.city || ''}, ${property.suburb || ''}`;
+  location.textContent = `${property.city || ''}, ${property.suburb || ''}`;
+  const price = document.createElement('p');
+  price.style.fontSize = '1.05rem';
+  price.style.color = '#c15a2e';
+  price.style.fontWeight = 'bold';
+  price.style.margin = '4px 0 0 0';
+  price.textContent = `$${property.price || 'N/A'}`;
 
-  card.appendChild(img);
+  info.appendChild(title);
+  info.appendChild(location);
+  info.appendChild(price);
+
+  // Assemble card
+  card.appendChild(imgSection);
   card.appendChild(info);
-  document.getElementById('messages').appendChild(card);
+
+  // Add card to grid
+  grid.appendChild(card);
 }
 
 function sendMessage() {
@@ -185,6 +671,77 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+
+// --- Welcome message typing animation ---
+function showWelcomeMessage() {
+  const messagesDiv = document.getElementById('messages');
+  messagesDiv.innerHTML = '';
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message bot';
+  messagesDiv.appendChild(msgDiv);
+
+  const input = document.getElementById('user-input');
+  const sendBtn = input.nextElementSibling;
+  input.disabled = true;
+  sendBtn.disabled = true;
+
+  let i = 0;
+  let cursorVisible = true;
+  let displayText = '';
+  const chars = WELCOME_MESSAGE;
+  function typeStep() {
+    if (i < chars.length) {
+      displayText += chars.substr(i, 2);
+      i += 2;
+      msgDiv.textContent = displayText + (cursorVisible ? '|' : '');
+      setTimeout(typeStep, 25);
+    } else {
+      // Blinking cursor for 600ms
+      let blinkCount = 0;
+      function blinkCursor() {
+        cursorVisible = !cursorVisible;
+        msgDiv.textContent = displayText + (cursorVisible ? '|' : '');
+        blinkCount++;
+        if (blinkCount < 6) {
+          setTimeout(blinkCursor, 100);
+        } else {
+          msgDiv.textContent = displayText;
+          input.disabled = false;
+          sendBtn.disabled = false;
+          input.focus();
+        }
+      }
+      blinkCursor();
+    }
+  }
+  typeStep();
+}
+
+// Sidebar open/close
+function openSidebar() {
+  document.getElementById('tw-sidebar').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('tw-sidebar').classList.remove('open');
+}
+// --- Start new chat (clear messages and input, show welcome) ---
+function startNewChat() {
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('user-input').value = '';
+  showWelcomeMessage();
+}
+
+// Send message on Enter key
+document.addEventListener('DOMContentLoaded', function() {
+  showWelcomeMessage();
+  const input = document.getElementById('user-input');
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !input.disabled) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+});
 </script>
 </body>
 </html>

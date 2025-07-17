@@ -54,7 +54,7 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
         sql = result.metadata.get("sql_query", "")
 
         # --- Post-process SQL to ensure all required fields are always selected ---
-        required_fields = ["main_image", "price", "street_address", "suburb", "city"]
+        required_fields = ["id", "main_image", "price", "street_address", "suburb", "city"]
         for field in required_fields:
             if field not in sql.lower():
                 import re
