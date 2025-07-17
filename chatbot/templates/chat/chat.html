@@ -74,6 +74,7 @@
       cursor: pointer;
       pointer-events: auto;
       transition: box-shadow 0.2s, background 0.2s;
+      text-decoration: none !important;
     }
     .tw-header-pill:active, .tw-header-pill:focus {
       box-shadow: 0 4px 16px rgba(193,90,46,0.16);
@@ -188,19 +189,37 @@
     /* Sidebar styles */
     .tw-sidebar {
       position: fixed;
-      top: 0; left: 0;
-      height: 100vh;
+      top: 56px; /* height of header */
+      left: 0;
+      height: calc(100vh - 56px);
       width: 260px;
       background: #fff;
       box-shadow: 2px 0 16px rgba(193,90,46,0.10);
-      z-index: 1000;
+      z-index: 1001;
       transform: translateX(-100%);
       transition: transform 0.3s cubic-bezier(.4,0,.2,1);
       display: flex;
       flex-direction: column;
+      border-radius: 0 18px 18px 0;
     }
     .tw-sidebar.open {
       transform: translateX(0);
+    }
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(30, 30, 30, 0.35);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
     }
     .tw-sidebar-close {
       background: none;
@@ -487,22 +506,276 @@
         gap: 8px 0;
       }
     }
+    .sidebar-account {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #f2f2f2;
+      background: none;
+    }
+    .sidebar-account-avatar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-profile-img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #f2f2f2;
+      border: 2px solid #eee;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.08);
+    }
+    .sidebar-account-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      justify-content: center;
+    }
+    .sidebar-account-name {
+      font-weight: 600;
+      color: #c15a2e;
+      font-size: 1.12rem;
+      margin-bottom: 2px;
+    }
+    .sidebar-account-email {
+      font-size: 0.98rem;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .sidebar-dashboard-btn {
+      display: inline-block;
+      background: #c15a2e;
+      color: #fff;
+      border-radius: 18px;
+      padding: 6px 18px;
+      font-size: 0.98rem;
+      text-decoration: none;
+      font-weight: 500;
+      margin-top: 4px;
+      transition: background 0.2s;
+      text-align: center;
+    }
+    .sidebar-dashboard-btn:hover {
+      background: #a3471e;
+    }
+    .sidebar-svg-avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: #f2f2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.10);
+      margin-bottom: 1.2rem;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar-svg-icon {
+      width: 72px;
+      height: 72px;
+      display: block;
+    }
+    .sidebar-account-block {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+    .sidebar-account-name {
+      width: 100%;
+      text-align: center;
+      margin: 0 auto 0.25rem auto;
+      display: block;
+      color: #111;
+      font-size: 1.18rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .sidebar-account-email {
+      width: 100%;
+      text-align: center;
+      margin: 0 auto 0.15rem auto;
+      display: block;
+      color: #222;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+    .sidebar-account-phone {
+      width: 100%;
+      text-align: center;
+      margin: 0 auto 0.7rem auto;
+      display: block;
+      color: #222;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+    .sidebar-dashboard-btn {
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, #c15a2e 0%, #e07a3f 100%);
+      color: #fff !important;
+      border: none;
+      box-shadow: 0 2px 8px rgba(59,130,246,0.10);
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      transition: background 0.2s, box-shadow 0.2s;
+      border-radius: 999px !important;
+      padding: 0.5rem 2.2rem;
+      min-width: 160px;
+      text-align: center;
+    }
+    .sidebar-dashboard-btn:hover {
+      background: linear-gradient(90deg, #a3471e 0%, #e07a3f 100%);
+      color: #fff !important;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.13);
+    }
+    .sidebar-account-divider {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      border: none;
+      border-top: 1.5px solid #eee;
+      width: 100%;
+    }
+    .sidebar-auth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0.5rem 1.5rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-radius: 999px !important;
+      background: linear-gradient(90deg, #c15a2e 0%, #e07a3f 100%);
+      color: #fff !important;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.10);
+      border: none;
+      transition: background 0.2s, box-shadow 0.2s;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .sidebar-auth-btn:hover {
+      background: linear-gradient(90deg, #a3471e 0%, #e07a3f 100%);
+      color: #fff !important;
+      box-shadow: 0 4px 16px rgba(193,90,46,0.13);
+    }
+    .sidebar-auth-icon {
+      width: 1.3em;
+      height: 1.3em;
+      margin-right: 0.5em;
+      vertical-align: middle;
+      stroke: #fff;
+    }
+    @media (max-width: 600px) {
+      .sidebar-auth-btn {
+        width: 98%;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+    }
+    .sidebar-profile-photo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0;
+      box-shadow: none;
+    }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
   <div id="tw-sidebar" class="tw-sidebar">
-    <button class="tw-sidebar-close" onclick="closeSidebar()" aria-label="Close Sidebar">&times;</button>
     <div class="tw-sidebar-content">
-      <h3>Menu</h3>
-      <ul>
-        <li><a href="/accounts/home/">Home</a></li>
-        <li><a href="/listings/">Listings</a></li>
-        <li><a href="/accounts/host_dashboard/">Host Dashboard</a></li>
-        <li><a href="/accounts/tenant_dashboard/">Tenant Dashboard</a></li>
-      </ul>
+      <!-- Desktop Sidebar User/Profile Section -->
+      <div class="flex flex-col items-center mb-6 sidebar-account-block">
+        {% if user.is_authenticated %}
+          {% if user.profile_photo %}
+            <div class="sidebar-svg-avatar">
+              <img src="{{ user.profile_photo.url }}" alt="Profile Photo" class="sidebar-profile-photo" />
+            </div>
+          {% else %}
+            <div class="sidebar-svg-avatar">
+              <svg class="sidebar-svg-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="24" fill="#f2f2f2"/>
+                <path d="M24 24c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7z" fill="#c15a2e"/>
+                <path d="M12 36c0-4.418 5.373-8 12-8s12 3.582 12 8v2a2 2 0 01-2 2H14a2 2 0 01-2-2v-2z" fill="#c15a2e"/>
+              </svg>
+            </div>
+          {% endif %}
+          <h2 class="sidebar-account-name text-xl font-bold text-gray-800 text-center mt-2 mb-1">
+            {{ user.get_full_name|default:user.username }}
+          </h2>
+          <p class="sidebar-account-email text-gray-500 text-sm text-center mb-1">{{ user.email }}</p>
+          <p class="sidebar-account-phone text-gray-500 text-sm text-center mb-3">{{ user.phone_number|default:'No phone number' }}</p>
+          <a href="{% if user.user_type == 'host' %}{% url 'host_dashboard' %}{% else %}{% url 'tenant_dashboard' %}{% endif %}"
+               class="sidebar-dashboard-btn">
+               Go to Dashboard
+          </a>
+
+
+          <hr class="sidebar-account-divider my-2 w-full" style="border: none; border-top: 1.5px solid #eee;">
+        {% else %}
+          <div class="sidebar-svg-avatar">
+            <svg class="sidebar-svg-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="24" fill="#f2f2f2"/>
+              <path d="M24 24c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7z" fill="#c15a2e"/>
+              <path d="M12 36c0-4.418 5.373-8 12-8s12 3.582 12 8v2a2 2 0 01-2 2H14a2 2 0 01-2-2v-2z" fill="#c15a2e"/>
+            </svg>
+          </div>
+          <h2 class="sidebar-account-name text-xl font-bold text-gray-800 text-center mt-2 mb-1">Guest</h2>
+          <p class="sidebar-account-email text-gray-500 text-sm text-center mb-1">Not logged in</p>
+          <p class="sidebar-account-phone text-gray-500 text-sm text-center mb-3">&nbsp;</p>
+          <a href="{% url 'login' %}?next={% url 'chat' %}"
+             class="sidebar-dashboard-btn sidebar-auth-btn mb-2">
+            <svg class="sidebar-auth-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+            Login
+          </a>
+          <a href="{% url 'signup' %}?next={% url 'chat' %}"
+             class="sidebar-dashboard-btn sidebar-auth-btn">
+            <svg class="sidebar-auth-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Sign Up
+          </a>
+          <hr class="sidebar-account-divider my-2 w-full" style="border: none; border-top: 1.5px solid #eee;">
+        {% endif %}
+      </div>
+
+      <!-- History Section -->
+      <div class="border-t border-gray-200 pt-4 mb-4">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">History</h3>
+        {% if user.is_authenticated %}
+          <ul class="space-y-2">
+            <li class="text-gray-700 px-3 py-2 rounded-lg bg-gray-50">No previous chats yet.</li>
+          </ul>
+        {% else %}
+          <div class="text-gray-500 text-sm px-3 py-2">You need to be logged in to view history</div>
+        {% endif %}
+      </div>
+
     </div>
   </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
   <!-- Header Bar -->
   <header class="tw-header">
     <button class="tw-header-icon tw-hamburger" aria-label="Menu" onclick="openSidebar()">
@@ -514,10 +787,10 @@
       </svg>
     </button>
     <div class="tw-header-center">
-      <button class="tw-header-pill" onclick="window.location.href='/accounts/home/'">
-        <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="tw-header-logo">
-        <span class="tw-header-title">Tourwise</span>
-      </button>
+        <a href="{% url 'home' %}" class="tw-header-pill">
+            <img src="{% static 'images/logo-black.png' %}" alt="Tourwise Logo" class="tw-header-logo">
+            <span class="tw-header-title">Tourwise</span>
+        </a>
     </div>
     <button class="tw-header-icon tw-plus" aria-label="Add" onclick="startNewChat()">
       <!-- Plus in circle SVG -->
@@ -550,16 +823,21 @@ function appendMessage(text, sender) {
 
 // --- Tailwind-based Property Card Rendering ---
 function appendCard(property) {
-  // Remove old grid if it exists (prevents stacking)
+  // Always check for and create the property grid if it doesn't exist
   let grid = document.getElementById('property-grid');
   if (!grid) {
     grid = document.createElement('div');
     grid.id = 'property-grid';
-    grid.style.display = 'flex';
-    grid.style.flexDirection = 'column';
-    grid.style.alignItems = 'flex-start';
-    grid.style.width = '100%';
-    document.getElementById('messages').appendChild(grid);
+    // Insert the grid after the last message, or at the end if no messages
+    const messagesDiv = document.getElementById('messages');
+    // Find the last message element
+    let lastMsg = messagesDiv.lastElementChild;
+    // If the last element is a property grid, don't add another
+    if (lastMsg && lastMsg.id === 'property-grid') {
+      grid = lastMsg;
+    } else {
+      messagesDiv.appendChild(grid);
+    }
   }
 
   // Card element
@@ -738,10 +1016,13 @@ function showWelcomeMessage() {
 // Sidebar open/close
 function openSidebar() {
   document.getElementById('tw-sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
 }
 function closeSidebar() {
   document.getElementById('tw-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
 }
+document.getElementById('sidebar-overlay').onclick = closeSidebar;
 // --- Start new chat (clear messages and input, show welcome) ---
 function startNewChat() {
   document.getElementById('messages').innerHTML = '';
