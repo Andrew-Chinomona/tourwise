@@ -913,6 +913,49 @@
         margin-top: 0.3rem;
       }
     }
+    @media (max-width: 768px) {
+      .property-card-img-mobile-carousel {
+        width: 60vw;
+        max-width: 60vw;
+        aspect-ratio: 1/1;
+        border-radius: 1.1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        background: #f2f2f2;
+        display: flex;
+        align-items: center;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 auto 1.1rem auto;
+      }
+      .property-card-img-mobile-slide {
+        flex: 0 0 100%;
+        width: 60vw;
+        height: 60vw;
+        max-width: 60vw;
+        max-height: 60vw;
+        border-radius: 1.1rem;
+        object-fit: cover;
+        scroll-snap-align: center;
+        display: block;
+      }
+      .property-card-carousel-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.3rem;
+        margin: 0.4rem 0 0.2rem 0;
+      }
+      .property-card-carousel-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        transition: background 0.2s;
+      }
+      .property-card-carousel-dot.active {
+        background: #c15a2e;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1057,18 +1100,43 @@ function appendCard(property) {
       window.location.href = `/listings/${property.id}/`;
     };
 
-    // Image container
-    const imgContainer = document.createElement('div');
-    imgContainer.className = 'property-card-img-mobile-container';
-    const img = document.createElement('img');
-    let imageUrl = property.main_image;
-    if (imageUrl && !imageUrl.startsWith('http')) {
-      imageUrl = '/media/' + imageUrl;
-    }
-    img.src = imageUrl || '/static/images/default-profile-icon.png';
-    img.alt = property.title || 'Property Image';
-    img.className = 'property-card-img-mobile';
-    imgContainer.appendChild(img);
+    // Carousel container
+    const carousel = document.createElement('div');
+    carousel.className = 'property-card-img-mobile-carousel';
+
+    // Use property.images if available, else fallback to main_image
+    let images = property.images || [];
+    if (!images.length && property.main_image) images = [property.main_image];
+    images.forEach((imgUrl, idx) => {
+      let imageUrl = imgUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = '/media/' + imageUrl;
+      }
+      const img = document.createElement('img');
+      img.src = imageUrl || '/static/images/default-profile-icon.png';
+      img.alt = property.title || 'Property Image';
+      img.className = 'property-card-img-mobile-slide';
+      carousel.appendChild(img);
+    });
+
+    // Carousel dots
+    const dots = document.createElement('div');
+    dots.className = 'property-card-carousel-dots';
+    images.forEach((_, idx) => {
+      const dot = document.createElement('div');
+      dot.className = 'property-card-carousel-dot' + (idx === 0 ? ' active' : '');
+      dots.appendChild(dot);
+    });
+
+    // Simple scroll event to update active dot
+    carousel.addEventListener('scroll', function () {
+      const scrollLeft = carousel.scrollLeft;
+      const slideWidth = carousel.offsetWidth;
+      const activeIdx = Math.round(scrollLeft / slideWidth);
+      Array.from(dots.children).forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === activeIdx);
+      });
+    });
 
     // Details
     const title = document.createElement('div');
@@ -1083,7 +1151,8 @@ function appendCard(property) {
     price.className = 'property-card-price-mobile';
     price.textContent = `$${property.price || 'N/A'}`;
 
-    card.appendChild(imgContainer);
+    card.appendChild(carousel);
+    if (images.length > 1) card.appendChild(dots);
     card.appendChild(title);
     card.appendChild(location);
     card.appendChild(price);

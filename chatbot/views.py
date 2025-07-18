@@ -57,6 +57,10 @@ def ai_sql_query(request):
                         row["city"] = prop.city
                         row["title"] = prop.title
                         row["description"] = prop.description
+
+                        from listings.models import PropertyImage
+                        images = PropertyImage.objects.filter(property=prop).values_list("image", flat=True)
+                        row["property_images"] = [img.url for img in images]
                 except Property.DoesNotExist:
                     pass
 
