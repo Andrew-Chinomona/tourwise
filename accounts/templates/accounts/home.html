@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load clean_location %}
-
+{% load widget_tweaks %}
 {% block extra_head %}
   <style>
     :root {
@@ -979,7 +979,7 @@
                 <div class="card-body">
                   <h5 class="card-title text-truncate">{{ property.title }}</h5>
                   <p class="card-text">
-                    {{ property|clean_location }}
+                    {{ property.street_address|title }}
                   </p>
                   <p class="price-text">
                     {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
@@ -1012,7 +1012,7 @@
             <div class="card-content-mobile">
               <h5 class="card-title card-title-mobile text-truncate">{{ property.property_type|title }} in {{ property.suburb|title }}</h5>
               <p class="card-text card-text-mobile">
-                {{ property.street_address|title }}
+                {{ property.street_address|cut:", Zimbabwe"|cut:"Zimbabwe,"|cut:"Zimbabwe"|title }}
               </p>
               <p class="price-text price-text-mobile">
                 {% if property.currency %}{{ property.currency.symbol }} {{ property.currency.code }}{% endif %} {{ property.price }}

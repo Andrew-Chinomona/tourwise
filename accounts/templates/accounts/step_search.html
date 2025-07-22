@@ -315,12 +315,12 @@
             </select>
           </div>
 
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary mb-3">
             Continue to Price
           </button>
         </form>
 
-        <a href="{% url 'step_search' %}?step=1" class="btn btn-secondary">
+        <a href="{% url 'step_search' %}?step=1" class="btn btn-secondary mt-2">
           ← Back to Location
         </a>
 
@@ -342,12 +342,12 @@
             <p class="optional-text">Leave blank to see all properties regardless of price</p>
           </div>
 
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary mb-3">
             Search Properties
           </button>
         </form>
 
-        <a href="{% url 'step_search' %}?step=2" class="btn btn-secondary">
+        <a href="{% url 'step_search' %}?step=2" class="btn btn-secondary mt-2">
           ← Back to Property Type
         </a>
       {% endif %}
