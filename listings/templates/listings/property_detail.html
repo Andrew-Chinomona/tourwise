@@ -2,8 +2,12 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4" style="margin-top: 90px;">
-  <h2 class="mb-4">Property Detail</h2>
+<div style="height: 35px;"></div>
+<div class="container mt-4" >
+  <!-- Desktop Heading (hidden on mobile) -->
+  <h2 class="mb-4 d-none d-md-block">Property Details</h2>
+  <!-- Mobile Heading (visible only on mobile) -->
+  <h2 class="mb-4 d-block d-md-none" style="margin-top:-40px; margin-bottom:-5px;">Property Details</h2>
   <!-- 🖼 Mobile Image Gallery -->
   <div class="mobile-image-gallery d-md-none mb-3">
     <div class="gallery-scroll">
@@ -18,7 +22,7 @@
     </div>
   </div>
   <!-- Lightbox Overlay for Mobile Gallery -->
-  <div id="mobileLightbox" class="mobile-lightbox-overlay" onclick="closeLightbox()">
+  <div id="mobileLightbox" class="mobile-lightbox-overlay" style="display: none;" onclick="closeLightbox()">
     <img id="lightboxImg" src="" alt="Full Image" class="mobile-lightbox-img">
     <span class="mobile-lightbox-close">&times;</span>
   </div>
@@ -266,12 +270,14 @@
   function openLightbox(src) {
     var overlay = document.getElementById('mobileLightbox');
     var img = document.getElementById('lightboxImg');
+    overlay.style.display = 'flex'; // Show overlay
     overlay.classList.add('show');
     img.src = src;
     document.body.style.overflow = 'hidden';
   }
   function closeLightbox() {
     var overlay = document.getElementById('mobileLightbox');
+    overlay.style.display = 'none'; // Hide overlay
     overlay.classList.remove('show');
     document.body.style.overflow = '';
   }
@@ -288,6 +294,9 @@
   document.addEventListener("DOMContentLoaded", function () {
     const lat = JSON.parse(document.getElementById('lat').textContent);
     const lng = JSON.parse(document.getElementById('lng').textContent);
+
+    // Ensure lightbox is hidden on page load
+    document.getElementById('mobileLightbox')?.classList.remove('show');
 
     if (lat && lng) {
       const map = L.map('map').setView([lat, lng], 15);
