@@ -1,6 +1,7 @@
 from django import forms
 from django.forms.widgets import ClearableFileInput
 from .models import Amenity, Property, Currency
+from django.contrib.gis.geos import Point
 
 
 # ---------- Utility Widgets ----------
@@ -241,6 +242,9 @@ class ChoosePaymentForm(forms.Form):
 # ---------- Edit Form ----------
 
 class EditPropertyForm(forms.ModelForm):
+    latitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
+    longitude = forms.FloatField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = Property
         fields = [
@@ -250,6 +254,8 @@ class EditPropertyForm(forms.ModelForm):
             'street_address',
             'suburb',
             'city',
+            'state_or_region',
+            'country',
             'bedrooms',
             'bathrooms',
             'area',
@@ -265,3 +271,14 @@ class EditPropertyForm(forms.ModelForm):
             'listing_type': forms.RadioSelect(),
             'amenities': forms.CheckboxSelectMultiple(),
         }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        lat = self.cleaned_data.get('latitude')
+        lng = self.cleaned_data.get('longitude')
+        if lat is not None and lng is not None:
+            instance.location = Point(lng, lat)
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance

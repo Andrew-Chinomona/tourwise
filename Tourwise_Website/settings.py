@@ -52,7 +52,9 @@ INSTALLED_APPS = [
     'behave_django',
     'widget_tweaks',
     'currencies',
-    'chatbot'
+    'chatbot',
+    'django.contrib.gis',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -88,7 +90,8 @@ WSGI_APPLICATION = 'Tourwise_Website.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        # 'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'tourwise_db'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
@@ -142,6 +145,11 @@ AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailOrPhoneBackend',  # custom
     'django.contrib.auth.backends.ModelBackend',  # fallback
 ]
+
+#GDAL_LIBRARY
+CONDA_PREFIX = os.environ.get('CONDA_PREFIX', r'C:\ProgramData\anaconda3\envs\tourwise-env')
+GEOS_LIBRARY_PATH = os.path.join(CONDA_PREFIX, 'Library', 'bin', 'geos_c.dll')
+GDAL_LIBRARY_PATH = r"C:\ProgramData\anaconda3\envs\tourwise-env\Library\bin\gdal.dll"
 
 # API Keys
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')

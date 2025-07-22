@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.gis.db import models as gis_models
 
 class Currency(models.Model):
     code = models.CharField(max_length=10, unique=True)
@@ -44,9 +45,15 @@ class Property(models.Model):
     street_address = models.CharField(max_length=255, blank=True)
     suburb = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
-    google_maps_url = models.URLField(blank=True, null=True, help_text="Google Maps link for confirmed location")
+    state_or_region = models.CharField(max_length=100, blank=True)  # NEW: for region/state
+    country = models.CharField(max_length=100, blank=True)          # NEW: for country
+    # ---
+    # The following fields are deprecated and will be removed after migration:
+    latitude = models.FloatField(blank=True, null=True)   # DEPRECATED: use location PointField
+    longitude = models.FloatField(blank=True, null=True)  # DEPRECATED: use location PointField
+    location = gis_models.PointField(geography=True, blank=True, null=True)
+
+    google_maps_url = models.URLField(blank=True, null=True)
 
     #Media
     main_image = models.ImageField(upload_to='property_main_images/', null=True, blank=True)

@@ -36,12 +36,8 @@
             <div id="map" class="mb-4"></div>
 
             <div class="mb-3">
-              <button type="button" class="btn rounded-3" id="confirm-location-btn" style="border-color: #e4d3b2; color: #c15a2e;">
-                ✅ Confirm Location
-              </button>
-              <div id="confirm-location-prompt" class="mt-2" style="color: #c15a2e; font-size: 1rem; display: none;">
-                Please confirm if this is the correct location displayed above.
-              </div>
+              <button type="button" id="confirm-location-btn" class="btn btn-primary">Confirm Location</button>
+              <span id="confirm-location-prompt" class="ms-2 text-success" style="display:none;">Location confirmed!</span>
             </div>
 
             <div class="d-flex justify-content-between">
@@ -66,376 +62,173 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-  // Initialize the map with proper options
-  let map = L.map('map', {
-    zoomControl: false,
-    tap: false,
-    dragging: true
-  }).setView([-17.8252, 31.0335], 13); // Harare default
+document.addEventListener("DOMContentLoaded", function () {
+    // Default map center (Harare)
+    let defaultLat = -17.8252, defaultLng = 31.0335;
+    let latInput = document.getElementById("latitude");
+    let lngInput = document.getElementById("longitude");
+    let citySuburbInput = document.getElementById('city_suburb');
+    let citySuburbSuggestions = document.getElementById('city_suburb_suggestions');
+    let autocompleteService = new google.maps.places.AutocompleteService();
+    let geocoder = new google.maps.Geocoder();
+    let cityPredictions = [];
+    let selectedIndex = -1;
 
-  let marker;
-  let confirmed = false;
+    // Use existing values if editing
+    let startLat = latInput.value ? parseFloat(latInput.value) : defaultLat;
+    let startLng = lngInput.value ? parseFloat(lngInput.value) : defaultLng;
 
-  // Use OpenStreetMap tile layer
-  map.attributionControl.setPrefix('');
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+    // Initialize map
+    let map = L.map('map').setView([startLat, startLng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © OpenStreetMap contributors'
+    }).addTo(map);
 
-  // Add zoom control bottom right
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+    // Add marker (draggable)
+    let marker = L.marker([startLat, startLng], {draggable: true}).addTo(map);
 
-  // Google-style marker using FontAwesome
-  const customIcon = L.divIcon({
-    html: '<i class="fas fa-map-marker-alt fa-2x" style="color: #c15a2e; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));"></i>',
-    iconSize: [28, 36],
-    iconAnchor: [14, 36],
-    className: 'custom-div-icon'
-  });
-
-  // Input elements
-  let citySuburbInput = document.getElementById("city_suburb");
-  let streetInput = document.getElementById("street_address");
-  let latInput = document.getElementById("latitude");
-  let lngInput = document.getElementById("longitude");
-  let mapsUrlInput = document.getElementById("google_maps_url");
-  let confirmBtn = document.getElementById("confirm-location-btn");
-  let confirmPrompt = document.getElementById("confirm-location-prompt");
-
-  // Suggestions boxes
-  let citySuburbSuggestions = document.getElementById("city_suburb_suggestions");
-  let streetSuggestions = document.getElementById("street_address_suggestions");
-
-  // Initialize autocomplete services
-  let autocompleteService = new google.maps.places.AutocompleteService();
-  let placesService = new google.maps.places.PlacesService(document.createElement('div'));
-  let citySuburbPredictions = [];
-  let streetPredictions = [];
-  let citySuburbSelectedIndex = -1;
-  let streetSelectedIndex = -1;
-
-  // Debounce function to limit API calls
-  function debounce(func, timeout = 500) {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => { func.apply(this, args); }, timeout);
-    };
-  }
-
-  // Highlight matching text in suggestions
-  function highlightMatch(text, query) {
-    const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
-    return text.replace(re, '<span class="highlight">$1</span>');
-  }
-
-  // --- Geocode and preview marker for a suggestion (without committing) ---
-  function previewSuggestionOnMap(description) {
-    if (!description) return;
-    const apiKey = "{{ GOOGLE_API_KEY|default:'' }}";
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(description + ', Zimbabwe')}&key=${apiKey}`;
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'OK' && data.results.length > 0) {
-          const lat = data.results[0].geometry.location.lat;
-          const lng = data.results[0].geometry.location.lng;
-          updateMapMarker(lat, lng);
-        }
-      });
-  }
-
-  // Setup autocomplete for city & suburb input
-  citySuburbInput.addEventListener('input', debounce(function() {
-    const query = citySuburbInput.value.trim();
-    citySuburbSuggestions.innerHTML = '';
-    citySuburbSuggestions.style.display = 'none';
-    citySuburbPredictions = [];
-    citySuburbSelectedIndex = -1;
-
-    if (query.length < 2) return;
-
-    autocompleteService.getPlacePredictions({
-      input: query,
-      types: ['geocode'],
-      componentRestrictions: { country: 'ZW' }
-    }, function(preds, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK && preds && preds.length) {
-        citySuburbPredictions = preds;
-        citySuburbSuggestions.style.display = 'block';
-        citySuburbSuggestions.innerHTML = '';
-
-        citySuburbPredictions.forEach((pred, idx) => {
-          const item = document.createElement('div');
-          item.classList.add('suggestion-item');
-          item.innerHTML = highlightMatch(pred.description, query);
-          item.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            selectCitySuburbPrediction(idx);
-          });
-          item.addEventListener('mouseenter', function() {
-            citySuburbSelectedIndex = idx;
-            updateCitySuburbSelection();
-            previewSuggestionOnMap(pred.description);
-          });
-          citySuburbSuggestions.appendChild(item);
-        });
-      } else {
-        citySuburbSuggestions.style.display = 'none';
-      }
-    });
-
-    setTimeout(() => {
-    if (citySuburbInput.value && streetInput.value) {
-      geocodeAndUpdateMap();
-    }
-  }, 300);
-  }));
-
-  // Setup autocomplete for street address input
-  streetInput.addEventListener('input', debounce(function() {
-    const query = streetInput.value.trim();
-    streetSuggestions.innerHTML = '';
-    streetSuggestions.style.display = 'none';
-    streetPredictions = [];
-    streetSelectedIndex = -1;
-
-    if (query.length < 2) return;
-
-    autocompleteService.getPlacePredictions({
-      input: query,
-      types: ['address'],
-        //types:['geocode']
-      componentRestrictions: { country: 'ZW' }
-    }, function(preds, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK && preds && preds.length) {
-        streetPredictions = preds;
-        streetSuggestions.style.display = 'block';
-        streetSuggestions.innerHTML = '';
-
-        streetPredictions.forEach((pred, idx) => {
-          const item = document.createElement('div');
-          item.classList.add('suggestion-item');
-          item.innerHTML = highlightMatch(pred.description, query);
-          item.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            selectStreetPrediction(idx);
-          });
-          item.addEventListener('mouseenter', function() {
-            streetSelectedIndex = idx;
-            updateStreetSelection();
-            previewSuggestionOnMap(pred.description);
-          });
-          streetSuggestions.appendChild(item);
-        });
-      } else {
-        streetSuggestions.style.display = 'none';
-      }
-    });
-    setTimeout(() => {
-        if (citySuburbInput.value && streetInput.value) {
-            geocodeAndUpdateMap();
-        }
-    }, 300);
-  }));
-
-  // Keyboard navigation for city & suburb suggestions
-  citySuburbInput.addEventListener('keydown', function(e) {
-    if (!citySuburbPredictions.length) return;
-
-    if (e.key === 'ArrowDown') {
-      citySuburbSelectedIndex = (citySuburbSelectedIndex + 1) % citySuburbPredictions.length;
-      updateCitySuburbSelection();
-      e.preventDefault();
-    } else if (e.key === 'ArrowUp') {
-      citySuburbSelectedIndex = (citySuburbSelectedIndex - 1 + citySuburbPredictions.length) % citySuburbPredictions.length;
-      updateCitySuburbSelection();
-      e.preventDefault();
-    } else if (e.key === 'Enter') {
-      if (citySuburbSelectedIndex >= 0 && citySuburbSelectedIndex < citySuburbPredictions.length) {
-        selectCitySuburbPrediction(citySuburbSelectedIndex);
-        e.preventDefault();
-      }
-    }
-  });
-
-  // Keyboard navigation for street address suggestions
-  streetInput.addEventListener('keydown', function(e) {
-    if (!streetPredictions.length) return;
-
-    if (e.key === 'ArrowDown') {
-      streetSelectedIndex = (streetSelectedIndex + 1) % streetPredictions.length;
-      updateStreetSelection();
-      e.preventDefault();
-    } else if (e.key === 'ArrowUp') {
-      streetSelectedIndex = (streetSelectedIndex - 1 + streetPredictions.length) % streetPredictions.length;
-      updateStreetSelection();
-      e.preventDefault();
-    } else if (e.key === 'Enter') {
-      if (streetSelectedIndex >= 0 && streetSelectedIndex < streetPredictions.length) {
-        selectStreetPrediction(streetSelectedIndex);
-        e.preventDefault();
-      }
-    }
-  });
-
-  // Update selected suggestion for city & suburb
-  function updateCitySuburbSelection() {
-    const items = citySuburbSuggestions.querySelectorAll('.suggestion-item');
-    items.forEach((item, idx) => {
-      if (idx === citySuburbSelectedIndex) {
-        item.classList.add('active');
-        item.scrollIntoView({ block: 'nearest' });
-        // Preview on map when keyboard highlights
-        previewSuggestionOnMap(citySuburbPredictions[idx].description);
-      } else {
-        item.classList.remove('active');
-      }
-    });
-  }
-
-  // Update selected suggestion for street address
-  function updateStreetSelection() {
-    const items = streetSuggestions.querySelectorAll('.suggestion-item');
-    items.forEach((item, idx) => {
-      if (idx === streetSelectedIndex) {
-        item.classList.add('active');
-        item.scrollIntoView({ block: 'nearest' });
-        // Preview on map when keyboard highlights
-        previewSuggestionOnMap(streetPredictions[idx].description);
-      } else {
-        item.classList.remove('active');
-      }
-    });
-  }
-
-  // Select a city & suburb prediction
-  function selectCitySuburbPrediction(idx) {
-    const pred = citySuburbPredictions[idx];
-    if (!pred) return;
-
-    citySuburbInput.value = pred.description;
-    citySuburbSuggestions.style.display = 'none';
-    if (streetInput.value) {
-      geocodeAndUpdateMap();
-    }
-  }
-
-  // Select a street address prediction
-  function selectStreetPrediction(idx) {
-    const pred = streetPredictions[idx];
-    if (!pred) return;
-
-    streetInput.value = pred.description;
-    streetSuggestions.style.display = 'none';
-    if (citySuburbInput.value) {
-      geocodeAndUpdateMap();
-    }
-  }
-
-  // Close suggestions when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!citySuburbSuggestions.contains(e.target) && e.target !== citySuburbInput) {
-      citySuburbSuggestions.style.display = 'none';
-    }
-    if (!streetSuggestions.contains(e.target) && e.target !== streetInput) {
-      streetSuggestions.style.display = 'none';
-    }
-  });
-
-  // --- Real-time geocode and map update ---
-  function geocodeAndUpdateMap() {
-    let address = '';
-    if (streetInput.value) address += streetInput.value + ', ';
-    if (citySuburbInput.value) address += citySuburbInput.value + ', ';
-    address += 'Zimbabwe';
-
-    if (!address.trim() || address.trim() === ', Zimbabwe') return;
-
-    const apiKey = "{{ GOOGLE_API_KEY|default:'' }}";
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'OK' && data.results.length > 0) {
-          const lat = data.results[0].geometry.location.lat;
-          const lng = data.results[0].geometry.location.lng;
-          latInput.value = lat;
-          lngInput.value = lng;
-          updateMapMarker(lat, lng);
-
-          // Update the Google Maps URL
-          mapsUrlInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
-        }
-      })
-      .catch(error => {
-        console.error('Geocoding error:', error);
-      });
-  }
-
-  // --- Update Leaflet marker in real time ---
-  function updateMapMarker(lat, lng) {
-    if (marker) {
-      marker.setLatLng([lat, lng]);
-    } else {
-      marker = L.marker([lat, lng], {
-        draggable: true,
-        icon: customIcon
-      }).addTo(map);
-
-      marker.on("dragend", function() {
-        const pos = marker.getLatLng();
+    // Update hidden fields when marker is dragged
+    marker.on('dragend', function (e) {
+        let pos = marker.getLatLng();
         latInput.value = pos.lat;
         lngInput.value = pos.lng;
-        mapsUrlInput.value = `https://www.google.com/maps?q=${pos.lat},${pos.lng}`;
-      });
-    }
-    map.setView([lat, lng], 16, { animate: true });
-  }
-
-  // --- Confirm Location button logic ---
-  confirmBtn.addEventListener('click', function() {
-    if (latInput.value && lngInput.value) {
-      confirmPrompt.style.display = 'block';
-      confirmPrompt.textContent = 'Location confirmed!';
-      citySuburbInput.readOnly = true;
-      streetInput.readOnly = true;
-      confirmBtn.disabled = true;
-
-      // Make the marker non-draggable after confirmation
-      if (marker) {
-        marker.dragging.disable();
-      }
-    } else {
-      confirmPrompt.style.display = 'block';
-      confirmPrompt.textContent = 'Please select a valid location first';
-      confirmPrompt.style.color = '#dc3545';
-    }
-  });
-
-  // Style form inputs on focus
-  document.querySelectorAll('.form-control').forEach(input => {
-    input.addEventListener('focus', function() {
-      this.style.borderColor = '#c15a2e';
-      this.style.boxShadow = '0 0 0 0.25rem rgba(193, 90, 46, 0.15)';
     });
-    input.addEventListener('blur', function() {
-      this.style.borderColor = '#e4d3b2';
-      this.style.boxShadow = 'none';
+
+    // Allow user to click map to move marker
+    map.on('click', function (e) {
+        marker.setLatLng(e.latlng);
+        latInput.value = e.latlng.lat;
+        lngInput.value = e.latlng.lng;
     });
-  });
 
-  // Add map resize observer
-  const mapObserver = new ResizeObserver(() => {
-    map.invalidateSize();
-  });
-  mapObserver.observe(document.getElementById('map'));
+    // Custom city/suburb suggestion box using Google AutocompleteService (Zimbabwe only)
+    citySuburbInput.addEventListener('input', function() {
+        const query = citySuburbInput.value.trim();
+        citySuburbSuggestions.innerHTML = '';
+        citySuburbSuggestions.style.display = 'none';
+        cityPredictions = [];
+        selectedIndex = -1;
+        if (query.length < 2) return;
+        autocompleteService.getPlacePredictions({
+            input: query,
+            {#types: ['geocode'],#}
+            componentRestrictions: { country: 'ZW' }
+        }, function(preds, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK && preds && preds.length) {
+                cityPredictions = preds;
+                citySuburbSuggestions.style.display = 'block';
+                citySuburbSuggestions.innerHTML = '';
+                cityPredictions.forEach((pred, idx) => {
+                    const item = document.createElement('div');
+                    item.classList.add('suggestion-item');
+                    item.textContent = pred.description;
+                    item.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                        selectCityPrediction(idx);
+                    });
+                    citySuburbSuggestions.appendChild(item);
+                });
+            }
+        });
+    });
 
-  // Initial map resize
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 100);
+    citySuburbInput.addEventListener('keydown', function(e) {
+        if (!cityPredictions.length) return;
+        if (e.key === 'ArrowDown') {
+            selectedIndex = (selectedIndex + 1) % cityPredictions.length;
+            updateSelection();
+            e.preventDefault();
+        } else if (e.key === 'ArrowUp') {
+            selectedIndex = (selectedIndex - 1 + cityPredictions.length) % cityPredictions.length;
+            updateSelection();
+            e.preventDefault();
+        } else if (e.key === 'Enter') {
+            if (selectedIndex >= 0 && selectedIndex < cityPredictions.length) {
+                selectCityPrediction(selectedIndex);
+                e.preventDefault();
+            }
+        }
+    });
+
+    function updateSelection() {
+        const items = citySuburbSuggestions.querySelectorAll('.suggestion-item');
+        items.forEach((item, idx) => {
+            if (idx === selectedIndex) {
+                item.classList.add('active');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    function selectCityPrediction(idx) {
+        const pred = cityPredictions[idx];
+        if (!pred) return;
+        citySuburbInput.value = pred.description;
+        citySuburbSuggestions.style.display = 'none';
+        geocoder.geocode({ placeId: pred.place_id }, function(results, status) {
+            if (status === 'OK' && results[0]) {
+                const loc = results[0].geometry.location;
+                const lat = loc.lat(), lng = loc.lng();
+                marker.setLatLng([lat, lng]);
+                map.setView([lat, lng], 14);
+                latInput.value = lat;
+                lngInput.value = lng;
+            }
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!citySuburbSuggestions.contains(e.target) && e.target !== citySuburbInput) {
+            citySuburbSuggestions.style.display = 'none';
+        }
+    });
+
+    // Google Places Autocomplete for street address (Zimbabwe only)
+    let autocomplete = new google.maps.places.Autocomplete(
+        document.getElementById('street_address'),
+        { types: ['address'], componentRestrictions: { country: 'ZW' } }
+    );
+    autocomplete.addListener('place_changed', function () {
+        let place = autocomplete.getPlace();
+        if (!place.geometry) return;
+        let lat = place.geometry.location.lat();
+        let lng = place.geometry.location.lng();
+        // Move marker and map
+        marker.setLatLng([lat, lng]);
+        map.setView([lat, lng], 16);
+        // Update hidden fields
+        latInput.value = lat;
+        lngInput.value = lng;
+    });
+
+    // Confirm Location button logic
+    const confirmBtn = document.getElementById('confirm-location-btn');
+    const confirmPrompt = document.getElementById('confirm-location-prompt');
+    const streetInput = document.getElementById('street_address');
+
+    confirmBtn.addEventListener('click', function() {
+        if (latInput.value && lngInput.value) {
+            confirmPrompt.style.display = 'inline';
+            confirmPrompt.textContent = 'Location confirmed!';
+            citySuburbInput.readOnly = true;
+            streetInput.readOnly = true;
+            confirmBtn.disabled = true;
+            // Make the marker non-draggable after confirmation
+            if (marker) {
+                marker.dragging.disable();
+            }
+            // Optionally, disable map click
+            map.off('click');
+        } else {
+            confirmPrompt.style.display = 'inline';
+            confirmPrompt.textContent = 'Please select a valid location first';
+            confirmPrompt.classList.remove('text-success');
+            confirmPrompt.classList.add('text-danger');
+        }
+    });
+});
 </script>
 
 <style>

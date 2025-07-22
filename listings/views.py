@@ -9,6 +9,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.http import JsonResponse
 from django.db.models import Q
+from django.contrib.gis.geos import Point
 
 @login_required()
 def start_property_listing(request):
@@ -89,8 +90,10 @@ def add_property_step3(request):
             property_obj.city = city
             property_obj.suburb = suburb
             property_obj.street_address = form.cleaned_data['street_address']
-            property_obj.latitude = form.cleaned_data.get('latitude')
-            property_obj.longitude = form.cleaned_data.get('longitude')
+            lat = form.cleaned_data.get('latitude')
+            lng = form.cleaned_data.get('longitude')
+            if lat is not None and lng is not None:
+                property_obj.location = Point(lng, lat)
             property_obj.google_maps_url = form.cleaned_data.get('google_maps_url')
             property_obj.generate_title()
             property_obj.current_step = 3

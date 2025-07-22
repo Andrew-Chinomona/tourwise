@@ -270,25 +270,33 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const lat = {{ latitude|default:"null" }};
-    const lng = {{ longitude|default:"null" }};
+{% if property.location %}
+  {% with lat=property.location.y lng=property.location.x %}
+    <script>
+      const lat = {{ lat }};
+      const lng = {{ lng }};
 
-    if (lat && lng) {
-      const map = L.map('map').setView([lat, lng], 15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data © OpenStreetMap contributors'
-      }).addTo(map);
+      if (lat && lng) {
+        const map = L.map('map').setView([lat, lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'Map data © OpenStreetMap contributors'
+        }).addTo(map);
 
-      L.marker([lat, lng]).addTo(map)
-        .bindPopup("{{ property.title|escapejs }}")
-        .openPopup();
-    } else {
-      document.getElementById('map').innerHTML = "<div class='d-flex align-items-center justify-content-center h-100'><p class='text-muted mb-0'>Location not available.</p></div>";
-    }
-  });
-</script>
+        L.marker([lat, lng]).addTo(map)
+          .bindPopup("{{ property.title|escapejs }}")
+          .openPopup();
+      } else {
+        document.getElementById('map').innerHTML = "<div class='d-flex align-items-center justify-content-center h-100'><p class='text-muted mb-0'>Location not available.</p></div>";
+      }
+    </script>
+  {% endwith %}
+{% else %}
+  <script>
+    const lat = null;
+    const lng = null;
+    document.getElementById('map').innerHTML = "<div class='d-flex align-items-center justify-content-center h-100'><p class='text-muted mb-0'>Location not available.</p></div>";
+  </script>
+{% endif %}
 
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
