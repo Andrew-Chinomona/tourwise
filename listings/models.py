@@ -51,9 +51,20 @@ class Property(models.Model):
     # The following fields are deprecated and will be removed after migration:
     latitude = models.FloatField(blank=True, null=True)   # DEPRECATED: use location PointField
     longitude = models.FloatField(blank=True, null=True)  # DEPRECATED: use location PointField
-    location = gis_models.PointField(geography=True, blank=True, null=True)
+    # ---
+    # To enable geospatial queries, install PostGIS and add the following field:
 
-    google_maps_url = models.URLField(blank=True, null=True)
+    location = gis_models.PointField(geography=True, blank=True, null=True)
+    #
+    # PostGIS Setup Instructions:
+    # 1. Install PostGIS in your PostgreSQL database (see https://postgis.net/install/)
+    # 2. In settings.py, set 'ENGINE': 'django.contrib.gis.db.backends.postgis' for your DATABASES config
+    # 3. Uncomment the import and the location field above
+    # 4. Run: python manage.py makemigrations listings
+    # 5. Run: python manage.py migrate
+    # 6. You can now store and query geospatial data in the location field
+    # ---
+    google_maps_url = models.URLField(blank=True, null=True, help_text="Google Maps link for confirmed location")
 
     #Media
     main_image = models.ImageField(upload_to='property_main_images/', null=True, blank=True)
@@ -88,6 +99,12 @@ class Property(models.Model):
 
     #Metadata
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def google_maps_directions_url(self):
+        if self.location:
+            return f"https://www.google.com/maps/dir/?api=1&destination={self.location.y},{self.location.x}"
+        return None
 
     @staticmethod
     def get_listing_price(listing_type):

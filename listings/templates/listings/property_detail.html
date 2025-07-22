@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4" style="margin-top: 90px;">
+  <h2 class="mb-4">Property Detail</h2>
   <!-- 🖼 Mobile Image Gallery -->
   <div class="mobile-image-gallery d-md-none mb-3">
     <div class="gallery-scroll">
@@ -134,6 +135,16 @@
       <!-- 🗺️ Map Section -->
       <h5 class="mb-3 section-heading">Property Location</h5>
       <div id="map" style="height: clamp(250px, 40vh, 350px);" class="rounded shadow-sm mb-4"></div>
+
+      <!-- Get Directions Button -->
+      {% if property.google_maps_directions_url %}
+      <div class="mt-3 mb-4">
+          <a href="{{ property.google_maps_directions_url }}" target="_blank" class="btn btn-brand-orange">
+              <i class="fas fa-directions me-2"></i>
+              Get Directions
+          </a>
+      </div>
+      {% endif %}
     </div>
 
     <!-- Right Column -->
@@ -152,19 +163,19 @@
       </div>
 
       <!-- Contact & Price Card -->
-      <div class="card shadow-sm sticky-top" style="top: 1rem;">
+      <div class="card shadow-sm sticky-top" style="top: 90px;">
         <div class="card-body">
           <h4 class="mb-3"><span class="currency-black">{{ property.currency }} {{ property.price }}</span></h4>
           <hr>
-          <button class="btn btn-contact-mobile d-md-none" onclick="toggleContactInfo()">Contact Details</button>
+          <button class="btn btn-brand-orange w-100 mb-3" onclick="toggleContactInfo()">Show Contact Details</button>
           <div id="contactInfo" class="d-none">
             <div class="mb-3">
               <strong class="d-block mb-1">Contact Email:</strong>
-              <span class="text-muted">{{ property.contact_email }}</span>
+              <a href="mailto:{{ property.contact_email }}">{{ property.contact_email }}</a>
             </div>
             <div class="mb-0">
               <strong class="d-block mb-1">Phone:</strong>
-              <span class="text-muted">{{ property.contact_phone }}</span>
+              <a href="tel:{{ property.contact_phone }}">{{ property.contact_phone }}</a>
             </div>
           </div>
         </div>
@@ -247,7 +258,7 @@
       button.textContent = 'Hide Contact Details';
     } else {
       contactInfo.classList.add('d-none');
-      button.textContent = 'Contact Details';
+      button.textContent = 'Show Contact Details';
     }
   }
 
@@ -270,33 +281,28 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-{% if property.location %}
-  {% with lat=property.location.y lng=property.location.x %}
-    <script>
-      const lat = {{ lat }};
-      const lng = {{ lng }};
+{{ property.location.y|json_script:"lat" }}
+{{ property.location.x|json_script:"lng" }}
 
-      if (lat && lng) {
-        const map = L.map('map').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: 'Map data © OpenStreetMap contributors'
-        }).addTo(map);
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const lat = JSON.parse(document.getElementById('lat').textContent);
+    const lng = JSON.parse(document.getElementById('lng').textContent);
 
-        L.marker([lat, lng]).addTo(map)
-          .bindPopup("{{ property.title|escapejs }}")
-          .openPopup();
-      } else {
-        document.getElementById('map').innerHTML = "<div class='d-flex align-items-center justify-content-center h-100'><p class='text-muted mb-0'>Location not available.</p></div>";
-      }
-    </script>
-  {% endwith %}
-{% else %}
-  <script>
-    const lat = null;
-    const lng = null;
-    document.getElementById('map').innerHTML = "<div class='d-flex align-items-center justify-content-center h-100'><p class='text-muted mb-0'>Location not available.</p></div>";
-  </script>
-{% endif %}
+    if (lat && lng) {
+      const map = L.map('map').setView([lat, lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © OpenStreetMap contributors'
+      }).addTo(map);
+
+      L.marker([lat, lng]).addTo(map)
+        .bindPopup(`<b>{{ property.title|escapejs }}</b><br><a href="{{ property.google_maps_directions_url }}" target="_blank">Get Directions</a>`)
+        .openPopup();
+    } else {
+      document.getElementById('map').innerHTML = "<div class='d-flex align-items-center justify-content-center h-100'><p class='text-muted mb-0'>Location not available.</p></div>";
+    }
+  });
+</script>
 
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -546,6 +552,12 @@
     color: #2f2f2f;
     margin-bottom: 0.7rem;
     letter-spacing: 0.01em;
+  }
+  .header, .navbar {
+    z-index: 1050;
+  }
+  .sticky-top {
+    z-index: 1040;
   }
 </style>
 {% endblock %}

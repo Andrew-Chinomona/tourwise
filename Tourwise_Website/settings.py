@@ -29,10 +29,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-change-me')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['65eee81277a4.ngrok-free.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['57709b82bc9d.ngrok-free.app', 'localhost', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://65eee81277a4.ngrok-free.app/',
+    'https://57709b82bc9d.ngrok-free.app/',
     'https://*.ngrok-free.app',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
