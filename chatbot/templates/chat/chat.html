@@ -240,6 +240,111 @@
         height: 6px;
       }
     }
+
+    /* Chat History Pills */
+    .chat-history-pill {
+      display: block;
+      width: calc(100% - 16px);
+      padding: 10px 12px;
+      margin: 0 8px 8px 8px;
+      background: #ffffff;
+      border: 2px solid #c15a2e;
+      border-radius: 16px;
+      text-decoration: none;
+      color: #495057;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-align: left;
+      box-sizing: border-box;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .chat-history-pill:hover {
+      background: #fff5f2;
+      border-color: #a3471e;
+      color: #c15a2e;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(193, 90, 46, 0.2);
+    }
+
+    .chat-history-pill.active {
+      background: #c15a2e;
+      border-color: #c15a2e;
+      color: white;
+      box-shadow: 0 3px 12px rgba(193, 90, 46, 0.3);
+    }
+
+    .chat-history-pill .chat-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.9rem;
+      line-height: 1.2;
+    }
+
+    .chat-history-pill .chat-meta {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-weight: 400;
+      line-height: 1.2;
+    }
+
+    .chat-history-pill.active .chat-meta {
+      opacity: 0.9;
+    }
+
+    /* Chat history container */
+    #chat-history-container {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    #chat-history-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #chat-history-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 2px;
+    }
+
+    #chat-history-container::-webkit-scrollbar-thumb {
+      background: #c15a2e;
+      border-radius: 2px;
+    }
+
+    #chat-history-container::-webkit-scrollbar-thumb:hover {
+      background: #a3471e;
+    }
+
+    /* Mobile responsive chat history pills */
+    @media (max-width: 768px) {
+      .chat-history-pill {
+        width: calc(100% - 12px);
+        margin: 0 6px 8px 6px;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+        border-radius: 18px;
+      }
+
+      .chat-history-pill .chat-title {
+        font-size: 0.95rem;
+      }
+
+      .chat-history-pill .chat-meta {
+        font-size: 0.8rem;
+      }
+
+      #chat-history-container {
+        max-height: 250px;
+      }
+    }
     /* Sidebar styles */
     .tw-sidebar {
       position: fixed;
@@ -1072,9 +1177,9 @@
       <div class="border-t border-gray-200 pt-4 mb-4">
         <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">History</h3>
         {% if user.is_authenticated %}
-          <ul class="space-y-2">
-            <li class="text-gray-700 px-3 py-2 rounded-lg bg-gray-50">No previous chats yet.</li>
-          </ul>
+          <div id="chat-history-container">
+            <div class="text-gray-500 text-sm px-3 py-2">Loading chat history...</div>
+          </div>
         {% else %}
           <div class="text-gray-500 text-sm px-3 py-2">You need to be logged in to view history</div>
         {% endif %}
@@ -1130,7 +1235,12 @@
     </div>
   </div>
 <script>
-const WELCOME_MESSAGE = `👋 Hey there, welcome to Tourwise!\nI’m your virtual assistant, here to help you find your perfect home — stress-free and hassle-free. 🏡✨\nJust tell me what you're looking for, and I’ll do the searching for you.\nWhether you're after something specific or just browsing, I’ve got you covered.\nLet’s get started — your next home could be just one message away! 😊`;
+// Django template variable for authentication status
+const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+</script>
+
+<script>
+const WELCOME_MESSAGE = `👋 Hey there, welcome to Tourwise!\nI'm your virtual assistant, here to help you find your perfect home — stress-free and hassle-free. 🏡✨\nJust tell me what you're looking for, and I'll do the searching for you.\nWhether you're after something specific or just browsing, I've got you covered.\nLet's get started — your next home could be just one message away! 😊`;
 
 function appendMessage(text, sender) {
   const msgDiv = document.createElement('div');
@@ -1436,6 +1546,96 @@ function showWelcomeMessage() {
   typeStep();
 }
 
+// Load chat history
+function loadChatHistory() {
+  if (!document.querySelector('#chat-history-container')) return;
+
+  fetch('/chatbot/history/')
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById('chat-history-container');
+
+      if (data.sessions.length === 0) {
+        container.innerHTML = '<div class="text-gray-500 text-sm px-3 py-2">No previous chats yet.</div>';
+        return;
+      }
+
+      const historyHtml = data.sessions.map(session => {
+        const date = new Date(session.updated_at);
+        const dateStr = date.toLocaleDateString('en-GB'); // dd/mm/yyyy format
+        const timeStr = date.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const title = `${dateStr} ${timeStr}`;
+
+        return `
+          <div class="chat-history-pill ${session.is_current ? 'active' : ''}"
+               onclick="loadSession('${session.id}')">
+            <div class="chat-title">${title}</div>
+            <div class="chat-meta">${session.message_count} messages</div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = historyHtml;
+    })
+    .catch(error => {
+      console.error('Error loading chat history:', error);
+      document.getElementById('chat-history-container').innerHTML =
+        '<div class="text-red-500 text-sm px-3 py-2">Error loading history</div>';
+    });
+}
+
+// Load a specific chat session
+function loadSession(sessionId) {
+  showThinking();
+
+  fetch(`/chatbot/session/${sessionId}/`)
+    .then(res => res.json())
+    .then(data => {
+      hideThinking();
+
+      // Clear current messages
+      document.getElementById('messages').innerHTML = '';
+
+      // Load session messages
+      data.messages.forEach(message => {
+        if (message.message_type === 'property_results' && message.metadata.properties) {
+          // Handle property results
+          appendMessage(message.content, 'bot');
+          message.metadata.properties.forEach(appendCard);
+        } else {
+          // Handle regular messages
+          appendMessage(message.content, message.sender);
+        }
+      });
+
+      // Update current session
+      fetch('/chatbot/new-chat/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+        }
+      }).then(() => {
+        // Set the loaded session as current
+        fetch(`/chatbot/session/${sessionId}/`).then(() => {
+          loadChatHistory(); // Refresh history to show current session
+        });
+      });
+
+      // Close sidebar on mobile
+      if (window.innerWidth <= 768) {
+        closeSidebar();
+      }
+    })
+    .catch(error => {
+      hideThinking();
+      console.error('Error loading session:', error);
+      appendMessage('Error loading chat session. Please try again.', 'bot');
+    });
+}
+
 // Sidebar open/close
 function openSidebar() {
   document.getElementById('tw-sidebar').classList.add('open');
@@ -1448,14 +1648,37 @@ function closeSidebar() {
 document.getElementById('sidebar-overlay').onclick = closeSidebar;
 // --- Start new chat (clear messages and input, show welcome) ---
 function startNewChat() {
-  document.getElementById('messages').innerHTML = '';
-  document.getElementById('user-input').value = '';
-  showWelcomeMessage();
+  showThinking();
+
+  fetch('/chatbot/new-chat/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    hideThinking();
+    document.getElementById('messages').innerHTML = '';
+    document.getElementById('user-input').value = '';
+    showWelcomeMessage();
+    loadChatHistory(); // Refresh history
+  })
+  .catch(error => {
+    hideThinking();
+    console.error('Error starting new chat:', error);
+  });
 }
 
 // Send message on Enter key
 document.addEventListener('DOMContentLoaded', function() {
   showWelcomeMessage();
+
+  // Load chat history for authenticated users
+  if (isAuthenticated) {
+    loadChatHistory();
+  }
+
   const input = document.getElementById('user-input');
   input.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !input.disabled) {
