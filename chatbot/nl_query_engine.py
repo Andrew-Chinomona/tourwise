@@ -101,10 +101,8 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
 
 query_engine = CaseInsensitivePropertyTypeQueryEngine(llm=llm, sql_database=sql_database, tables=included_tables)
 
-# sql_database = SQLDatabase(engine)
-# query_engine = NLSQLTableQueryEngine(llm=llm, sql_database=sql_database)
-
 def run_nl_query(natural_query):
     result = query_engine.query(natural_query)
     print("SQL generated: ", result.metadata.get("sql_query", "[none]"))
     return result
+
