@@ -1248,6 +1248,10 @@ function sendMessage() {
   })
   .then(res => res.json())
   .then(data => {
+    // Show friendly message if present
+    if (data.friendly_message) {
+      appendMessage(data.friendly_message, 'bot');
+    }
     // Handle new backend response structure
     if (Array.isArray(data.result) && data.result.length > 1 && data.result[1].result && data.result[1].col_keys) {
       const rows = data.result[1].result;

@@ -70,7 +70,7 @@ def ai_sql_query(request):
             return JsonResponse({"error": "Failed to parse database results."}, status=500)
 
         if not rows:
-            return JsonResponse({"result": "No results found."}, status=200)
+            return JsonResponse({"result": "No results found.", "friendly_message": "Sorry, I couldn't find any properties matching your request."}, status=200)
 
         # Fuzzy scoring
         scored = []
@@ -96,7 +96,10 @@ def ai_sql_query(request):
         scored.sort(reverse=True, key=lambda x: x[0])
         # Return all results, sorted by score
         filtered = [row for score, row in scored]
-        return JsonResponse({"result": filtered}, status=200)
+
+        # Get friendly message from the result metadata
+        friendly_message = result.metadata.get("chat_response", "Here is what I found.")
+        return JsonResponse({"result": filtered, "friendly_message": friendly_message}, status=200)
 
     except Exception as e:
         print("🔥 Error in ai_sql_query:", str(e))
