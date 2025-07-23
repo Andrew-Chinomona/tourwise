@@ -8,6 +8,7 @@ from listings.models import Property, Amenity
 from rapidfuzz import fuzz
 from chatbot.nl_query_engine import run_nl_query
 
+
 @require_POST
 @csrf_exempt
 def ai_sql_query(request):
@@ -22,6 +23,13 @@ def ai_sql_query(request):
 
     try:
         result = run_nl_query(user_input)
+
+        # Handle conversational responses
+        if isinstance(result, dict) and result.get("is_conversational"):
+            return JsonResponse({
+                "result": result.get("results", []),
+                "friendly_message": result.get("chat_response", "Hello!")
+            }, status=200)
 
         # Normalize SQL response to list of dicts
         rows = []
@@ -70,7 +78,9 @@ def ai_sql_query(request):
             return JsonResponse({"error": "Failed to parse database results."}, status=500)
 
         if not rows:
-            return JsonResponse({"result": "No results found.", "friendly_message": "Sorry, I couldn't find any properties matching your request."}, status=200)
+            return JsonResponse({"result": "No results found.",
+                                 "friendly_message": "Sorry, I couldn't find any properties matching your request."},
+                                status=200)
 
         # Fuzzy scoring
         scored = []
