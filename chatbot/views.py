@@ -242,12 +242,12 @@ def ai_sql_query(request):
         friendly_message = result.metadata.get("chat_response", "Here is what I found.")
 
         # Convert Decimal values to float for JSON serialization
-        filtered = convert_decimal_to_float(filtered)
+        filtered = _deep_convert_to_json_safe(filtered)
 
         # Prepare metadata for saving - ensure it's JSON safe
         metadata_for_save = {
             'property_count': len(filtered),
-            'properties': _deep_convert_to_json_safe(filtered)
+            'properties': filtered  # Use the cleaned filtered data directly
         }
 
         # Debug: Print the metadata to see what's causing the issue
@@ -262,6 +262,19 @@ def ai_sql_query(request):
             print(f"🔥 Metadata JSON test failed: {e}")
             # Force convert everything to basic types
             metadata_for_save = _force_convert_to_basic_types(metadata_for_save)
+            print(f"🔥 After force conversion: {metadata_for_save}")
+
+            # Test again after conversion
+            try:
+                json.dumps(metadata_for_save)
+                print("✅ Metadata is now JSON serializable after conversion")
+            except Exception as e2:
+                print(f"🔥 Still failing after conversion: {e2}")
+                # Last resort: create a minimal safe metadata
+                metadata_for_save = {
+                    'property_count': len(filtered),
+                    'properties': []
+                }
 
         # Save bot message with property results
         save_message(

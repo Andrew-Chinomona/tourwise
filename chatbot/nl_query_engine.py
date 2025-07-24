@@ -31,7 +31,7 @@ llm = Groq(
         "When users mention 'houses', 'homes', or 'house', use property_type = 'house'. "
         "When users mention 'apartments', 'flats', or 'apartment', use property_type = 'apartment'. "
         "Use proper WHERE clauses and lowercase string values when filtering by suburb, city, or property_type. "
-        "Always include the required fields: id, main_image, price, street_address, suburb, city in your SELECT statement. "
+        "Always include the required fields: id, title, main_image, price, street_address, suburb, city in your SELECT statement. "
         "Do not use table aliases unless necessary. "
         "Do not fabricate table or column names."
     )
@@ -74,7 +74,7 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
         sql = result.metadata.get("sql_query", "")
 
         # --- Post-process SQL to ensure all required fields are always selected ---
-        required_fields = ["id", "main_image", "price", "street_address", "suburb", "city"]
+        required_fields = ["id", "title", "main_image", "price", "street_address", "suburb", "city"]
         for field in required_fields:
             if field not in sql.lower():
                 import re
