@@ -47,6 +47,27 @@ def get_or_create_session(request):
 
 def save_message(session, sender, content, message_type='text', metadata=None):
     """Save a message to the database"""
+    # Convert any Decimal values in metadata before saving
+    if metadata:
+        try:
+            # Deep conversion of all Decimal values
+            metadata = convert_decimal_to_float(metadata)
+            # Test JSON serialization to ensure it's valid
+            json.dumps(metadata)
+        except (TypeError, ValueError) as e:
+            print(f"🔥 Error converting metadata: {e}")
+            # Fallback: convert everything to basic types
+            metadata = _force_convert_to_basic_types(metadata)
+            print(f"🔥 Converted metadata: {metadata}")
+
+    # Final safety check - ensure metadata is JSON safe
+    if metadata:
+        try:
+            json.dumps(metadata)
+        except Exception as e:
+            print(f"🔥 Final metadata conversion failed: {e}")
+            metadata = _force_convert_to_basic_types(metadata)
+
     return ChatMessage.objects.create(
         session=session,
         sender=sender,
@@ -54,6 +75,42 @@ def save_message(session, sender, content, message_type='text', metadata=None):
         message_type=message_type,
         metadata=metadata or {}
     )
+
+
+def _deep_convert_to_json_safe(obj):
+    """Convert any object to JSON-safe types"""
+    if isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {key: _deep_convert_to_json_safe(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [_deep_convert_to_json_safe(item) for item in obj]
+    elif hasattr(obj, '__dict__'):
+        return str(obj)
+    else:
+        return obj
+
+
+def _force_convert_to_basic_types(obj):
+    """Force convert any object to basic JSON-safe types"""
+    if obj is None:
+        return None
+    elif isinstance(obj, (str, int, float, bool)):
+        return obj
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {str(key): _force_convert_to_basic_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [_force_convert_to_basic_types(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return [_force_convert_to_basic_types(item) for item in obj]
+    else:
+        # Convert any other object to string
+        try:
+            return str(obj)
+        except:
+            return "Unknown object"
 
 
 @require_POST
@@ -81,6 +138,14 @@ def ai_sql_query(request):
     try:
         result = run_nl_query(user_input)
 
+        # Convert any Decimal values in the result metadata
+        if hasattr(result, 'metadata') and result.metadata:
+            result.metadata = convert_decimal_to_float(result.metadata)
+
+        # Convert any Decimal values in the response
+        if hasattr(result, 'response') and result.response:
+            result.response = convert_decimal_to_float(result.response)
+
         # Handle conversational responses
         if isinstance(result, dict) and result.get("is_conversational"):
             bot_response = result.get("chat_response", "Hello!")
@@ -100,6 +165,9 @@ def ai_sql_query(request):
             else:
                 parsed = raw_result
 
+            # Convert any Decimal values in the raw result
+            parsed = convert_decimal_to_float(parsed)
+
             col_keys = result.metadata.get("col_keys", [])
             for tup in parsed:
                 row = {}
@@ -107,6 +175,9 @@ def ai_sql_query(request):
                     row = dict(zip(col_keys, tup))
                 elif isinstance(tup, dict):
                     row = tup
+
+                # Convert any Decimal values in the row
+                row = convert_decimal_to_float(row)
 
                 # ✅ Try to enrich with full data from database
                 try:
@@ -173,21 +244,71 @@ def ai_sql_query(request):
         # Convert Decimal values to float for JSON serialization
         filtered = convert_decimal_to_float(filtered)
 
+        # Prepare metadata for saving - ensure it's JSON safe
+        metadata_for_save = {
+            'property_count': len(filtered),
+            'properties': _deep_convert_to_json_safe(filtered)
+        }
+
+        # Debug: Print the metadata to see what's causing the issue
+        print(f"🔥 Metadata before save: {metadata_for_save}")
+        print(f"🔥 Metadata type: {type(metadata_for_save)}")
+
+        # Test JSON serialization of metadata
+        try:
+            json.dumps(metadata_for_save)
+            print("✅ Metadata is JSON serializable")
+        except Exception as e:
+            print(f"🔥 Metadata JSON test failed: {e}")
+            # Force convert everything to basic types
+            metadata_for_save = _force_convert_to_basic_types(metadata_for_save)
+
         # Save bot message with property results
         save_message(
             session,
             'bot',
             friendly_message,
             'property_results',
-            {'property_count': len(filtered), 'properties': filtered}
+            metadata_for_save
         )
 
-        return JsonResponse({"result": filtered, "friendly_message": friendly_message}, status=200)
+        # Final conversion to ensure all data is JSON serializable
+        try:
+            response_data = {"result": filtered, "friendly_message": friendly_message}
+            # Test JSON serialization
+            json.dumps(response_data)
+            return JsonResponse(response_data, status=200)
+        except (TypeError, ValueError) as json_error:
+            print(f"🔥 JSON serialization error: {json_error}")
+            print(f"🔥 Problematic data: {filtered}")
+            # Fallback: convert everything to strings
+            filtered_safe = []
+            for item in filtered:
+                safe_item = {}
+                for key, value in item.items():
+                    if isinstance(value, Decimal):
+                        safe_item[key] = float(value)
+                    elif hasattr(value, '__dict__'):  # Handle any object types
+                        safe_item[key] = str(value)
+                    else:
+                        safe_item[key] = value
+                filtered_safe.append(safe_item)
+
+            return JsonResponse({"result": filtered_safe, "friendly_message": friendly_message}, status=200)
 
     except Exception as e:
         print("🔥 Error in ai_sql_query:", str(e))
-        error_message = f"Something went wrong: {str(e)}"
-        save_message(session, 'bot', error_message, 'error')
+        import traceback
+        print("🔥 Full traceback:")
+        traceback.print_exc()
+
+        # Try to save error message
+        try:
+            error_message = f"Something went wrong: {str(e)}"
+            save_message(session, 'bot', error_message, 'error')
+        except Exception as save_error:
+            print(f"🔥 Error saving error message: {save_error}")
+
         return JsonResponse({"error": str(e)}, status=500)
 
 
