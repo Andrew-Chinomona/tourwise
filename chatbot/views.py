@@ -117,197 +117,34 @@ def _force_convert_to_basic_types(obj):
 @csrf_exempt
 def ai_sql_query(request):
     """
-    Accepts a POST request with 'message' and returns a response from the LlamaIndex SQL query engine.
-    Also performs fuzzy matching on property descriptions and amenities.
-    Enriches partial SQL data with full ORM data from Django.
+    Accepts a POST request with 'message' and returns a response using the MCP architecture.
+    Maintains backward compatibility with existing frontend.
     """
     user_input = request.POST.get("message", "").strip()
     if not user_input:
         return JsonResponse({"error": "No message provided"}, status=400)
 
-    # Get or create chat session
-    session = get_or_create_session(request)
-
-    # Save user message
-    user_message = save_message(session, 'user', user_input)
-
-    # Generate title for session if it's the first user message
-    if session.messages.filter(sender='user').count() == 1:
-        session.generate_title()
-
     try:
-        result = run_nl_query(user_input)
+        # Import MCP components
+        from .mcp_core import MCPContext, get_mcp_orchestrator
+        from .response_formatter import MCPResponseFormatter
 
-        # Convert any Decimal values in the result metadata
-        if hasattr(result, 'metadata') and result.metadata:
-            result.metadata = convert_decimal_to_float(result.metadata)
+        # Create MCP context
+        context = MCPContext(request)
+        context.get_or_create_session()
 
-        # Convert any Decimal values in the response
-        if hasattr(result, 'response') and result.response:
-            result.response = convert_decimal_to_float(result.response)
+        # Generate title for session if it's the first user message
+        if context.session.messages.filter(sender='user').count() == 0:
+            context.session.generate_title()
 
-        # Handle conversational responses
-        if isinstance(result, dict) and result.get("is_conversational"):
-            bot_response = result.get("chat_response", "Hello!")
-            # Save bot message
-            save_message(session, 'bot', bot_response, 'conversational')
-            return JsonResponse({
-                "result": result.get("results", []),
-                "friendly_message": bot_response
-            }, status=200)
+        # Process message through MCP orchestrator
+        orchestrator = get_mcp_orchestrator()
+        mcp_response = orchestrator.process_message(user_input, context)
 
-        # Normalize SQL response to list of dicts
-        rows = []
-        try:
-            raw_result = result.response
-            if isinstance(raw_result, str):
-                parsed = ast.literal_eval(raw_result)
-            else:
-                parsed = raw_result
+        # Format response for frontend
+        response_data = MCPResponseFormatter.format_for_frontend(mcp_response)
 
-            # Convert any Decimal values in the raw result
-            parsed = convert_decimal_to_float(parsed)
-
-            col_keys = result.metadata.get("col_keys", [])
-            for tup in parsed:
-                row = {}
-                if isinstance(tup, tuple):
-                    row = dict(zip(col_keys, tup))
-                elif isinstance(tup, dict):
-                    row = tup
-
-                # Convert any Decimal values in the row
-                row = convert_decimal_to_float(row)
-
-                # ✅ Try to enrich with full data from database
-                try:
-                    prop = None
-                    if "id" in row:
-                        prop = Property.objects.get(id=row["id"])
-                    elif "title" in row:
-                        prop = Property.objects.filter(title__icontains=row["title"]).first()
-
-                    if prop:
-                        row["id"] = prop.id
-                        row["main_image"] = prop.main_image.url if prop.main_image else ""
-                        row["price"] = float(prop.price) if prop.price else None
-                        row["street_address"] = prop.street_address
-                        row["suburb"] = prop.suburb
-                        row["city"] = prop.city
-                        row["title"] = prop.title
-                        row["description"] = prop.description
-
-                        from listings.models import PropertyImage
-                        images = PropertyImage.objects.filter(property=prop).values_list("image", flat=True)
-                        row["property_images"] = [img.url for img in images]
-                except Property.DoesNotExist:
-                    pass
-
-                rows.append(row)
-        except Exception as parse_err:
-            print("❌ Error parsing SQL result:", parse_err)
-            return JsonResponse({"error": "Failed to parse database results."}, status=500)
-
-        if not rows:
-            bot_response = "Sorry, I couldn't find any properties matching your request."
-            save_message(session, 'bot', bot_response, 'no_results')
-            return JsonResponse({"result": "No results found.", "friendly_message": bot_response}, status=200)
-
-        # Fuzzy scoring
-        scored = []
-        for row in rows:
-            description = row.get("description", "")
-            property_id = row.get("id")
-            amenities_str = ""
-
-            if property_id:
-                try:
-                    prop = Property.objects.get(id=property_id)
-                    amenities = prop.amenities.all()
-                    amenities_str = ", ".join([a.name for a in amenities])
-                except Property.DoesNotExist:
-                    pass
-
-            desc_score = fuzz.token_set_ratio(user_input, description)
-            amenity_score = fuzz.token_set_ratio(user_input, amenities_str)
-            total_score = desc_score * 0.6 + amenity_score * 0.4
-            scored.append((total_score, row))
-
-        # Sort by score descending
-        scored.sort(reverse=True, key=lambda x: x[0])
-        # Return all results, sorted by score
-        filtered = [row for score, row in scored]
-
-        # Get friendly message from the result metadata
-        friendly_message = result.metadata.get("chat_response", "Here is what I found.")
-
-        # Convert Decimal values to float for JSON serialization
-        filtered = _deep_convert_to_json_safe(filtered)
-
-        # Prepare metadata for saving - ensure it's JSON safe
-        metadata_for_save = {
-            'property_count': len(filtered),
-            'properties': filtered  # Use the cleaned filtered data directly
-        }
-
-        # Debug: Print the metadata to see what's causing the issue
-        print(f"🔥 Metadata before save: {metadata_for_save}")
-        print(f"🔥 Metadata type: {type(metadata_for_save)}")
-
-        # Test JSON serialization of metadata
-        try:
-            json.dumps(metadata_for_save)
-            print("✅ Metadata is JSON serializable")
-        except Exception as e:
-            print(f"🔥 Metadata JSON test failed: {e}")
-            # Force convert everything to basic types
-            metadata_for_save = _force_convert_to_basic_types(metadata_for_save)
-            print(f"🔥 After force conversion: {metadata_for_save}")
-
-            # Test again after conversion
-            try:
-                json.dumps(metadata_for_save)
-                print("✅ Metadata is now JSON serializable after conversion")
-            except Exception as e2:
-                print(f"🔥 Still failing after conversion: {e2}")
-                # Last resort: create a minimal safe metadata
-                metadata_for_save = {
-                    'property_count': len(filtered),
-                    'properties': []
-                }
-
-        # Save bot message with property results
-        save_message(
-            session,
-            'bot',
-            friendly_message,
-            'property_results',
-            metadata_for_save
-        )
-
-        # Final conversion to ensure all data is JSON serializable
-        try:
-            response_data = {"result": filtered, "friendly_message": friendly_message}
-            # Test JSON serialization
-            json.dumps(response_data)
-            return JsonResponse(response_data, status=200)
-        except (TypeError, ValueError) as json_error:
-            print(f"🔥 JSON serialization error: {json_error}")
-            print(f"🔥 Problematic data: {filtered}")
-            # Fallback: convert everything to strings
-            filtered_safe = []
-            for item in filtered:
-                safe_item = {}
-                for key, value in item.items():
-                    if isinstance(value, Decimal):
-                        safe_item[key] = float(value)
-                    elif hasattr(value, '__dict__'):  # Handle any object types
-                        safe_item[key] = str(value)
-                    else:
-                        safe_item[key] = value
-                filtered_safe.append(safe_item)
-
-            return JsonResponse({"result": filtered_safe, "friendly_message": friendly_message}, status=200)
+        return JsonResponse(response_data, status=200)
 
     except Exception as e:
         print("🔥 Error in ai_sql_query:", str(e))
@@ -317,8 +154,10 @@ def ai_sql_query(request):
 
         # Try to save error message
         try:
-            error_message = f"Something went wrong: {str(e)}"
-            save_message(session, 'bot', error_message, 'error')
+            from .mcp_core import MCPContext
+            context = MCPContext(request)
+            context.get_or_create_session()
+            context.save_message('bot', f"Something went wrong: {str(e)}", 'error')
         except Exception as save_error:
             print(f"🔥 Error saving error message: {save_error}")
 

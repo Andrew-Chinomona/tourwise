@@ -9,7 +9,7 @@ import django
 from django.conf import settings
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Tourwise_Website.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tourwise_website.settings')
 django.setup()
 
 from payments.models import Payment

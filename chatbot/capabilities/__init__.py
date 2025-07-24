@@ -1,0 +1,1 @@
+# Capabilities package for MCP architecture
