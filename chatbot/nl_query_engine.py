@@ -187,89 +187,13 @@ query_engine = CaseInsensitivePropertyTypeQueryEngine(llm=llm, sql_database=sql_
 
 
 def run_nl_query(natural_query):
-    # Handle conversational queries first
-    natural_query_lower = natural_query.lower().strip()
+    """
+    Pure SQL query engine - no conversational handling.
+    Conversational queries are now handled by the MCP architecture.
+    """
+    print(f"🔍 Processing SQL query: '{natural_query}'")
 
-    print(f"🔍 Processing query: '{natural_query}' (lowercase: '{natural_query_lower}')")
-
-    # Greetings and salutations
-    greetings = [
-        "hello", "hi", "hey", "hie", "good morning", "good afternoon", "good evening",
-        "how are you", "how's it going", "what's up", "sup", "yo"
-    ]
-
-    # Farewells
-    farewells = [
-        "bye", "goodbye", "see you", "take care", "have a good day", "thanks", "thank you"
-    ]
-
-    # Gratitude
-    gratitude = [
-        "thanks", "thank you", "appreciate it", "awesome", "great", "perfect", "excellent"
-    ]
-
-    # Check if it's a conversational query
-    if any(greeting in natural_query_lower for greeting in greetings):
-        print(f"✅ Detected greeting: '{natural_query}'")
-        import random
-        responses = [
-            "Hello! 👋 I'm here to help you find your perfect property in Zimbabwe. What are you looking for today?",
-            "Hi there! 😊 Welcome to Tourwise! I can help you find houses, apartments, and other properties. What's on your mind?",
-            "Hey! 🏡 Great to see you! I'm your property search assistant. What type of property are you interested in?",
-            "Good day! ✨ I'm here to make your property search easy and fun. What can I help you find today?",
-            "Hello! 🌟 Welcome to Tourwise! I'm excited to help you discover amazing properties. What are you searching for?"
-        ]
-        return {
-            "chat_response": random.choice(responses),
-            "results": [],
-            "is_conversational": True
-        }
-
-    elif any(farewell in natural_query_lower for farewell in farewells):
-        print(f"✅ Detected farewell: '{natural_query}'")
-        import random
-        responses = [
-            "Goodbye! 👋 It was great helping you today. Feel free to come back anytime!",
-            "Take care! 😊 Happy house hunting! Don't hesitate to return if you need more help.",
-            "See you later! 🏡 I hope you found what you were looking for. Come back soon!",
-            "Have a wonderful day! ✨ Thanks for using Tourwise. I'll be here when you need me!",
-            "Bye for now! 🌟 Good luck with your property search. I'm always here to help!"
-        ]
-        return {
-            "chat_response": random.choice(responses),
-            "results": [],
-            "is_conversational": True
-        }
-
-    elif any(grat in natural_query_lower for grat in gratitude):
-        print(f"✅ Detected gratitude: '{natural_query}'")
-        import random
-        responses = [
-            "You're very welcome! 😊 I'm glad I could help. Is there anything else you'd like to know?",
-            "My pleasure! ✨ I love helping people find their perfect home. What else can I assist you with?",
-            "Anytime! 🏡 I'm here to make your property search as smooth as possible. Need anything else?",
-            "Happy to help! 🌟 That's what I'm here for. Feel free to ask me anything about properties!",
-            "You're welcome! 😄 I enjoy helping people discover great properties. What's next on your list?"
-        ]
-        return {
-            "chat_response": random.choice(responses),
-            "results": [],
-            "is_conversational": True
-        }
-
-    # Handle other conversational queries
-    elif any(phrase in natural_query_lower for phrase in [
-        "how does this work", "what can you do", "help", "what are you", "who are you"
-    ]):
-        print(f"✅ Detected help query: '{natural_query}'")
-        return {
-            "chat_response": "I'm your AI property assistant! 🏡 I can help you find houses, apartments, and other properties in Zimbabwe. Just tell me what you're looking for - like 'houses in Harare' or 'apartments under $500' - and I'll search our database for you. What type of property interests you?",
-            "results": [],
-            "is_conversational": True
-        }
-
-    print(f"🔍 No conversational match found, proceeding with SQL query for: '{natural_query}'")
-    # If not conversational, proceed with normal SQL query
+    # Execute SQL query directly
     result = query_engine.query(natural_query)
     print("SQL generated: ", result.metadata.get("sql_query", "[none]"))
     return result

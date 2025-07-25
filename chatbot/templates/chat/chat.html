@@ -1279,6 +1279,14 @@ function hideThinking() {
 
 // --- Tailwind-based Property Card Rendering ---
 function appendCard(property) {
+  // Debug: Log the property data being processed
+  console.log("🔍 appendCard called with property:", property);
+  console.log("🔍 Property title:", property.title);
+  console.log("🔍 Property price:", property.price);
+  console.log("🔍 Property city:", property.city);
+  console.log("🔍 Property suburb:", property.suburb);
+  console.log("🔍 Property main_image:", property.main_image);
+
   // Always check for and create the property grid if it doesn't exist
   let grid = document.getElementById('property-grid');
   if (!grid) {
@@ -1374,11 +1382,21 @@ function appendCard(property) {
   const imgSection = document.createElement('div');
   imgSection.className = 'property-card-img-section-js';
   const img = document.createElement('img');
-  let imageUrl = property.main_image;
-  if (imageUrl && !imageUrl.startsWith('http')) {
-    imageUrl = '/media/' + imageUrl;
+
+  // Handle main_image properly
+  let imageUrl = property.main_image || '';
+  console.log("🔍 Original imageUrl:", imageUrl);
+
+  if (imageUrl) {
+    if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/media/')) {
+      imageUrl = '/media/' + imageUrl;
+    }
+  } else {
+    imageUrl = '/static/images/default-profile-icon.png';
   }
-  img.src = imageUrl || '/static/images/default-profile-icon.png';
+
+  console.log("🔍 Final imageUrl:", imageUrl);
+  img.src = imageUrl;
   img.alt = property.title || 'Property Image';
   img.className = 'property-card-img-js';
   imgSection.appendChild(img);
@@ -1397,19 +1415,26 @@ function appendCard(property) {
   title.style.color = '#333';
   title.style.margin = '0 0 2px 0';
   title.title = property.title || '';
-  title.textContent = property.title || 'Untitled Property';
+  title.textContent = property.title || 'Property';
+
   const location = document.createElement('p');
   location.style.fontSize = '0.97rem';
   location.style.color = '#888';
   location.style.margin = '0 0 2px 0';
-  location.title = `${property.city || ''}, ${property.suburb || ''}`;
-  location.textContent = `${property.city || ''}, ${property.suburb || ''}`;
+  const city = property.city || '';
+  const suburb = property.suburb || '';
+  const locationText = city && suburb ? `${city}, ${suburb}` : city || suburb || 'Location not specified';
+  location.title = locationText;
+  location.textContent = locationText;
+
   const price = document.createElement('p');
   price.style.fontSize = '1.05rem';
   price.style.color = '#c15a2e';
   price.style.fontWeight = 'bold';
   price.style.margin = '4px 0 0 0';
-  price.textContent = `$${property.price || 'N/A'}`;
+  const priceValue = property.price;
+  const priceText = priceValue ? `$${priceValue}` : 'Price not specified';
+  price.textContent = priceText;
 
   info.appendChild(title);
   info.appendChild(location);
@@ -1441,42 +1466,38 @@ function sendMessage() {
   .then(res => res.json())
   .then(data => {
     hideThinking(); // Hide thinking animation
+
+    console.log("🔍 Frontend received data:", data);
+
+    // Handle MCP response format
+    if (data.error) {
+      appendMessage("❌ " + data.error, 'bot');
+      return;
+    }
+
     // Show friendly message if present
     if (data.friendly_message) {
       appendMessage(data.friendly_message, 'bot');
     }
 
-    // If we have a friendly message and no results, don't show "No results found"
-    if (data.friendly_message && (!data.result || data.result.length === 0)) {
-      return; // Exit early, don't process results
-    }
-
-    // Handle new backend response structure
-    if (Array.isArray(data.result) && data.result.length > 1 && data.result[1].result && data.result[1].col_keys) {
-      const rows = data.result[1].result;
-      const colKeys = data.result[1].col_keys;
-      if (rows.length === 0) {
-        appendMessage("No results found.", 'bot');
-      } else {
-        rows.forEach(rowArr => {
-          let property = {};
-          colKeys.forEach((key, idx) => {
-            property[key] = rowArr[idx];
-          });
-          appendCard(property);
-        });
-      }
-    } else if (Array.isArray(data.result)) {
+    // Handle property results from MCP
+    if (data.result && Array.isArray(data.result)) {
       if (data.result.length === 0) {
         appendMessage("No results found.", 'bot');
       } else {
-        data.result.forEach(appendCard);
+        console.log("🔍 Processing properties:", data.result.length);
+        data.result.forEach((property, index) => {
+          console.log(`🔍 Property ${index}:`, property);
+          appendCard(property);
+        });
       }
     } else if (typeof data.result === "string") {
       appendMessage(data.result, 'bot');
-    } else if (data.error) {
-      appendMessage("❌ " + data.error, 'bot');
+    } else if (data.is_conversational) {
+      // Conversational response - no properties to show
+      console.log("🔍 Conversational response, no properties");
     } else {
+      console.log("🔍 Unexpected response format:", data);
       appendMessage("Unexpected response format.", 'bot');
     }
   })

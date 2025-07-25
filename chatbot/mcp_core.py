@@ -13,7 +13,6 @@ from .models import ChatSession, ChatMessage
 
 logger = logging.getLogger(__name__)
 
-
 class MessageType(Enum):
     """Types of messages that can be processed"""
     CONVERSATIONAL = "conversational"
@@ -24,7 +23,6 @@ class MessageType(Enum):
     FAREWELL = "farewell"
     GRATITUDE = "gratitude"
     ERROR = "error"
-
 
 @dataclass
 class MCPMessage:
@@ -43,7 +41,6 @@ class MCPMessage:
             'session_id': self.session_id,
             'user_id': self.user_id
         }
-
 
 @dataclass
 class MCPResponse:
@@ -65,7 +62,6 @@ class MCPResponse:
             'error_message': self.error_message
         }
 
-
 class MCPCapability:
     """Base class for MCP capabilities"""
 
@@ -85,7 +81,6 @@ class MCPCapability:
         """Override to set processing priority (lower = higher priority)"""
         return 100
 
-
 class MCPContext:
     """Manages conversation context and session state"""
 
@@ -101,8 +96,7 @@ class MCPContext:
         self.session = get_or_create_session(self.request)
         return self.session
 
-    def save_message(self, sender: str, content: str, message_type: str = 'text',
-                     metadata: Dict[str, Any] = None) -> ChatMessage:
+    def save_message(self, sender: str, content: str, message_type: str = 'text', metadata: Dict[str, Any] = None) -> ChatMessage:
         """Save a message to the database"""
         from .views import save_message
         return save_message(self.session, sender, content, message_type, metadata)
@@ -114,7 +108,6 @@ class MCPContext:
     def set_context_data(self, key: str, value: Any):
         """Set context data"""
         self.context_data[key] = value
-
 
 class MCPOrchestrator:
     """Main orchestrator for MCP message processing"""
@@ -152,8 +145,13 @@ class MCPOrchestrator:
             )
 
             # Find the first capability that can handle this message
+            print(f"🔍 MCP Orchestrator checking {len(self.capabilities)} capabilities for: '{content}'")
             for capability in self.capabilities:
-                if capability.can_handle(message):
+                print(f"🔍 Checking capability: {capability.name}")
+                can_handle = capability.can_handle(message)
+                print(f"🔍 {capability.name} can handle: {can_handle}")
+                if can_handle:
+                    print(f"🔍 Processing with capability: {capability.name}")
                     logger.info(f"Processing message with capability: {capability.name}")
                     response = capability.process(message, context.context_data)
 
@@ -182,11 +180,9 @@ class MCPOrchestrator:
                 error_message=str(e)
             )
 
-
 # Global orchestrator instance
 mcp_orchestrator = MCPOrchestrator()
 
-
 def get_mcp_orchestrator() -> MCPOrchestrator:
     """Get the global MCP orchestrator instance"""
-    return mcp_orchestrator
+    return mcp_orchestrator 

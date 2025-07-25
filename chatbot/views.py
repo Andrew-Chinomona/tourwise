@@ -141,8 +141,19 @@ def ai_sql_query(request):
         orchestrator = get_mcp_orchestrator()
         mcp_response = orchestrator.process_message(user_input, context)
 
-        # Format response for frontend
-        response_data = MCPResponseFormatter.format_for_frontend(mcp_response)
+        # Format response for frontend using dedicated backend formatter
+        from .backend_formatter import format_response_for_frontend
+        response_data = format_response_for_frontend(mcp_response)
+
+        print(f"🔍 Backend formatted response: {response_data}")
+        if response_data.get('result'):
+            print(f"🔍 Properties count: {len(response_data['result'])}")
+            if response_data['result']:
+                first_prop = response_data['result'][0]
+                print(f"🔍 First property title: {first_prop.get('title')}")
+                print(f"🔍 First property price: {first_prop.get('price')}")
+                print(f"🔍 First property city: {first_prop.get('city')}")
+                print(f"🔍 First property main_image: {first_prop.get('main_image')}")
 
         return JsonResponse(response_data, status=200)
 

@@ -1041,7 +1041,7 @@
                 <div class="card-body">
                   <h5 class="card-title text-truncate">{{ property.title }}</h5>
                   <p class="card-text">
-                    {{ property|clean_location }}
+                    {{ property.street_address|title}}
                   </p>
                   <p class="price-text">
                     {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
