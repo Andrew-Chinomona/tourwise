@@ -1208,6 +1208,291 @@
         background: #c15a2e;
       }
     }
+
+    /* Properties Modal Styles */
+    .properties-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .properties-modal.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .properties-modal-panel {
+      background: white;
+      border-radius: 16px;
+      width: 95vw;
+      height: 90vh;
+      max-width: 1200px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .properties-modal.show .properties-modal-panel {
+      transform: scale(1);
+    }
+
+    .properties-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .properties-modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .properties-modal-close {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+      line-height: 1;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .properties-modal-close:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .properties-modal-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      min-height: 0;
+    }
+
+    .properties-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .properties-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .properties-modal-panel {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .properties-modal-header {
+        padding: 16px 20px;
+      }
+
+      .properties-modal-title {
+        font-size: 1.25rem;
+      }
+
+      .properties-modal-content {
+        padding: 20px 16px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .properties-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .properties-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Property Card in Modal */
+    .modal-property-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-property-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .modal-property-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: #f3f4f6;
+    }
+
+    .modal-property-content {
+      padding: 16px;
+    }
+
+    .modal-property-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 8px 0;
+      line-height: 1.4;
+    }
+
+    .modal-property-location {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin: 0 0 8px 0;
+    }
+
+    .modal-property-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #c15a2e;
+      margin: 0;
+    }
+
+    .modal-property-distance {
+      font-size: 0.85rem;
+      color: #059669;
+      margin: 4px 0 0 0;
+      font-weight: 500;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #c15a2e;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* View Properties Button */
+    .view-properties-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #c15a2e;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+      margin-top: 8px;
+    }
+
+    .view-properties-btn:hover {
+      background: #a3471e;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(193, 90, 46, 0.3);
+      color: white;
+      text-decoration: none;
+    }
+
+    .view-properties-btn-icon {
+      font-size: 1.2rem;
+    }
+
+    /* Chat Bubble with View Properties Button */
+    .chat-bubble-with-button {
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px 20px;
+      max-width: 80%;
+      align-self: flex-start;
+      box-shadow: 0 2px 8px rgba(193,90,46,0.07);
+      border-bottom-left-radius: 6px;
+      margin: 2px 0;
+    }
+
+    /* Infinite Scroll Indicator */
+    .infinite-scroll-loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .infinite-scroll-loader.hidden {
+      display: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      color: #d1d5db;
+    }
+
+    .empty-state-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+
+    .empty-state-description {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -1282,6 +1567,34 @@
     </div>
   </div>
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <!-- Properties Modal -->
+  <div id="properties-modal" class="properties-modal">
+    <div class="properties-modal-panel">
+      <div class="properties-modal-header">
+        <h2 id="properties-modal-title" class="properties-modal-title">Properties</h2>
+        <button class="properties-modal-close" onclick="closePropertiesModal()" aria-label="Close">
+          ×
+        </button>
+      </div>
+      <div class="properties-modal-content">
+        <div id="properties-grid" class="properties-grid">
+          <!-- Properties will be populated here -->
+        </div>
+        <div id="infinite-scroll-loader" class="infinite-scroll-loader hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <div class="empty-state-icon">🏠</div>
+          <div class="empty-state-title">No Properties Found</div>
+          <div class="empty-state-description">
+            Try adjusting your search criteria or browse our featured listings.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Header Bar -->
   <header class="tw-header">
 
@@ -1336,11 +1649,201 @@ const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endi
 <script>
 const WELCOME_MESSAGE = `👋 Hey there, welcome to Tourwise!\nI'm your virtual assistant, here to help you find your perfect home — stress-free and hassle-free. 🏡✨\nJust tell me what you're looking for, and I'll do the searching for you.\nWhether you're after something specific or just browsing, I've got you covered.\nLet's get started — your next home could be just one message away! 😊`;
 
+// Global state for properties modal
+let modalProperties = [];
+let currentPage = 1;
+let itemsPerPage = 20;
+let isLoading = false;
+let hasMoreItems = true;
+
 function appendMessage(text, sender) {
   const msgDiv = document.createElement('div');
   msgDiv.className = 'message ' + sender;
   msgDiv.textContent = text;
   document.getElementById('messages').appendChild(msgDiv);
+}
+
+// Create chat bubble with View Properties button
+function createChatBubbleWithButton(message, properties) {
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = 'chat-bubble-with-button';
+
+  const messageText = document.createElement('div');
+  messageText.textContent = message;
+  messageText.style.marginBottom = '8px';
+
+  const viewButton = document.createElement('button');
+  viewButton.className = 'view-properties-btn';
+  viewButton.innerHTML = `
+    <span class="view-properties-btn-icon"></span>
+    View Properties
+  `;
+  viewButton.onclick = () => openPropertiesModal(properties, message);
+
+  bubbleDiv.appendChild(messageText);
+  bubbleDiv.appendChild(viewButton);
+  document.getElementById('messages').appendChild(bubbleDiv);
+}
+
+// Open properties modal
+function openPropertiesModal(properties, title = 'Properties') {
+  modalProperties = [...properties];
+  currentPage = 1;
+  hasMoreItems = true;
+  isLoading = false;
+
+  const modal = document.getElementById('properties-modal');
+  const modalTitle = document.getElementById('properties-modal-title');
+  const grid = document.getElementById('properties-grid');
+  const emptyState = document.getElementById('empty-state');
+
+  modalTitle.textContent = `${properties.length} ${properties.length === 1 ? 'Property' : 'Properties'} Found`;
+
+  // Clear previous content
+  grid.innerHTML = '';
+  emptyState.style.display = 'none';
+
+  if (properties.length === 0) {
+    emptyState.style.display = 'block';
+  } else {
+    // Load initial batch
+    loadPropertiesPage();
+  }
+
+  // Show modal
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  // Setup infinite scroll
+  setupInfiniteScroll();
+}
+
+// Close properties modal
+function closePropertiesModal() {
+  const modal = document.getElementById('properties-modal');
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+
+  // Reset state
+  modalProperties = [];
+  currentPage = 1;
+  hasMoreItems = true;
+  isLoading = false;
+}
+
+// Load a page of properties
+function loadPropertiesPage() {
+  if (isLoading || !hasMoreItems) return;
+
+  isLoading = true;
+  const loader = document.getElementById('infinite-scroll-loader');
+  loader.classList.remove('hidden');
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const pageProperties = modalProperties.slice(startIndex, endIndex);
+
+  // Simulate loading delay for smooth UX
+  setTimeout(() => {
+    const grid = document.getElementById('properties-grid');
+
+    pageProperties.forEach(property => {
+      const card = createModalPropertyCard(property);
+      grid.appendChild(card);
+    });
+
+    currentPage++;
+    hasMoreItems = endIndex < modalProperties.length;
+    isLoading = false;
+    loader.classList.add('hidden');
+  }, 300);
+}
+
+// Create property card for modal
+function createModalPropertyCard(property) {
+  const card = document.createElement('div');
+  card.className = 'modal-property-card';
+  card.onclick = () => {
+    window.location.href = `/listings/${property.id}/`;
+  };
+
+  // Image
+  let imageUrl = property.main_image || '';
+  if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/media/')) {
+    imageUrl = '/media/' + imageUrl;
+  }
+  if (!imageUrl) {
+    imageUrl = '/static/images/default-profile-icon.png';
+  }
+
+  const img = document.createElement('img');
+  img.src = imageUrl;
+  img.alt = property.title || 'Property Image';
+  img.className = 'modal-property-image';
+  img.loading = 'lazy'; // Lazy load for performance
+
+  // Content
+  const content = document.createElement('div');
+  content.className = 'modal-property-content';
+
+  const title = document.createElement('h3');
+  title.className = 'modal-property-title';
+  title.textContent = property.title || 'Property';
+
+  const location = document.createElement('p');
+  location.className = 'modal-property-location';
+  const city = property.city || '';
+  const suburb = property.suburb || '';
+  location.textContent = city && suburb ? `${suburb}, ${city}` : city || suburb || 'Location not specified';
+
+  const price = document.createElement('p');
+  price.className = 'modal-property-price';
+  price.textContent = property.price ? `$${property.price}` : 'Price on request';
+
+  content.appendChild(title);
+  content.appendChild(location);
+  content.appendChild(price);
+
+  // Add distance if available (for CBD searches)
+  if (property.distance_from_cbd) {
+    const distance = document.createElement('p');
+    distance.className = 'modal-property-distance';
+    distance.textContent = `${property.distance_from_cbd}km from CBD`;
+    content.appendChild(distance);
+  }
+
+  card.appendChild(img);
+  card.appendChild(content);
+
+  return card;
+}
+
+// Setup infinite scroll
+function setupInfiniteScroll() {
+  const modalContent = document.querySelector('.properties-modal-content');
+
+  const scrollHandler = () => {
+    if (isLoading || !hasMoreItems) return;
+
+    const scrollTop = modalContent.scrollTop;
+    const scrollHeight = modalContent.scrollHeight;
+    const clientHeight = modalContent.clientHeight;
+
+    // Load more when user is 100px from bottom
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
+      loadPropertiesPage();
+    }
+  };
+
+  modalContent.addEventListener('scroll', scrollHandler);
+
+  // Clean up on modal close
+  const modal = document.getElementById('properties-modal');
+  modal.addEventListener('transitionend', (e) => {
+    if (e.target === modal && !modal.classList.contains('show')) {
+      modalContent.removeEventListener('scroll', scrollHandler);
+    }
+  });
 }
 
 // Show thinking animation
@@ -1619,10 +2122,10 @@ function sendMessage() {
         appendMessage("No results found.", 'bot');
       } else {
         console.log("🔍 Processing properties:", data.result.length);
-        data.result.forEach((property, index) => {
-          console.log(`🔍 Property ${index}:`, property);
-          appendCard(property);
-        });
+
+        // Create chat bubble with View Properties button
+        const friendlyMsg = data.friendly_message || `I found ${data.result.length} properties matching your criteria.`;
+        createChatBubbleWithButton(friendlyMsg, data.result);
       }
     } else if (typeof data.result === "string") {
       appendMessage(data.result, 'bot');
@@ -1838,6 +2341,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Enter' && !input.disabled) {
       e.preventDefault();
       sendMessage();
+    }
+  });
+
+  // Modal event listeners
+  const modal = document.getElementById('properties-modal');
+
+  // Close modal when clicking outside
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closePropertiesModal();
+    }
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('show')) {
+      closePropertiesModal();
     }
   });
 });

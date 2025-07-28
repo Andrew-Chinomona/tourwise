@@ -129,9 +129,11 @@ class MCPOrchestrator:
         from .capabilities.property_search import PropertySearchCapability
         from .capabilities.database_query import DatabaseQueryCapability
         from .capabilities.location_clarification import LocationClarificationCapability
+        from .capabilities.comprehensive_handler import ComprehensiveHandlerCapability
 
         self.register_capability(ConversationalCapability())
         self.register_capability(LocationClarificationCapability())  # Higher priority for location clarification
+        self.register_capability(ComprehensiveHandlerCapability())  # Handle complex queries
         self.register_capability(PropertySearchCapability())
         self.register_capability(DatabaseQueryCapability())
 
