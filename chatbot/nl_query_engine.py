@@ -171,10 +171,10 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
                 for row in result.response:
                     # Try to get property id from row (id or pk)
                     prop_id = row.get("id")
-                    if prop_id:
-                        images = PropertyImage.objects.filter(property_id=prop_id).values_list("image", flat=True)
-                        # Store as list of relative paths
-                        row["property_images"] = list(images)
+                    # if prop_id:
+                    #     images = PropertyImage.objects.filter(property_id=prop_id).values_list("image", flat=True)
+                    #     # Store as list of relative paths
+                    #     row["property_images"] = list(images)
         except Exception as e:
             # If anything goes wrong, skip adding images (do not break main flow)
             pass

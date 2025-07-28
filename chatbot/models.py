@@ -68,3 +68,44 @@ class ChatMessage(models.Model):
     @property
     def is_bot_message(self):
         return self.sender == 'bot'
+
+
+class CBDLocation(models.Model):
+    """Stores CBD/location data for Zimbabwean cities"""
+    name = models.CharField(max_length=100, unique=True)
+    city = models.CharField(max_length=100)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.city})"
+
+
+class ConversationState(models.Model):
+    """Tracks conversation state for follow-up questions"""
+    session = models.OneToOneField(ChatSession, on_delete=models.CASCADE, related_name='conversation_state')
+    waiting_for_location = models.BooleanField(default=False)
+    waiting_for_cbd_clarification = models.BooleanField(default=False)
+    pending_search_query = models.TextField(blank=True)
+    suggested_cbds = models.JSONField(default=list, blank=True)  # Store suggested CBDs
+    selected_cbd = models.ForeignKey(CBDLocation, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"State for {self.session}"
+
+    def reset_state(self):
+        """Reset all waiting flags"""
+        self.waiting_for_location = False
+        self.waiting_for_cbd_clarification = False
+        self.pending_search_query = ""
+        self.suggested_cbds = []
+        self.selected_cbd = None
+        self.save()

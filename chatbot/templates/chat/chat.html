@@ -5,6 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chatbot SQL Tester</title>
+  <!-- Swiper.js CDN for mobile property carousel -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <style>
     html, body {
       height: 100%;
@@ -19,6 +22,30 @@
       height: 100vh;
       width: 100vw;
       overflow: hidden;
+    }
+
+    /* Global Swiper Styles for Mobile */
+    @media (max-width: 768px) {
+      .swiper {
+        width: 100%;
+        height: 100%;
+      }
+
+      .swiper-slide {
+        text-align: center;
+        font-size: 18px;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .swiper-slide img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
     }
     .tw-header {
       position: fixed;
@@ -1072,6 +1099,73 @@
       }
     }
     @media (max-width: 768px) {
+      /* Swiper Property Card Styles */
+      .swiper-property-card {
+        width: 100%;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+      }
+
+      .property-swiper {
+        width: 80vw;
+        max-width: 300px;
+        height: 60vw;
+        max-height: 300px;
+        margin: 0 auto 1rem auto;
+        border-radius: 1.1rem;
+        overflow: hidden;
+        background: #f2f2f2;
+      }
+
+      .property-swiper .swiper-slide {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .property-swiper-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 1.1rem;
+      }
+
+      /* Swiper Navigation Buttons */
+      .property-swiper .swiper-button-next,
+      .property-swiper .swiper-button-prev {
+        width: 30px;
+        height: 30px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        color: #c15a2e;
+        font-size: 12px;
+      }
+
+      .property-swiper .swiper-button-next:after,
+      .property-swiper .swiper-button-prev:after {
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      /* Swiper Pagination */
+      .property-swiper .swiper-pagination {
+        bottom: 10px;
+      }
+
+      .property-swiper .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 1;
+      }
+
+      .property-swiper .swiper-pagination-bullet-active {
+        background: #c15a2e;
+      }
+
+      /* Legacy mobile carousel styles (keeping for compatibility) */
       .property-card-img-mobile-carousel {
         width: 60vw;
         max-width: 60vw;
@@ -1301,52 +1395,59 @@ function appendCard(property) {
     }
   }
 
-  // Mobile layout
+  // Mobile layout with Swiper coverflow
   if (window.innerWidth <= 768) {
     const card = document.createElement('div');
-    card.className = 'property-card-js';
+    card.className = 'property-card-js swiper-property-card';
     card.title = property.title || 'Property';
     card.onclick = () => {
       window.location.href = `/listings/${property.id}/`;
     };
 
-    // Carousel container
-    const carousel = document.createElement('div');
-    carousel.className = 'property-card-img-mobile-carousel';
+    // Create Swiper container
+    const swiperContainer = document.createElement('div');
+    swiperContainer.className = 'swiper property-swiper';
+
+    // Create Swiper wrapper
+    const swiperWrapper = document.createElement('div');
+    swiperWrapper.className = 'swiper-wrapper';
 
     // Use property.images if available, else fallback to main_image
     let images = property.images || [];
     if (!images.length && property.main_image) images = [property.main_image];
+
     images.forEach((imgUrl, idx) => {
       let imageUrl = imgUrl;
       if (imageUrl && !imageUrl.startsWith('http')) {
         imageUrl = '/media/' + imageUrl;
       }
+
+      const slide = document.createElement('div');
+      slide.className = 'swiper-slide';
+
       const img = document.createElement('img');
       img.src = imageUrl || '/static/images/default-profile-icon.png';
       img.alt = property.title || 'Property Image';
-      img.className = 'property-card-img-mobile-slide';
-      carousel.appendChild(img);
+      img.className = 'property-swiper-img';
+      slide.appendChild(img);
+
+      swiperWrapper.appendChild(slide);
     });
 
-    // Carousel dots
-    const dots = document.createElement('div');
-    dots.className = 'property-card-carousel-dots';
-    images.forEach((_, idx) => {
-      const dot = document.createElement('div');
-      dot.className = 'property-card-carousel-dot' + (idx === 0 ? ' active' : '');
-      dots.appendChild(dot);
-    });
+    // Add navigation arrows
+    const prevButton = document.createElement('div');
+    prevButton.className = 'swiper-button-prev';
+    const nextButton = document.createElement('div');
+    nextButton.className = 'swiper-button-next';
 
-    // Simple scroll event to update active dot
-    carousel.addEventListener('scroll', function () {
-      const scrollLeft = carousel.scrollLeft;
-      const slideWidth = carousel.offsetWidth;
-      const activeIdx = Math.round(scrollLeft / slideWidth);
-      Array.from(dots.children).forEach((dot, idx) => {
-        dot.classList.toggle('active', idx === activeIdx);
-      });
-    });
+    // Add pagination
+    const pagination = document.createElement('div');
+    pagination.className = 'swiper-pagination';
+
+    swiperContainer.appendChild(swiperWrapper);
+    swiperContainer.appendChild(prevButton);
+    swiperContainer.appendChild(nextButton);
+    swiperContainer.appendChild(pagination);
 
     // Details
     const title = document.createElement('div');
@@ -1361,12 +1462,44 @@ function appendCard(property) {
     price.className = 'property-card-price-mobile';
     price.textContent = `$${property.price || 'N/A'}`;
 
-    card.appendChild(carousel);
-    if (images.length > 1) card.appendChild(dots);
+    card.appendChild(swiperContainer);
     card.appendChild(title);
     card.appendChild(location);
     card.appendChild(price);
     grid.appendChild(card);
+
+    // Initialize Swiper after adding to DOM
+    setTimeout(() => {
+      if (images.length > 0) {
+        new Swiper(swiperContainer, {
+          effect: "coverflow",
+          grabCursor: true,
+          centeredSlides: true,
+          loop: images.length > 1,
+          slidesPerView: "auto",
+          coverflowEffect: {
+            rotate: 0,
+            stretch: 0,
+            depth: 100,
+            modifier: 2.5,
+            slideShadows: false,
+          },
+          autoplay: images.length > 1 ? {
+            delay: 2500,
+            disableOnInteraction: false,
+          } : false,
+          pagination: {
+            el: pagination,
+            clickable: true,
+          },
+          navigation: {
+            nextEl: nextButton,
+            prevEl: prevButton,
+          },
+        });
+      }
+    }, 100);
+
     return;
   }
 

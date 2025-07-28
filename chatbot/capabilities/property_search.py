@@ -90,7 +90,7 @@ class PropertySearchCapability(MCPCapability):
                             "area": prop.area,
                             "price": float(prop.price) if prop.price else None,
                             "main_image": main_image_url,
-                            "property_images": [img.url for img in images] if images else [],
+                            # "property_images": [img.url for img in images] if images else [],
                             "created_at": prop.created_at.isoformat() if prop.created_at else None
                         })
                     rows = fallback_rows
@@ -243,7 +243,7 @@ class PropertySearchCapability(MCPCapability):
                     "area": prop.area,
                     "price": float(prop.price) if prop.price else None,
                     "main_image": main_image_url,
-                    "property_images": [img.url for img in images] if images else [],
+                    # "property_images": [img.url for img in images] if images else [],
                     "created_at": prop.created_at.isoformat() if prop.created_at else None
                 }
 
@@ -270,7 +270,7 @@ class PropertySearchCapability(MCPCapability):
                 "area": row.get("area"),
                 "price": row.get("price"),
                 "main_image": main_image_from_sql,
-                "property_images": row.get("property_images", []),
+                # "property_images": row.get("property_images", []),
                 "created_at": row.get("created_at")
             }
 
@@ -317,7 +317,7 @@ class PropertySearchCapability(MCPCapability):
                         "area": prop.area,
                         "price": float(prop.price) if prop.price else None,
                         "main_image": main_image_url,
-                        "property_images": [img.url for img in images] if images else [],
+                        # "property_images": [img.url for img in images] if images else [],
                         "created_at": prop.created_at.isoformat() if prop.created_at else None
                     }
 

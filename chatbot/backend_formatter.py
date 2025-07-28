@@ -28,7 +28,7 @@ def format_properties_for_frontend(properties):
             'bathrooms': prop.get('bathrooms'),
             'area': prop.get('area'),
             'property_type': prop.get('property_type') or '',
-            'property_images': prop.get('property_images') or []
+            # 'property_images': prop.get('property_images') or []
         }
 
         # Ensure main_image is properly formatted

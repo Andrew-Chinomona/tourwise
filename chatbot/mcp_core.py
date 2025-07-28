@@ -128,8 +128,10 @@ class MCPOrchestrator:
         from .capabilities.conversational import ConversationalCapability
         from .capabilities.property_search import PropertySearchCapability
         from .capabilities.database_query import DatabaseQueryCapability
+        from .capabilities.location_clarification import LocationClarificationCapability
 
         self.register_capability(ConversationalCapability())
+        self.register_capability(LocationClarificationCapability())  # Higher priority for location clarification
         self.register_capability(PropertySearchCapability())
         self.register_capability(DatabaseQueryCapability())
 
@@ -153,7 +155,11 @@ class MCPOrchestrator:
                 if can_handle:
                     print(f"🔍 Processing with capability: {capability.name}")
                     logger.info(f"Processing message with capability: {capability.name}")
-                    response = capability.process(message, context.context_data)
+
+                    # Pass session in context data for capabilities that need it
+                    context_data = context.context_data.copy()
+                    context_data['session'] = context.session
+                    response = capability.process(message, context_data)
 
                     # Save the message and response to database
                     if context.session:

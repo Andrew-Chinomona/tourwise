@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ChatSession, ChatMessage
+from .models import ChatSession, ChatMessage, CBDLocation, ConversationState
 
 
 class ChatMessageInline(admin.TabularInline):
@@ -34,3 +34,22 @@ class ChatMessageAdmin(admin.ModelAdmin):
         return obj.content[:100] + "..." if len(obj.content) > 100 else obj.content
 
     content_preview.short_description = 'Content'
+
+
+@admin.register(CBDLocation)
+class CBDLocationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'city', 'latitude', 'longitude', 'is_active', 'created_at']
+    list_filter = ['city', 'is_active', 'created_at']
+    search_fields = ['name', 'city', 'description']
+    readonly_fields = ['created_at']
+    ordering = ['city', 'name']
+
+
+@admin.register(ConversationState)
+class ConversationStateAdmin(admin.ModelAdmin):
+    list_display = ['session', 'waiting_for_location', 'waiting_for_cbd_clarification', 'selected_cbd', 'updated_at']
+    list_filter = ['waiting_for_location', 'waiting_for_cbd_clarification', 'created_at', 'updated_at']
+    search_fields = ['session__title', 'pending_search_query']
+    readonly_fields = ['created_at', 'updated_at']
+    raw_id_fields = ['session', 'selected_cbd']
+
