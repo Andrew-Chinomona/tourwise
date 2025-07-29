@@ -30,6 +30,18 @@ llm = Groq(
         "The property_type field has these values: 'house', 'apartment', 'airbnb', 'room', 'guesthouse'. "
         "When users mention 'houses', 'homes', or 'house', use property_type = 'house'. "
         "When users mention 'apartments', 'flats', or 'apartment', use property_type = 'apartment'. "
+
+        "LOCATION HANDLING RULES: "
+        "- Common SUBURBS in Zimbabwe include: Avondale, Borrowdale, Mount Pleasant, Westgate, Greendale, Warren Park, Mambo, etc. "
+        "- Common CITIES in Zimbabwe include: Harare, Bulawayo, Mutare, Gweru, Kwekwe, Masvingo, Chitungwiza, etc. "
+        "- When a user mentions a location name, check if it could be a suburb OR city: "
+        "  * If it's a known suburb (like Avondale, Borrowdale), search BOTH suburb and city fields: "
+        "    WHERE (LOWER(suburb) = 'avondale' OR LOWER(city) = 'avondale') "
+        "  * If it's a known city (like Harare, Bulawayo), prioritize city field: "
+        "    WHERE LOWER(city) = 'harare' "
+        "  * If uncertain, search BOTH fields to be safe: "
+        "    WHERE (LOWER(suburb) = 'location' OR LOWER(city) = 'location') "
+
         "Use proper WHERE clauses and lowercase string values when filtering by suburb, city, or property_type. "
         "Always include the required fields: id, title, main_image, price, street_address, suburb, city in your SELECT statement. "
         "Do not use table aliases unless necessary. "
@@ -89,6 +101,40 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
                     sql = select_match.group(1) + new_select + select_match.group(3) + sql[select_match.end(3):]
                     result.metadata["sql_query"] = sql
         # --- End post-process ---
+
+        # --- Fix location queries: Convert single field location searches to multi-field searches ---
+        known_suburbs = [
+            'avondale', 'borrowdale', 'mount pleasant', 'westgate', 'greendale', 'warren park',
+            'mambo', 'highlands', 'mbare', 'glen view', 'glen norah', 'hatfield', 'msasa',
+            'waterfalls', 'chitungwiza', 'epworth', 'ruwa', 'norton', 'chegutu', 'kadoma'
+        ]
+
+        # Check if SQL has a single location condition that should be expanded
+        import re
+        location_patterns = [
+            (r"city\s*=\s*'([^']+)'", "city"),
+            (r"LOWER\(city\)\s*=\s*'([^']+)'", "city"),
+            (r"suburb\s*=\s*'([^']+)'", "suburb"),
+            (r"LOWER\(suburb\)\s*=\s*'([^']+)'", "suburb")
+        ]
+
+        for pattern, field_type in location_patterns:
+            match = re.search(pattern, sql, re.IGNORECASE)
+            if match:
+                location_value = match.group(1).lower()
+                # If this looks like it could be either a suburb or city, expand the search
+                if location_value in known_suburbs or not any(
+                        city in location_value for city in ['harare', 'bulawayo', 'mutare', 'gweru']):
+                    # Replace single field condition with both field condition
+                    old_condition = match.group(0)
+                    new_condition = f"(LOWER(suburb) = '{location_value}' OR LOWER(city) = '{location_value}')"
+                    sql = sql.replace(old_condition, new_condition)
+                    result.metadata["sql_query"] = sql
+                    print(f"🔧 Fixed location query: {old_condition} -> {new_condition}")
+                    # Re-execute the query with the fixed SQL
+                    result.response = self.sql_database.run_sql(sql)
+                    break
+        # --- End location fix ---
 
         # Rewrite property_type comparisons to be case-insensitive (improved logic for table aliases)
         new_sql = re.sub(
@@ -171,10 +217,10 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
                 for row in result.response:
                     # Try to get property id from row (id or pk)
                     prop_id = row.get("id")
-                    # if prop_id:
-                    #     images = PropertyImage.objects.filter(property_id=prop_id).values_list("image", flat=True)
-                    #     # Store as list of relative paths
-                    #     row["property_images"] = list(images)
+                    if prop_id:
+                        images = PropertyImage.objects.filter(property_id=prop_id).values_list("image", flat=True)
+                        # Store as list of relative paths
+                        row["property_images"] = list(images)
         except Exception as e:
             # If anything goes wrong, skip adding images (do not break main flow)
             pass
