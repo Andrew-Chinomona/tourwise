@@ -1871,34 +1871,45 @@
       margin: 0 0 12px 0;
     }
 
-    .mobile-property-location {
-      font-size: 1rem;
-      color: #6b7280;
+    .mobile-property-info {
       margin: 0 0 24px 0;
+    }
+
+    .mobile-property-info-item {
+      margin-bottom: 20px;
+    }
+
+    .mobile-property-info-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .mobile-property-info-heading {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 6px 0;
+    }
+
+    .mobile-property-info-value {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #1f2937;
+      margin: 0;
       line-height: 1.4;
     }
 
-    .mobile-property-description {
-      margin: 0 0 20px 0;
-    }
-
-    .mobile-property-description h4 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #374151;
-      margin: 0 0 8px 0;
-    }
-
-    .mobile-property-description p {
-      font-size: 0.9rem;
+    .mobile-property-info-item:first-child .mobile-property-info-value {
       color: #6b7280;
-      line-height: 1.5;
-      margin: 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
+
+    .mobile-property-info-item:last-child .mobile-property-info-value {
+      color: #c15a2e;
+      font-weight: 600;
+    }
+
+
 
     .mobile-view-details-btn {
       width: 100%;
@@ -2147,18 +2158,22 @@
           <!-- Carousel navigation dots will be populated here -->
         </div>
       </div>
-      <div class="mobile-details-section">
-        <h3 id="mobile-property-title" class="mobile-property-title">Property Title</h3>
-        <p id="mobile-property-price" class="mobile-property-price">$0</p>
-        <p id="mobile-property-location" class="mobile-property-location">Location</p>
-        <div class="mobile-property-description">
-          <h4>Description</h4>
-          <p id="mobile-property-description-text">No description available</p>
+              <div class="mobile-details-section">
+          <div class="mobile-property-info">
+            <div class="mobile-property-info-item">
+              <h4 class="mobile-property-info-heading">Location</h4>
+              <p id="mobile-property-location" class="mobile-property-info-value">Location</p>
+            </div>
+
+            <div class="mobile-property-info-item">
+              <h4 class="mobile-property-info-heading">Price</h4>
+              <p id="mobile-property-price" class="mobile-property-info-value">$0</p>
+            </div>
+          </div>
+          <button id="mobile-view-details-btn" class="mobile-view-details-btn" onclick="viewPropertyDetails()">
+            View Full Details
+          </button>
         </div>
-        <button id="mobile-view-details-btn" class="mobile-view-details-btn" onclick="viewPropertyDetails()">
-          View Full Details
-        </button>
-      </div>
     </div>
   </div>
 
@@ -3141,22 +3156,16 @@ function setupMobileCarouselNavigation() {
 
 // Update mobile property details
 function updateMobilePropertyDetails(property) {
-  const titleEl = document.getElementById('mobile-property-title');
   const priceEl = document.getElementById('mobile-property-price');
   const locationEl = document.getElementById('mobile-property-location');
-  const descriptionEl = document.getElementById('mobile-property-description-text');
   const btnEl = document.getElementById('mobile-view-details-btn');
 
   if (!property) {
-    titleEl.textContent = 'No Properties Found';
     priceEl.textContent = '';
     locationEl.textContent = 'Try adjusting your search criteria';
-    descriptionEl.textContent = 'No description available';
     btnEl.style.display = 'none';
     return;
   }
-
-  titleEl.textContent = property.title || 'Property';
 
   // Format price with currency symbol
   if (property.price) {
@@ -3178,9 +3187,6 @@ function updateMobilePropertyDetails(property) {
   }
 
   locationEl.textContent = locationText;
-
-  // Update description
-  descriptionEl.textContent = property.description || 'No description available';
 
   btnEl.style.display = 'block';
 
