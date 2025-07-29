@@ -12,7 +12,6 @@ from ..nl_query_engine import run_nl_query
 
 logger = logging.getLogger(__name__)
 
-
 class SmartLocationSearchCapability(MCPCapability):
     """Handles intelligent location-based property searches"""
 
@@ -49,9 +48,7 @@ class SmartLocationSearchCapability(MCPCapability):
         content_lower = message.content.lower().strip()
 
         # Check if message contains property search terms AND location terms
-        has_property_terms = any(term in content_lower for term in
-                                 ['house', 'houses', 'apartment', 'apartments', 'property', 'properties', 'home',
-                                  'homes'])
+        has_property_terms = any(term in content_lower for term in ['house', 'houses', 'apartment', 'apartments', 'property', 'properties', 'home', 'homes'])
         has_location_terms = any(term in content_lower for term in self.location_keywords)
 
         # Check if message contains known Zimbabwe locations
@@ -164,15 +161,54 @@ class SmartLocationSearchCapability(MCPCapability):
             elif any(term in query_lower for term in ['guesthouse', 'guest house']):
                 property_filter = Q(property_type='guesthouse')
 
+            # Extract price constraints from query
+            price_filter = Q()
+            import re
+
+            # Look for price patterns like "below $1000", "under $500", "less than $2000"
+            price_patterns = [
+                r'below\s+\$?(\d+(?:,\d+)*)',  # below $1000
+                r'under\s+\$?(\d+(?:,\d+)*)',  # under $500
+                r'less\s+than\s+\$?(\d+(?:,\d+)*)',  # less than $2000
+                r'up\s+to\s+\$?(\d+(?:,\d+)*)',  # up to $1500
+                r'max\s+\$?(\d+(?:,\d+)*)',  # max $1000
+                r'maximum\s+\$?(\d+(?:,\d+)*)',  # maximum $1000
+                r'\$?(\d+(?:,\d+)*)\s+or\s+less',  # $1000 or less
+                r'\$?(\d+(?:,\d+)*)\s+and\s+below',  # $1000 and below
+                r'cheaper\s+than\s+\$?(\d+(?:,\d+)*)',  # cheaper than $1000
+                r'no\s+more\s+than\s+\$?(\d+(?:,\d+)*)',  # no more than $1000
+                r'within\s+\$?(\d+(?:,\d+)*)',  # within $1000
+            ]
+
+            max_price = None
+            for pattern in price_patterns:
+                match = re.search(pattern, query_lower)
+                if match:
+                    price_str = match.group(1).replace(',', '')
+                    try:
+                        max_price = float(price_str)
+                        print(f"🔍 Extracted max price: ${max_price}")
+                        break
+                    except ValueError:
+                        continue
+
+            if max_price:
+                price_filter = Q(price__lte=max_price)
+                print(f"🔍 Applied price filter: <= ${max_price}")
+
             # Combine filters
             final_filter = Q(is_paid=True)
             if location_filter:
                 final_filter &= location_filter
             if property_filter:
                 final_filter &= property_filter
+            if price_filter:
+                final_filter &= price_filter
 
             # Execute search
+            print(f"🔍 SmartLocationSearch - Final filter: {final_filter}")
             properties = Property.objects.filter(final_filter).order_by('-created_at')[:50]
+            print(f"🔍 SmartLocationSearch - Found {properties.count()} properties")
 
             if not properties.exists():
                 # No results - try fallback with SQL query engine
@@ -205,10 +241,15 @@ class SmartLocationSearchCapability(MCPCapability):
             location_names = location_info['is_suburb'] + location_info['is_city'] + location_info['ambiguous']
             location_str = ', '.join([loc.title() for loc in location_names])
 
+            # Add price information to the message
+            price_info = ""
+            if max_price:
+                price_info = f" under ${max_price:,.0f}"
+
             if len(property_data) == 1:
-                friendly_message = f"Perfect! I found 1 property in {location_str}."
+                friendly_message = f"Perfect! I found 1 property in {location_str}{price_info}."
             else:
-                friendly_message = f"Great! I found {len(property_data)} properties in {location_str}."
+                friendly_message = f"Great! I found {len(property_data)} properties in {location_str}{price_info}."
 
             return MCPResponse(
                 content=friendly_message,
