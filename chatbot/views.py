@@ -133,18 +133,22 @@ def ai_sql_query(request):
 
         # Process with AI
         try:
-            from .mcp_core import MCPOrchestrator
+            from .mcp_core import MCPOrchestrator, MCPContext
             orchestrator = MCPOrchestrator()
-            response = orchestrator.process_message(user_message, request)
+
+            # Create proper MCP context
+            mcp_context = MCPContext(request)
+            mcp_context.session = session
+
+            response = orchestrator.process_message(user_message, mcp_context)
 
             # Save AI response
-            ai_content = response.get('friendly_message',
-                                      'I apologize, but I encountered an error processing your request.')
-            ai_msg = save_message(session, 'bot', ai_content, 'text', response)
+            ai_content = response.content
+            ai_msg = save_message(session, 'bot', ai_content, 'text', response.to_dict())
 
             # Return response with session info
             return JsonResponse({
-                "response": response,
+                "response": response.to_dict(),
                 "session_id": str(session.id),
                 "message_id": str(ai_msg.id),
                 "timestamp": ai_msg.created_at.isoformat()

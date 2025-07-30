@@ -146,7 +146,7 @@ class MCPOrchestrator:
             message = MCPMessage(
                 content=content,
                 message_type=MessageType.CONVERSATIONAL,  # Default, will be updated by capabilities
-                session_id=context.session.session_id if context.session else None,
+                session_id=context.session.session_id if context.session and hasattr(context.session, 'session_id') else None,
                 user_id=context.user.id if context.user and context.user.is_authenticated else None
             )
 
@@ -164,11 +164,6 @@ class MCPOrchestrator:
                     context_data = context.context_data.copy()
                     context_data['session'] = context.session
                     response = capability.process(message, context_data)
-
-                    # Save the message and response to database
-                    if context.session:
-                        context.save_message('user', content)
-                        context.save_message('bot', response.content, response.message_type.value, response.metadata)
 
                     return response
 

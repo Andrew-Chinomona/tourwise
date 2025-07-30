@@ -2248,9 +2248,7 @@
 <script>
 // Django template variable for authentication status
 const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
-</script>
 
-<script>
 const WELCOME_MESSAGE = `👋 Hey there, welcome to Tourwise!\nI'm your virtual assistant, here to help you find your perfect home — stress-free and hassle-free. 🏡✨\nJust tell me what you're looking for, and I'll do the searching for you.\nWhether you're after something specific or just browsing, I've got you covered.\nLet's get started — your next home could be just one message away! 😊`;
 
 // Global state for properties modal
@@ -2269,6 +2267,8 @@ function appendMessage(text, sender) {
 
 // Create chat bubble with View Properties button
 function createChatBubbleWithButton(message, properties) {
+  console.log("🔍 createChatBubbleWithButton called with:", { message, propertiesCount: properties.length });
+
   const bubbleDiv = document.createElement('div');
   bubbleDiv.className = 'chat-bubble-with-button';
 
@@ -2286,7 +2286,11 @@ function createChatBubbleWithButton(message, properties) {
 
   bubbleDiv.appendChild(messageText);
   bubbleDiv.appendChild(viewButton);
-  document.getElementById('messages').appendChild(bubbleDiv);
+
+  const messagesContainer = document.getElementById('messages');
+  messagesContainer.appendChild(bubbleDiv);
+
+  console.log("🔍 Chat bubble with button created and added to DOM");
 }
 
 // Open properties modal
@@ -2724,30 +2728,44 @@ function sendMessage() {
     // Handle the new response format
     const response = data.response || data;
 
-    // Show friendly message if present
-    if (response.friendly_message) {
-      appendMessage(response.friendly_message, 'bot');
+    // Show content from MCPResponse
+    if (response.content) {
+      appendMessage(response.content, 'bot');
     }
 
     // Handle property results from MCP
-    if (response.result && Array.isArray(response.result)) {
-      if (response.result.length === 0) {
+    if (response.data && response.data.properties && Array.isArray(response.data.properties)) {
+      if (response.data.properties.length === 0) {
         appendMessage("No results found.", 'bot');
       } else {
-        console.log("🔍 Processing properties:", response.result.length);
+        console.log("🔍 Processing properties:", response.data.properties.length);
+        console.log("🔍 Properties data:", response.data.properties);
 
         // Create chat bubble with View Properties button
-        const friendlyMsg = response.friendly_message || `I found ${response.result.length} properties matching your criteria.`;
-        createChatBubbleWithButton(friendlyMsg, response.result);
+        const friendlyMsg = response.content || `I found ${response.data.properties.length} properties matching your criteria.`;
+        console.log("🔍 Creating chat bubble with message:", friendlyMsg);
+        createChatBubbleWithButton(friendlyMsg, response.data.properties);
       }
-    } else if (typeof response.result === "string") {
-      appendMessage(response.result, 'bot');
-    } else if (response.is_conversational) {
+    } else if (response.data && response.data.result && Array.isArray(response.data.result)) {
+      // Fallback for old format
+      if (response.data.result.length === 0) {
+        appendMessage("No results found.", 'bot');
+      } else {
+        console.log("🔍 Processing properties (fallback):", response.data.result.length);
+        const friendlyMsg = response.content || `I found ${response.data.result.length} properties matching your criteria.`;
+        createChatBubbleWithButton(friendlyMsg, response.data.result);
+      }
+    } else if (response.data && typeof response.data.result === "string") {
+      appendMessage(response.data.result, 'bot');
+    } else if (response.metadata && response.metadata.is_conversational) {
       // Conversational response - no properties to show
       console.log("🔍 Conversational response, no properties");
     } else {
-      console.log("🔍 Unexpected response format:", response);
-      appendMessage("Unexpected response format.", 'bot');
+      console.log("🔍 Response format:", response);
+      // If no specific handling, just show the content
+      if (response.content) {
+        appendMessage(response.content, 'bot');
+      }
     }
   })
   .catch(() => {

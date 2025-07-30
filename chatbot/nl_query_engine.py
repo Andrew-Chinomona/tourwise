@@ -112,22 +112,23 @@ class CaseInsensitivePropertyTypeQueryEngine(NLSQLTableQueryEngine):
         # Check if SQL has a single location condition that should be expanded
         import re
         location_patterns = [
-            (r"city\s*=\s*'([^']+)'", "city"),
-            (r"LOWER\(city\)\s*=\s*'([^']+)'", "city"),
-            (r"suburb\s*=\s*'([^']+)'", "suburb"),
-            (r"LOWER\(suburb\)\s*=\s*'([^']+)'", "suburb")
+            (r"(\w+\.)?city\s*=\s*'([^']+)'", "city"),
+            (r"(\w+\.)?LOWER\(city\)\s*=\s*'([^']+)'", "city"),
+            (r"(\w+\.)?suburb\s*=\s*'([^']+)'", "suburb"),
+            (r"(\w+\.)?LOWER\(suburb\)\s*=\s*'([^']+)'", "suburb")
         ]
 
         for pattern, field_type in location_patterns:
             match = re.search(pattern, sql, re.IGNORECASE)
             if match:
-                location_value = match.group(1).lower()
+                table_alias = match.group(1) if match.group(1) else ""
+                location_value = match.group(2).lower()
                 # If this looks like it could be either a suburb or city, expand the search
                 if location_value in known_suburbs or not any(
                         city in location_value for city in ['harare', 'bulawayo', 'mutare', 'gweru']):
                     # Replace single field condition with both field condition
                     old_condition = match.group(0)
-                    new_condition = f"(LOWER(suburb) = '{location_value}' OR LOWER(city) = '{location_value}')"
+                    new_condition = f"({table_alias}LOWER(suburb) = '{location_value}' OR {table_alias}LOWER(city) = '{location_value}')"
                     sql = sql.replace(old_condition, new_condition)
                     result.metadata["sql_query"] = sql
                     print(f"🔧 Fixed location query: {old_condition} -> {new_condition}")
