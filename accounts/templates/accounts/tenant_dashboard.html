@@ -1,10 +1,578 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="dashboard-container">
+  <!-- Background with subtle pattern -->
+  <div class="dashboard-background"></div>
+
 <div class="container py-5">
-    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md mx-auto mt-5">
-        <h1 class="text-2xl font-bold mb-4 text-center">Tenant Dashboard</h1>
-        <p class="text-gray-600 text-center">Welcome to your dashboard!</p>
+    <!-- Welcome Header -->
+    <div class="welcome-header text-center mb-5">
+      <h1 class="dashboard-title">Welcome back, {{ user.get_full_name|default:user.username|title }}</h1>
+      <p class="dashboard-subtitle">Manage your profile and account settings</p>
+    </div>
+
+    <!-- Profile Information Card -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8 col-md-10">
+        <div class="glass-card profile-card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-person-circle me-2"></i>
+              Profile Information
+            </h3>
+          </div>
+
+          <div class="card-body">
+            <div class="row align-items-center">
+              <!-- Profile Photo Section -->
+              <div class="col-md-4 text-center mb-4 mb-md-0">
+                <div class="profile-photo-container">
+                  {% if user.profile_photo %}
+                    <img src="{{ user.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
+                    <div class="photo-overlay">
+                      <button type="button" class="photo-change-btn" onclick="document.getElementById('profile-photo-input').click()">
+                        <i class="bi bi-camera"></i>
+                      </button>
+                    </div>
+                  {% else %}
+                    <div class="profile-photo-placeholder" onclick="document.getElementById('profile-photo-input').click()">
+                      <i class="bi bi-person-circle"></i>
+                      <div class="upload-hint">
+                        <i class="bi bi-camera-fill"></i>
+                        <span>Add Photo</span>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- Hidden file input for photo upload -->
+                <form method="post" enctype="multipart/form-data" style="display: none;" id="photo-upload-form">
+                  {% csrf_token %}
+                  <input type="file" id="profile-photo-input" name="profile_photo" accept="image/*" onchange="uploadPhoto()">
+                </form>
+
+                {% if user.profile_photo %}
+                  <div class="photo-actions mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deletePhoto()">
+                      <i class="bi bi-trash me-1"></i>Remove
+                    </button>
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- Profile Details -->
+              <div class="col-md-8">
+                <div class="profile-details">
+                  <div class="detail-item">
+                    <label class="detail-label">Full Name</label>
+                    <div class="detail-value">{{ user.get_full_name|default:"Not provided" }}</div>
+                  </div>
+
+                  <div class="detail-item">
+                    <label class="detail-label">Email</label>
+                    <div class="detail-value">{{ user.email }}</div>
+                  </div>
+
+                  <div class="detail-item">
+                    <label class="detail-label">Phone Number</label>
+                    <div class="detail-value">{{ user.phone_number|default:"Not provided" }}</div>
+                  </div>
+
+                  <div class="detail-item">
+                    <label class="detail-label">Account Type</label>
+                    <div class="detail-value">
+                      <span class="badge bg-success">{{ user.user_type|title }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Cards -->
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+        <div class="row g-4">
+          <!-- Edit Profile Card -->
+          <div class="col-md-6">
+            <div class="glass-card action-card">
+              <div class="card-body text-center">
+                <div class="action-icon">
+                  <i class="bi bi-pencil-square"></i>
+                </div>
+                <h5 class="action-title">Edit Profile</h5>
+                <p class="action-description">Update your personal information and profile photo</p>
+                <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-glass">
+                  <i class="bi bi-pencil me-2"></i>Edit Profile
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete Account Card -->
+          <div class="col-md-6">
+            <div class="glass-card action-card">
+              <div class="card-body text-center">
+                <div class="action-icon text-white">
+                  <i class="bi bi-trash3"></i>
+                </div>
+                <h5 class="action-title">Delete Account</h5>
+                <p class="action-description">Permanently delete your account and all data</p>
+                <a href="{% url 'delete_account' %}" class="btn btn-danger btn-glass">
+                  <i class="bi bi-trash me-2"></i>Delete Account
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     </div>
 </div>
+
+<style>
+/* Modern Glass Dashboard Styling */
+:root {
+  --primary-color: #c15a2e;
+  --primary-light: rgba(193, 90, 46, 0.1);
+  --primary-alpha: rgba(193, 90, 46, 0.8);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --text-dark: #2f2f2f;
+  --text-muted: #6c757d;
+  --success-color: #198754;
+}
+
+.dashboard-container {
+  min-height: 100vh;
+  position: relative;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.dashboard-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(193, 90, 46, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(193, 90, 46, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.welcome-header {
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #a84b24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboard-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Glass Card Styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.card-header {
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem 2rem;
+}
+
+.card-title {
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+/* Profile Photo Styling */
+.profile-photo-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.profile-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(193, 90, 46, 0.05) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  color: var(--primary-color);
+  font-size: 3rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.profile-photo-placeholder:hover {
+  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(193, 90, 46, 0.15) 100%);
+  transform: scale(1.05);
+}
+
+.photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.profile-photo-container:hover .photo-overlay {
+  opacity: 1;
+}
+
+.photo-change-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.photo-change-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.upload-hint {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 4px 12px rgba(193, 90, 46, 0.3);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.profile-photo-placeholder:hover .upload-hint {
+  opacity: 1;
+  bottom: -15px;
+}
+
+.photo-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Profile Details */
+.profile-details {
+  padding-left: 1rem;
+}
+
+.detail-item {
+  margin-bottom: 1.5rem;
+}
+
+.detail-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Action Cards */
+.action-card {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.action-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #a84b24 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  box-shadow: 0 8px 24px rgba(193, 90, 46, 0.3);
+}
+
+.action-icon.text-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+  box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+}
+
+.action-title {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+}
+
+.action-description {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Buttons */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary.btn-glass {
+  color: var(--primary-color);
+}
+
+.btn-primary.btn-glass:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(193, 90, 46, 0.3);
+}
+
+.btn-danger.btn-glass {
+  color: #dc3545;
+}
+
+.btn-danger.btn-glass:hover {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+}
+
+
+
+/* Badge Styling */
+.badge {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .profile-details {
+    padding-left: 0;
+    margin-top: 1.5rem;
+  }
+
+  .action-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .quick-action-btn {
+    min-height: 100px;
+    padding: 1rem 0.75rem;
+  }
+
+  .quick-action-btn i {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-title {
+    font-size: 1.8rem;
+  }
+
+  .glass-card {
+    border-radius: 16px;
+  }
+
+  .card-header {
+    border-radius: 16px 16px 0 0;
+  }
+}
+</style>
+
+<script>
+// Photo upload functionality
+function uploadPhoto() {
+  const form = document.getElementById('photo-upload-form');
+  const fileInput = document.getElementById('profile-photo-input');
+
+  if (fileInput.files.length > 0) {
+    // Show loading state
+    const container = document.querySelector('.profile-photo-container');
+    const originalContent = container.innerHTML;
+
+    container.innerHTML = `
+      <div class="profile-photo-placeholder">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Uploading...</span>
+        </div>
+        <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--primary-color);">
+          Uploading...
+        </div>
+      </div>
+    `;
+
+    // Submit the form
+    form.submit();
+  }
+}
+
+// Photo deletion functionality
+function deletePhoto() {
+  if (confirm('Are you sure you want to remove your profile photo?')) {
+    // Create a form to delete the photo
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "delete_profile_photo" %}';
+
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+
+    // Show loading state
+    const container = document.querySelector('.profile-photo-container');
+    container.innerHTML = `
+      <div class="profile-photo-placeholder">
+        <div class="spinner-border text-danger" role="status">
+          <span class="visually-hidden">Removing...</span>
+        </div>
+        <div style="font-size: 0.8rem; margin-top: 0.5rem; color: #dc3545;">
+          Removing...
+        </div>
+      </div>
+    `;
+
+    // Submit the form
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+// Handle messages auto-hide
+document.addEventListener('DOMContentLoaded', function() {
+  const alerts = document.querySelectorAll('.alert');
+  alerts.forEach(function(alert) {
+    setTimeout(function() {
+      if (alert.querySelector('.btn-close')) {
+        alert.querySelector('.btn-close').click();
+      }
+    }, 5000); // Auto-hide after 5 seconds
+  });
+});
+</script>
 {% endblock %} 

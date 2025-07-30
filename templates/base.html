@@ -522,11 +522,22 @@
             {% endif %}
           </div>
           <div id="mobile-user-dropdown" class="mobile-user-dropdown-menu" style="display:none;position:absolute;top:48px;right:0;z-index:2000;background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(44,44,44,0.13);min-width:140px;">
-            <a href="{% url 'host_dashboard' %}" class="dropdown-link">Profile</a>
+            <a href="{% if user.user_type == 'host' %}{% url 'host_dashboard' %}{% else %}{% url 'tenant_dashboard' %}{% endif %}" class="dropdown-link">Profile</a>
             <a href="{% url 'logout' %}" class="dropdown-link">Logout</a>
           </div>
         {% elif user.is_authenticated and user.user_type == 'tenant' %}
-          <a href="{% url 'become_host' %}" class="btn btn-outline-custom btn-sm">Become a Host</a>
+          <div id="mobile-tenant-menu-trigger" style="cursor:pointer;">
+            {% if user.profile_photo %}
+              <img src="{{ user.profile_photo.url }}" class="rounded-circle" alt="Profile Photo" style="width:36px;height:36px;object-fit:cover;">
+            {% else %}
+              <img src="{% static 'images/user.png' %}" class="rounded-circle" alt="Default User" style="width:36px;height:36px;object-fit:cover;">
+            {% endif %}
+          </div>
+          <div id="mobile-tenant-dropdown" class="mobile-user-dropdown-menu" style="display:none;position:absolute;top:48px;right:0;z-index:2000;background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(44,44,44,0.13);min-width:140px;">
+            <a href="{% url 'tenant_dashboard' %}" class="dropdown-link">Profile</a>
+            <a href="{% url 'become_host' %}" class="dropdown-link">Become Host</a>
+            <a href="{% url 'logout' %}" class="dropdown-link">Logout</a>
+          </div>
         {% endif %}
       </div>
       <!-- END MOBILE HEADER LOGIC -->
@@ -562,7 +573,7 @@
                      class="menu-icon">
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                <li><a class="dropdown-item" href="{% url 'host_dashboard' %}">Profile</a></li>
+                <li><a class="dropdown-item" href="{% if user.user_type == 'host' %}{% url 'host_dashboard' %}{% else %}{% url 'tenant_dashboard' %}{% endif %}">Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{% url 'logout' %}">Log Out</a></li>
               </ul>
@@ -711,18 +722,40 @@
       });
     });
 
-    // Mobile user dropdown toggle
+    // Mobile user dropdown toggle (for hosts and tenants)
     document.addEventListener('DOMContentLoaded', function() {
-      var trigger = document.getElementById('mobile-user-menu-trigger');
-      var dropdown = document.getElementById('mobile-user-dropdown');
-      if (trigger && dropdown) {
-        trigger.addEventListener('click', function(e) {
+      // Host dropdown
+      var hostTrigger = document.getElementById('mobile-user-menu-trigger');
+      var hostDropdown = document.getElementById('mobile-user-dropdown');
+      if (hostTrigger && hostDropdown) {
+        hostTrigger.addEventListener('click', function(e) {
           e.stopPropagation();
-          dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+          hostDropdown.style.display = hostDropdown.style.display === 'block' ? 'none' : 'block';
+          // Close tenant dropdown if open
+          var tenantDropdown = document.getElementById('mobile-tenant-dropdown');
+          if (tenantDropdown) tenantDropdown.style.display = 'none';
         });
         document.addEventListener('click', function(e) {
-          if (!dropdown.contains(e.target) && e.target !== trigger) {
-            dropdown.style.display = 'none';
+          if (!hostDropdown.contains(e.target) && e.target !== hostTrigger) {
+            hostDropdown.style.display = 'none';
+          }
+        });
+      }
+
+      // Tenant dropdown
+      var tenantTrigger = document.getElementById('mobile-tenant-menu-trigger');
+      var tenantDropdown = document.getElementById('mobile-tenant-dropdown');
+      if (tenantTrigger && tenantDropdown) {
+        tenantTrigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          tenantDropdown.style.display = tenantDropdown.style.display === 'block' ? 'none' : 'block';
+          // Close host dropdown if open
+          var hostDropdown = document.getElementById('mobile-user-dropdown');
+          if (hostDropdown) hostDropdown.style.display = 'none';
+        });
+        document.addEventListener('click', function(e) {
+          if (!tenantDropdown.contains(e.target) && e.target !== tenantTrigger) {
+            tenantDropdown.style.display = 'none';
           }
         });
       }

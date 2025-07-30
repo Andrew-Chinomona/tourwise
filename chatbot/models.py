@@ -1,6 +1,9 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from datetime import timedelta
 import uuid
 
 
@@ -13,6 +16,7 @@ class ChatSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    has_ai_response = models.BooleanField(default=False)  # Track if AI has responded
 
     class Meta:
         ordering = ['-updated_at']
@@ -39,12 +43,40 @@ class ChatSession(models.Model):
             self.title = title
             self.save()
 
+    def is_expired(self):
+        """Check if session is older than 24 hours"""
+        return timezone.now() - self.created_at > timedelta(hours=24)
+
+    @classmethod
+    def cleanup_expired_sessions(cls):
+        """Delete sessions older than 24 hours"""
+        cutoff_time = timezone.now() - timedelta(hours=24)
+        expired_sessions = cls.objects.filter(created_at__lt=cutoff_time)
+        count = expired_sessions.count()
+        expired_sessions.delete()
+        return count
+
+    @classmethod
+    def enforce_session_limit(cls, user):
+        """Enforce maximum 10 sessions per user by deleting oldest ones"""
+        if not user or not user.is_authenticated:
+            return 0
+
+        user_sessions = cls.objects.filter(user=user, is_active=True).order_by('-updated_at')
+        if user_sessions.count() > 10:
+            sessions_to_delete = user_sessions[10:]  # Keep only the 10 most recent
+            count = sessions_to_delete.count()
+            sessions_to_delete.delete()
+            return count
+        return 0
+
 
 class ChatMessage(models.Model):
     """Represents individual messages within a chat session"""
     SENDER_CHOICES = [
         ('user', 'User'),
         ('bot', 'Bot'),
+        ('system', 'System'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -68,6 +100,30 @@ class ChatMessage(models.Model):
     @property
     def is_bot_message(self):
         return self.sender == 'bot'
+
+    @property
+    def is_system_message(self):
+        return self.sender == 'system'
+
+
+# Signal handlers for automatic cleanup and session management
+@receiver(post_save, sender=ChatMessage)
+def handle_message_save(sender, instance, created, **kwargs):
+    """Handle automatic session management when messages are saved"""
+    if created:
+        session = instance.session
+
+        # Mark session as having AI response if bot message is saved
+        if instance.sender == 'bot' and not session.has_ai_response:
+            session.has_ai_response = True
+            session.save(update_fields=['has_ai_response'])
+
+        # Generate title if this is the first user message
+        if instance.sender == 'user' and not session.title:
+            session.generate_title()
+
+        # Update session timestamp
+        session.save(update_fields=['updated_at'])
 
 
 class CBDLocation(models.Model):

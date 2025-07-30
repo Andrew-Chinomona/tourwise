@@ -1,0 +1,391 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="edit-profile-container">
+  <!-- Background with subtle pattern -->
+  <div class="dashboard-background"></div>
+  
+  <div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h1 class="page-title">Edit Profile</h1>
+      <p class="page-subtitle">Update your personal information</p>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-pencil-square me-2"></i>
+              Profile Information
+            </h3>
+          </div>
+          
+          <div class="card-body">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="profile-form">
+              {% csrf_token %}
+              
+              <!-- Current Profile Photo -->
+              <div class="text-center mb-4">
+                <div class="current-photo-container">
+                  {% if user.profile_photo %}
+                    <img src="{{ user.profile_photo.url }}" alt="Current Profile Photo" class="current-photo">
+                  {% else %}
+                    <div class="photo-placeholder">
+                      <i class="bi bi-person-circle"></i>
+                    </div>
+                  {% endif %}
+                </div>
+                <p class="text-muted mt-2">Current Profile Photo</p>
+              </div>
+
+              <div class="row">
+                <!-- Personal Information -->
+                <div class="col-md-6">
+                  <div class="form-section">
+                    <h5 class="section-title">Personal Information</h5>
+                    
+                    <div class="form-group">
+                      <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                      {{ form.first_name }}
+                      {% if form.first_name.errors %}
+                        <div class="text-danger small">{{ form.first_name.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                      <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                      {{ form.last_name }}
+                      {% if form.last_name.errors %}
+                        <div class="text-danger small">{{ form.last_name.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="col-md-6">
+                  <div class="form-section">
+                    <h5 class="section-title">Contact Information</h5>
+                    
+                    <div class="form-group">
+                      <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                      {{ form.email }}
+                      {% if form.email.errors %}
+                        <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                      <label for="{{ form.phone_number.id_for_label }}" class="form-label">Phone Number</label>
+                      {{ form.phone_number }}
+                      <div class="form-text">{{ form.phone_number.help_text }}</div>
+                      {% if form.phone_number.errors %}
+                        <div class="text-danger small">{{ form.phone_number.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Profile Photo Upload -->
+              <div class="form-section mt-4">
+                <h5 class="section-title">Profile Photo</h5>
+                <div class="form-group">
+                  <label for="{{ form.profile_photo.id_for_label }}" class="form-label">Upload New Photo</label>
+                  {{ form.profile_photo }}
+                  <div class="form-text">Choose a new profile photo (optional)</div>
+                  {% if form.profile_photo.errors %}
+                    <div class="text-danger small">{{ form.profile_photo.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-glass">
+                  <i class="bi bi-check-circle me-2"></i>Save Changes
+                </button>
+                <a href="{% if user.user_type == 'host' %}{% url 'host_dashboard' %}{% else %}{% url 'tenant_dashboard' %}{% endif %}" class="btn btn-secondary btn-glass">
+                  <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Edit Profile Styling */
+:root {
+  --primary-color: #c15a2e;
+  --primary-light: rgba(193, 90, 46, 0.1);
+  --text-dark: #2f2f2f;
+  --text-muted: #6c757d;
+}
+
+.edit-profile-container {
+  min-height: 100vh;
+  position: relative;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.dashboard-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(193, 90, 46, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(193, 90, 46, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.page-title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #a84b24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Glass Card Styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.card-header {
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem 2rem;
+}
+
+.card-title {
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+/* Current Photo Display */
+.current-photo-container {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.current-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.photo-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(193, 90, 46, 0.05) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  color: var(--primary-color);
+  font-size: 2.5rem;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  color: var(--text-dark);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(193, 90, 46, 0.2);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: var(--text-dark);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 3px rgba(193, 90, 46, 0.1);
+}
+
+.form-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary.btn-glass {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary.btn-glass:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(193, 90, 46, 0.3);
+}
+
+.btn-secondary.btn-glass {
+  color: var(--text-muted);
+  border-color: var(--text-muted);
+}
+
+.btn-secondary.btn-glass:hover {
+  background: var(--text-muted);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(108, 117, 125, 0.3);
+}
+
+/* Alert Styling */
+.alert {
+  border-radius: 12px;
+  border: none;
+  backdrop-filter: blur(10px);
+  margin-bottom: 2rem;
+}
+
+.alert-success {
+  background: rgba(25, 135, 84, 0.1);
+  color: #0f5132;
+  border: 1px solid rgba(25, 135, 84, 0.2);
+}
+
+.alert-danger {
+  background: rgba(220, 53, 69, 0.1);
+  color: #842029;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn-glass {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .glass-card {
+    border-radius: 16px;
+  }
+  
+  .card-header {
+    border-radius: 16px 16px 0 0;
+  }
+}
+</style>
+{% endblock %}

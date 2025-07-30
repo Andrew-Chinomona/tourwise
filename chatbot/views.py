@@ -1,15 +1,18 @@
 import json
 import ast
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+from django.utils import timezone
+from django.db.models import Q
 from listings.models import Property, Amenity
 from rapidfuzz import fuzz
 from chatbot.nl_query_engine import run_nl_query
 from .models import ChatSession, ChatMessage
 import uuid
 from decimal import Decimal
+import time
 
 
 def convert_decimal_to_float(obj):
@@ -34,6 +37,10 @@ def get_or_create_session(request):
             return session
         except ChatSession.DoesNotExist:
             pass
+
+    # Enforce session limit before creating new session
+    if request.user.is_authenticated:
+        ChatSession.enforce_session_limit(request.user)
 
     # Create new session
     session = ChatSession.objects.create(
@@ -100,75 +107,65 @@ def _force_convert_to_basic_types(obj):
     elif isinstance(obj, Decimal):
         return float(obj)
     elif isinstance(obj, dict):
-        return {str(key): _force_convert_to_basic_types(value) for key, value in obj.items()}
+        return {key: _force_convert_to_basic_types(value) for key, value in obj.items()}
     elif isinstance(obj, list):
         return [_force_convert_to_basic_types(item) for item in obj]
-    elif isinstance(obj, tuple):
-        return [_force_convert_to_basic_types(item) for item in obj]
     else:
-        # Convert any other object to string
-        try:
-            return str(obj)
-        except:
-            return "Unknown object"
+        return str(obj)
 
 
 @require_POST
 @csrf_exempt
 def ai_sql_query(request):
-    """
-    Accepts a POST request with 'message' and returns a response using the MCP architecture.
-    Maintains backward compatibility with existing frontend.
-    """
-    user_input = request.POST.get("message", "").strip()
-    if not user_input:
-        return JsonResponse({"error": "No message provided"}, status=400)
-
+    """Handle AI chat queries with automatic session management"""
     try:
-        # Import MCP components
-        from .mcp_core import MCPContext, get_mcp_orchestrator
-        from .response_formatter import MCPResponseFormatter
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
 
-        # Create MCP context
-        context = MCPContext(request)
-        context.get_or_create_session()
+        if not user_message:
+            return JsonResponse({"error": "Message is required"}, status=400)
 
-        # Generate title for session if it's the first user message
-        if context.session.messages.filter(sender='user').count() == 0:
-            context.session.generate_title()
+        # Get or create session
+        session = get_or_create_session(request)
 
-        # Process message through MCP orchestrator
-        orchestrator = get_mcp_orchestrator()
-        mcp_response = orchestrator.process_message(user_input, context)
+        # Save user message
+        user_msg = save_message(session, 'user', user_message, 'text')
 
-        # Format response for frontend using dedicated backend formatter
-        from .backend_formatter import format_response_for_frontend
-        response_data = format_response_for_frontend(mcp_response)
+        # Process with AI
+        try:
+            from .mcp_core import MCPOrchestrator
+            orchestrator = MCPOrchestrator()
+            response = orchestrator.process_message(user_message, request)
 
-        print(f"🔍 Backend formatted response: {response_data}")
-        if response_data.get('result'):
-            print(f"🔍 Properties count: {len(response_data['result'])}")
-            if response_data['result']:
-                first_prop = response_data['result'][0]
-                print(f"🔍 First property title: {first_prop.get('title')}")
-                print(f"🔍 First property price: {first_prop.get('price')}")
-                print(f"🔍 First property city: {first_prop.get('city')}")
-                print(f"🔍 First property main_image: {first_prop.get('main_image')}")
+            # Save AI response
+            ai_content = response.get('friendly_message',
+                                      'I apologize, but I encountered an error processing your request.')
+            ai_msg = save_message(session, 'bot', ai_content, 'text', response)
 
-        return JsonResponse(response_data, status=200)
+            # Return response with session info
+            return JsonResponse({
+                "response": response,
+                "session_id": str(session.id),
+                "message_id": str(ai_msg.id),
+                "timestamp": ai_msg.created_at.isoformat()
+            })
 
+        except Exception as ai_error:
+            # Save error message
+            error_msg = save_message(session, 'bot', f"Something went wrong: {str(ai_error)}", 'error')
+            return JsonResponse({
+                "error": str(ai_error),
+                "session_id": str(session.id),
+                "message_id": str(error_msg.id)
+            }, status=500)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
-        print("🔥 Error in ai_sql_query:", str(e))
-        import traceback
-        print("🔥 Full traceback:")
-        traceback.print_exc()
-
         # Try to save error message
         try:
-            from .mcp_core import MCPContext
-            context = MCPContext(request)
-            context.get_or_create_session()
-            context.save_message('bot', f"Something went wrong: {str(e)}", 'error')
+            session = get_or_create_session(request)
+            error_msg = save_message(session, 'bot', f"Something went wrong: {str(e)}", 'error')
         except Exception as save_error:
             print(f"🔥 Error saving error message: {save_error}")
 
@@ -177,24 +174,39 @@ def ai_sql_query(request):
 
 @require_GET
 def get_chat_history(request):
-    """Get chat history for the current user"""
+    """Get chat history for the current user with real-time updates support"""
     if not request.user.is_authenticated:
         return JsonResponse({"sessions": []})
+
+    # Clean up expired sessions first
+    ChatSession.cleanup_expired_sessions()
+
+    # Enforce session limits
+    ChatSession.enforce_session_limit(request.user)
 
     sessions = ChatSession.objects.filter(
         user=request.user,
         is_active=True
-    ).prefetch_related('messages')[:20]  # Limit to last 20 sessions
+    ).prefetch_related('messages')[:10]  # Limit to 10 most recent sessions
 
     session_data = []
     for session in sessions:
+        last_message = session.get_last_message()
         session_data.append({
             'id': str(session.id),
+            'session_id': session.session_id,
             'title': session.title or f"Chat {session.created_at.strftime('%Y-%m-%d %H:%M')}",
             'created_at': session.created_at.isoformat(),
             'updated_at': session.updated_at.isoformat(),
             'message_count': session.get_message_count(),
-            'is_current': session.session_id == request.session.get('chat_session_id')
+            'has_ai_response': session.has_ai_response,
+            'is_current': session.session_id == request.session.get('chat_session_id'),
+            'last_message': {
+                'content': last_message.content[:100] + '...' if last_message and len(
+                    last_message.content) > 100 else last_message.content if last_message else '',
+                'sender': last_message.sender if last_message else None,
+                'timestamp': last_message.created_at.isoformat() if last_message else None
+            } if last_message else None
         })
 
     return JsonResponse({"sessions": session_data})
@@ -226,8 +238,11 @@ def get_session_messages(request, session_id):
         return JsonResponse({
             "session": {
                 'id': str(session.id),
+                'session_id': session.session_id,
                 'title': session.title,
-                'created_at': session.created_at.isoformat()
+                'created_at': session.created_at.isoformat(),
+                'updated_at': session.updated_at.isoformat(),
+                'has_ai_response': session.has_ai_response
             },
             "messages": message_data
         })
@@ -255,6 +270,103 @@ def start_new_chat(request):
         del request.session['chat_session_id']
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+def chat_history_stream(request):
+    """Server-Sent Events endpoint for real-time chat history updates"""
+
+    def event_stream():
+        """Generate SSE events for chat history updates"""
+        last_check = timezone.now()
+
+        while True:
+            try:
+                # Check for new messages or session updates
+                if request.user.is_authenticated:
+                    new_messages = ChatMessage.objects.filter(
+                        session__user=request.user,
+                        session__is_active=True,
+                        created_at__gt=last_check
+                    ).select_related('session').order_by('created_at')
+
+                    if new_messages.exists():
+                        # Send updated history
+                        sessions = ChatSession.objects.filter(
+                            user=request.user,
+                            is_active=True
+                        ).prefetch_related('messages')[:10]
+
+                        session_data = []
+                        for session in sessions:
+                            last_message = session.get_last_message()
+                            session_data.append({
+                                'id': str(session.id),
+                                'session_id': session.session_id,
+                                'title': session.title or f"Chat {session.created_at.strftime('%Y-%m-%d %H:%M')}",
+                                'updated_at': session.updated_at.isoformat(),
+                                'message_count': session.get_message_count(),
+                                'has_ai_response': session.has_ai_response,
+                                'is_current': session.session_id == request.session.get('chat_session_id'),
+                                'last_message': {
+                                    'content': last_message.content[:100] + '...' if last_message and len(
+                                        last_message.content) > 100 else last_message.content if last_message else '',
+                                    'sender': last_message.sender if last_message else None,
+                                    'timestamp': last_message.created_at.isoformat() if last_message else None
+                                } if last_message else None
+                            })
+
+                        yield f"data: {json.dumps({'type': 'history_update', 'sessions': session_data})}\n\n"
+
+                last_check = timezone.now()
+                time.sleep(2)  # Check every 2 seconds
+
+            except Exception as e:
+                print(f"Error in chat history stream: {e}")
+                time.sleep(5)  # Wait longer on error
+
+    response = StreamingHttpResponse(
+        event_stream(),
+        content_type='text/event-stream'
+    )
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'
+    return response
+
+
+@require_POST
+@csrf_exempt
+def delete_session(request, session_id):
+    """Delete a specific chat session"""
+    try:
+        session = ChatSession.objects.get(id=session_id)
+
+        # Check if user has access to this session
+        if request.user.is_authenticated and session.user != request.user:
+            return JsonResponse({"error": "Access denied"}, status=403)
+
+        session.delete()
+        return JsonResponse({"success": True})
+
+    except ChatSession.DoesNotExist:
+        return JsonResponse({"error": "Session not found"}, status=404)
+
+
+@require_POST
+@csrf_exempt
+def cleanup_expired_sessions(request):
+    """Manually trigger cleanup of expired sessions"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    try:
+        expired_count = ChatSession.cleanup_expired_sessions()
+        return JsonResponse({
+            "success": True,
+            "deleted_sessions": expired_count
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 def chat_view(request):

@@ -1979,6 +1979,74 @@
       border-radius: 2px;
       z-index: 3;
     }
+
+    /* Enhanced Chat History Styles */
+    .chat-history-pill {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .chat-history-pill:hover {
+      background: #e9ecef;
+      border-color: #c15a2e;
+    }
+
+    .chat-history-pill.active {
+      background: #e3f2fd;
+      border-color: #c15a2e;
+      border-left: 4px solid #c15a2e;
+    }
+
+    .chat-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .chat-preview {
+      color: #666;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #999;
+    }
+
+    .chat-delete-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      color: #dc3545;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      border-radius: 3px;
+    }
+
+    .chat-history-pill:hover .chat-delete-btn {
+      opacity: 1;
+    }
+
+    .chat-delete-btn:hover {
+      background: rgba(220, 53, 69, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -2636,10 +2704,10 @@ function sendMessage() {
   fetch("/chatbot/sql/", {
     method: "POST",
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
       "X-CSRFToken": getCookie('csrftoken'),
     },
-    body: "message=" + encodeURIComponent(message),
+    body: JSON.stringify({ message: message }),
   })
   .then(res => res.json())
   .then(data => {
@@ -2647,35 +2715,38 @@ function sendMessage() {
 
     console.log("🔍 Frontend received data:", data);
 
-    // Handle MCP response format
+    // Handle error responses
     if (data.error) {
       appendMessage("❌ " + data.error, 'bot');
       return;
     }
 
+    // Handle the new response format
+    const response = data.response || data;
+
     // Show friendly message if present
-    if (data.friendly_message) {
-      appendMessage(data.friendly_message, 'bot');
+    if (response.friendly_message) {
+      appendMessage(response.friendly_message, 'bot');
     }
 
     // Handle property results from MCP
-    if (data.result && Array.isArray(data.result)) {
-      if (data.result.length === 0) {
+    if (response.result && Array.isArray(response.result)) {
+      if (response.result.length === 0) {
         appendMessage("No results found.", 'bot');
       } else {
-        console.log("🔍 Processing properties:", data.result.length);
+        console.log("🔍 Processing properties:", response.result.length);
 
         // Create chat bubble with View Properties button
-        const friendlyMsg = data.friendly_message || `I found ${data.result.length} properties matching your criteria.`;
-        createChatBubbleWithButton(friendlyMsg, data.result);
+        const friendlyMsg = response.friendly_message || `I found ${response.result.length} properties matching your criteria.`;
+        createChatBubbleWithButton(friendlyMsg, response.result);
       }
-    } else if (typeof data.result === "string") {
-      appendMessage(data.result, 'bot');
-    } else if (data.is_conversational) {
+    } else if (typeof response.result === "string") {
+      appendMessage(response.result, 'bot');
+    } else if (response.is_conversational) {
       // Conversational response - no properties to show
       console.log("🔍 Conversational response, no properties");
     } else {
-      console.log("🔍 Unexpected response format:", data);
+      console.log("🔍 Unexpected response format:", response);
       appendMessage("Unexpected response format.", 'bot');
     }
   })
@@ -2745,7 +2816,7 @@ function showWelcomeMessage() {
   typeStep();
 }
 
-// Load chat history
+// Load chat history with real-time updates
 function loadChatHistory() {
   if (!document.querySelector('#chat-history-container')) return;
 
@@ -2766,13 +2837,27 @@ function loadChatHistory() {
           hour: '2-digit',
           minute: '2-digit'
         });
-        const title = `${dateStr} ${timeStr}`;
+
+        // Use session title if available, otherwise use date/time
+        const title = session.title || `${dateStr} ${timeStr}`;
+
+        // Add preview of last message if available
+        const lastMessagePreview = session.last_message ?
+          `<div class="chat-preview">${session.last_message.content.substring(0, 50)}${session.last_message.content.length > 50 ? '...' : ''}</div>` : '';
 
         return `
           <div class="chat-history-pill ${session.is_current ? 'active' : ''}"
-               onclick="loadSession('${session.id}')">
+               onclick="loadSession('${session.id}')" data-session-id="${session.id}">
             <div class="chat-title">${title}</div>
-            <div class="chat-meta">${session.message_count} messages</div>
+            ${lastMessagePreview}
+            <div class="chat-meta">
+              <span>${session.message_count} messages</span>
+              <button class="chat-delete-btn" onclick="deleteSession('${session.id}', event)" title="Delete chat">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+              </button>
+            </div>
           </div>
         `;
       }).join('');
@@ -2835,6 +2920,94 @@ function loadSession(sessionId) {
     });
 }
 
+// Delete a chat session
+function deleteSession(sessionId, event) {
+  event.stopPropagation();
+
+  if (!confirm('Are you sure you want to delete this chat?')) {
+    return;
+  }
+
+  fetch(`/chatbot/session/${sessionId}/delete/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Remove from sidebar
+      const item = document.querySelector(`[data-session-id="${sessionId}"]`);
+      if (item) {
+        item.remove();
+      }
+
+      // If this was the current session, start a new chat
+      const currentSession = document.querySelector('.chat-history-pill.active');
+      if (currentSession && currentSession.getAttribute('data-session-id') === sessionId) {
+        startNewChat();
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Error deleting session:', error);
+  });
+}
+
+// Start a new chat
+function startNewChat() {
+  fetch('/chatbot/new-chat/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Clear chat
+      document.getElementById('messages').innerHTML = '';
+
+      // Reload history to get updated current session
+      loadChatHistory();
+    }
+  })
+  .catch(error => {
+    console.error('Error starting new chat:', error);
+  });
+}
+
+// Real-time updates using Server-Sent Events
+let eventSource = null;
+
+function startRealTimeUpdates() {
+  if (eventSource) {
+    eventSource.close();
+  }
+
+  eventSource = new EventSource('/chatbot/history/stream/');
+
+  eventSource.onmessage = function(event) {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'history_update') {
+        loadChatHistory(); // Refresh the existing history display
+      }
+    } catch (error) {
+      console.error('Error parsing SSE data:', error);
+    }
+  };
+
+  eventSource.onerror = function(error) {
+    console.error('SSE error:', error);
+    // Reconnect after 5 seconds
+    setTimeout(() => {
+      startRealTimeUpdates();
+    }, 5000);
+  };
+}
+
 // Sidebar open/close
 function openSidebar() {
   document.getElementById('tw-sidebar').classList.add('open');
@@ -2876,6 +3049,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load chat history for authenticated users
   if (isAuthenticated) {
     loadChatHistory();
+
+    // Start real-time updates
+    startRealTimeUpdates();
   }
 
   const input = document.getElementById('user-input');
@@ -2902,6 +3078,13 @@ document.addEventListener('DOMContentLoaded', function() {
       closePropertiesModal();
     }
   });
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+  if (eventSource) {
+    eventSource.close();
+  }
 });
 
 // ===== MOBILE PROPERTIES OVERLAY FUNCTIONALITY =====
@@ -3399,6 +3582,8 @@ document.addEventListener('keydown', function(e) {
     }
   }
 });
+
+
 
 </script>
 </body>

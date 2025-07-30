@@ -1217,39 +1217,140 @@
 </script>
 <style>
 @media (min-width: 768px) {
+  /* Modern, clean dropdown styling for desktop */
   .location-suggestions {
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
-    background: white;
-    border: 2px solid #e4d3b2;
-    border-top: none;
-    border-radius: 0 0 12px 12px;
-    max-height: 260px;
+    width: 50%;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(193, 90, 46, 0.1);
+    border-radius: 16px;
+    max-height: 320px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 9999;
     display: none;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    box-shadow:
+      0 10px 40px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(193, 90, 46, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    margin-top: 8px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
+
+  /* Ensure the search form container supports the dropdown */
+  .pill-search-bar {
+    position: relative !important;
+    z-index: 100;
+  }
+
   .suggestion-item {
-    padding: 0.75rem 1.25rem;
+    padding: 14px 20px;
     cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background 0.2s ease;
-    font-size: 1.1rem;
+    border: none;
+    transition: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+    font-size: 15px;
+    line-height: 1.5;
+    color: #374151;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
   }
-  .suggestion-item:last-child { border-bottom: none; }
+
+  .suggestion-item:first-child {
+    border-radius: 16px 16px 0 0;
+  }
+
+  .suggestion-item:last-child {
+    border-radius: 0 0 16px 16px;
+  }
+
+  .suggestion-item:only-child {
+    border-radius: 16px;
+  }
+
+  .suggestion-item::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #d1d5db;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+
   .suggestion-item:hover, .suggestion-item.active {
-    background: #f9f5ef;
-    color: #c15a2e;
+    background: rgba(193, 90, 46, 0.03);
+    color: #1f2937;
+    transform: none;
   }
+
+  .suggestion-item:hover::before, .suggestion-item.active::before {
+    background: #c15a2e;
+    transform: scale(1.2);
+  }
+
+  .suggestion-item:hover {
+    background: rgba(193, 90, 46, 0.05);
+  }
+
   .highlight {
-    background: #ffe5d0;
+    background: rgba(193, 90, 46, 0.15);
     color: #c15a2e;
-    font-weight: bold;
+    font-weight: 500;
     border-radius: 3px;
-    padding: 0 2px;
+    padding: 1px 2px;
+    transition: all 0.15s ease;
+    display: inline;
+    line-height: inherit;
+  }
+
+  /* Minimal scrollbar styling */
+  .location-suggestions::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .location-suggestions::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .location-suggestions::-webkit-scrollbar-thumb {
+    background: rgba(193, 90, 46, 0.2);
+    border-radius: 2px;
+  }
+
+  .location-suggestions::-webkit-scrollbar-thumb:hover {
+    background: rgba(193, 90, 46, 0.3);
+  }
+
+  /* Enhanced focus state for the input when dropdown is open */
+  .pill-input:focus + .location-suggestions,
+  .location-suggestions.show {
+    display: block !important;
+  }
+
+  /* Ensure dropdown appears above other content */
+  .search-bar-wrapper {
+    z-index: 1000 !important;
+  }
+
+  /* Add subtle animation when dropdown appears */
+  .location-suggestions.show {
+    animation: dropdownFadeIn 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  @keyframes dropdownFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 </style>

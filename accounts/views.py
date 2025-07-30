@@ -150,6 +150,7 @@ def search_results_view(request):
             city = parts[0]
 
     base_filter = {'is_paid': True}
+
     def build_filter(**kwargs):
         return {k: v for k, v in kwargs.items() if v is not None and v != ''}
 
@@ -314,18 +315,95 @@ def step_search_view(request):
     return render(request, 'accounts/step_search.html', context)
 
 
-@login_required()
+@login_required
 def delete_profile_photo(request):
-    user = request.user
-    if user.profile_photo:
-        user.profile_photo.delete(save=False)
-        user.profile_photo = None
-        user.save()
-        messages.success(request, "Profile photo deleted.")
-    return redirect('host_dashboard')
+    if request.method == 'POST':
+        user = request.user
+        if user.profile_photo:
+            user.profile_photo.delete(save=False)
+            user.profile_photo = None
+            user.save()
+            messages.success(request, "Profile photo deleted.")
+
+        # Redirect based on user type
+        if user.user_type == 'host':
+            return redirect('host_dashboard')
+        else:
+            return redirect('tenant_dashboard')
+
+    # Default redirect for GET requests
+    if request.user.user_type == 'host':
+        return redirect('host_dashboard')
+    else:
+        return redirect('tenant_dashboard')
 
 
+@login_required
 def tenant_dashboard(request):
-    from django.contrib.auth.decorators import login_required
-    from django.shortcuts import render
-    return render(request, 'accounts/tenant_dashboard.html')
+    """Tenant dashboard with profile editing functionality"""
+    from django.contrib import messages
+
+    if request.method == 'POST':
+        # Handle profile photo upload
+        if 'profile_photo' in request.FILES:
+            user = request.user
+            user.profile_photo = request.FILES['profile_photo']
+            user.save()
+            messages.success(request, 'Profile photo updated successfully!')
+            return redirect('tenant_dashboard')
+
+    context = {
+        'user': request.user
+    }
+    return render(request, 'accounts/tenant_dashboard.html', context)
+
+
+@login_required
+def edit_profile(request):
+    """Handle profile editing for both host and tenant"""
+    from .forms import UserProfileEditForm
+    from django.contrib import messages
+
+    if request.method == 'POST':
+        form = UserProfileEditForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            # Redirect back to appropriate dashboard
+            if request.user.user_type == 'host':
+                return redirect('host_dashboard')
+            else:
+                return redirect('tenant_dashboard')
+    else:
+        form = UserProfileEditForm(instance=request.user)
+
+    context = {
+        'form': form,
+        'user': request.user
+    }
+    return render(request, 'accounts/edit_profile.html', context)
+
+
+@login_required
+def delete_account(request):
+    """Handle account deletion with confirmation"""
+    from .forms import AccountDeletionForm
+    from django.contrib import messages
+    from django.contrib.auth import logout
+
+    if request.method == 'POST':
+        form = AccountDeletionForm(request.user, request.POST)
+        if form.is_valid():
+            user = request.user
+            logout(request)
+            user.delete()
+            messages.success(request, 'Your account has been successfully deleted.')
+            return redirect('home')
+    else:
+        form = AccountDeletionForm(request.user)
+
+    context = {
+        'form': form,
+        'user': request.user
+    }
+    return render(request, 'accounts/delete_account.html', context)
