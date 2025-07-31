@@ -1572,6 +1572,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .mobile-carousel-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 20%, rgba(193, 90, 46, 0.05) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(217, 119, 6, 0.05) 0%, transparent 50%);
+      pointer-events: none;
     }
 
     .mobile-carousel-container {
@@ -1850,10 +1864,25 @@
     /* Details Section (Bottom Half) */
     .mobile-details-section {
       flex: 1;
-      background: #fff;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       padding: 24px 20px 32px;
       overflow-y: auto;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid rgba(229, 231, 235, 0.3);
+      position: relative;
+    }
+
+    .mobile-details-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     .mobile-property-title {
@@ -1873,10 +1902,38 @@
 
     .mobile-property-info {
       margin: 0 0 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .mobile-property-info-item {
-      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mobile-property-info-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    }
+
+    .mobile-property-info-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      background: rgba(255, 255, 255, 0.8);
     }
 
     .mobile-property-info-item:last-child {
@@ -1884,57 +1941,91 @@
     }
 
     .mobile-property-info-heading {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #6b7280;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #4b5563;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 0 0 6px 0;
+      letter-spacing: 1px;
+      margin: 0 0 8px 0;
+      position: relative;
+    }
+
+    .mobile-property-info-heading::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, #c15a2e, #f59e0b);
+      border-radius: 1px;
     }
 
     .mobile-property-info-value {
-      font-size: 1.1rem;
-      font-weight: 500;
+      font-size: 1.2rem;
+      font-weight: 600;
       color: #1f2937;
       margin: 0;
       line-height: 1.4;
+      position: relative;
     }
 
     .mobile-property-info-item:first-child .mobile-property-info-value {
-      color: #6b7280;
+      color: #4b5563;
+      font-weight: 500;
     }
 
     .mobile-property-info-item:last-child .mobile-property-info-value {
       color: #c15a2e;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.3rem;
     }
 
 
 
     .mobile-view-details-btn {
       width: 100%;
-      background: #c15a2e;
+      background: linear-gradient(135deg, #c15a2e 0%, #d97706 100%);
       color: white;
       border: none;
       border-radius: 50px;
-      padding: 16px 24px;
+      padding: 18px 24px;
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       margin-top: auto;
-      box-shadow: 0 4px 12px rgba(193, 90, 46, 0.3);
+      box-shadow: 0 8px 32px rgba(193, 90, 46, 0.3);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .mobile-view-details-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
     }
 
     .mobile-view-details-btn:hover {
-      background: #a3471e;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(193, 90, 46, 0.4);
+      background: linear-gradient(135deg, #a3471e 0%, #b45309 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(193, 90, 46, 0.4);
+    }
+
+    .mobile-view-details-btn:hover::before {
+      left: 100%;
     }
 
     .mobile-view-details-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(193, 90, 46, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(193, 90, 46, 0.3);
     }
 
     /* Carousel Indicators */
@@ -2727,42 +2818,55 @@ function sendMessage() {
 
     // Handle the new response format
     const response = data.response || data;
+    console.log("🔍 Full response object:", response);
+    console.log("🔍 Response message_type:", response.message_type);
+    console.log("🔍 Response metadata:", response.metadata);
 
-    // Show content from MCPResponse
-    if (response.content) {
-      appendMessage(response.content, 'bot');
-    }
+    let messageHandled = false; // Flag to prevent duplicate messages
 
     // Handle property results from MCP
     if (response.data && response.data.properties && Array.isArray(response.data.properties)) {
+      messageHandled = true;
       if (response.data.properties.length === 0) {
-        appendMessage("No results found.", 'bot');
+        // Use the helpful message from the backend instead of generic "No results found"
+        const noResultsMsg = response.content || "No properties found for your search.";
+        appendMessage(noResultsMsg, 'bot');
       } else {
         console.log("🔍 Processing properties:", response.data.properties.length);
         console.log("🔍 Properties data:", response.data.properties);
 
-        // Create chat bubble with View Properties button
+        // Create chat bubble with View Properties button (no duplicate message)
         const friendlyMsg = response.content || `I found ${response.data.properties.length} properties matching your criteria.`;
         console.log("🔍 Creating chat bubble with message:", friendlyMsg);
         createChatBubbleWithButton(friendlyMsg, response.data.properties);
       }
     } else if (response.data && response.data.result && Array.isArray(response.data.result)) {
+      messageHandled = true;
       // Fallback for old format
       if (response.data.result.length === 0) {
-        appendMessage("No results found.", 'bot');
+        // Use the helpful message from the backend instead of generic "No results found"
+        const noResultsMsg = response.content || "No properties found for your search.";
+        appendMessage(noResultsMsg, 'bot');
       } else {
         console.log("🔍 Processing properties (fallback):", response.data.result.length);
+        // Create chat bubble with View Properties button (no duplicate message)
         const friendlyMsg = response.content || `I found ${response.data.result.length} properties matching your criteria.`;
         createChatBubbleWithButton(friendlyMsg, response.data.result);
       }
     } else if (response.data && typeof response.data.result === "string") {
+      messageHandled = true;
       appendMessage(response.data.result, 'bot');
-    } else if (response.metadata && response.metadata.is_conversational) {
+    } else if (response.message_type === 'conversational' || (response.metadata && response.metadata.is_conversational)) {
+      messageHandled = true;
       // Conversational response - no properties to show
       console.log("🔍 Conversational response, no properties");
-    } else {
+      // Show the conversational content
+      if (response.content) {
+        appendMessage(response.content, 'bot');
+      }
+    } else if (!messageHandled) {
       console.log("🔍 Response format:", response);
-      // If no specific handling, just show the content
+      // If no specific handling, just show the content (covers errors, etc.)
       if (response.content) {
         appendMessage(response.content, 'bot');
       }
