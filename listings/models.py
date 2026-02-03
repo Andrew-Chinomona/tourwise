@@ -39,7 +39,7 @@ class Property(models.Model):
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, blank=True, null=True)
     title = models.CharField(max_length=100, default='Untitled')
     description = models.TextField(blank=True, null=True)
-    current_step = models.IntegerField(default=1)
+    # current_step = models.IntegerField(default=1)  # Removed - no longer using multi-step form
 
     #Location
     street_address = models.CharField(max_length=255, blank=True)

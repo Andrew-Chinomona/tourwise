@@ -91,7 +91,6 @@ def home_view(request):
         'recent_listings': recent_listings,
         'featured_listings': featured_listings,
         'locations': locations,
-        'GOOGLE_API_KEY': settings.GOOGLE_API_KEY,
     }
 
     return render(request, 'accounts/home.html', context)
@@ -309,7 +308,6 @@ def step_search_view(request):
         'step': step,
         'saved_location': saved_location,
         'saved_property_type': saved_property_type,
-        'GOOGLE_API_KEY': settings.GOOGLE_API_KEY,
     }
 
     return render(request, 'accounts/step_search.html', context)

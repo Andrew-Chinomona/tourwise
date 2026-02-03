@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --primary-color: #c15a2e;
+    --bg-light: #f9f5ef;
+    --border-color: #e4d3b2;
+    --text-dark: #2f2f2f;
+  }
+  
+  .form-section {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .form-section h3 {
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--primary-color);
+  }
+  
+  .form-label {
+    color: var(--text-dark);
+    font-weight: 500;
+  }
+  
+  .btn-primary-custom {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+  }
+  
+  .btn-primary-custom:hover {
+    background-color: #a84b24;
+    border-color: #a84b24;
+    color: white;
+  }
+  
+  .btn-outline-custom {
+    border-color: var(--border-color);
+    color: var(--primary-color);
+  }
+  
+  .btn-outline-custom:hover {
+    background-color: var(--bg-light);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  #map {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  
+  .location-suggestions {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: none;
+  }
+  
+  .suggestion-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--bg-light);
+  }
+  
+  .suggestion-item:hover,
+  .suggestion-item.active {
+    background-color: var(--bg-light);
+  }
+  
+  .image-preview {
+    max-width: 200px;
+    max-height: 200px;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
+  
+  .amenity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .form-check-label {
+    color: var(--text-dark);
+  }
+  
+  .required-field::after {
+    content: " *";
+    color: var(--primary-color);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-sm" style="background-color: var(--bg-light); border: 1px solid var(--border-color);">
+        <div class="card-body p-4">
+          <h2 class="mb-4" style="color: var(--text-dark);">
+            {% if editing %}Edit Draft Listing{% else %}Add New Property Listing{% endif %}
+          </h2>
+          
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          
+          <form method="post" enctype="multipart/form-data" id="property-form">
+            {% csrf_token %}
+            
+            <!-- Section 1: Basic Information -->
+            <div class="form-section">
+              <h3><i class="fas fa-home me-2"></i>Basic Information</h3>
+              
+              <div class="mb-3">
+                <label for="{{ form.property_type.id_for_label }}" class="form-label required-field">{{ form.property_type.label }}</label>
+                {{ form.property_type }}
+                {% if form.property_type.errors %}
+                  <div class="invalid-feedback d-block">{{ form.property_type.errors|first }}</div>
+                {% endif %}
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label required-field">{{ form.description.label }}</label>
+                {{ form.description }}
+                <small class="form-text text-muted">Maximum 1000 characters</small>
+                {% if form.description.errors %}
+                  <div class="invalid-feedback d-block">{{ form.description.errors|first }}</div>
+                {% endif %}
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.price.id_for_label }}" class="form-label required-field">{{ form.price.label }}</label>
+                  {{ form.price }}
+                  {% if form.price.errors %}
+                    <div class="invalid-feedback d-block">{{ form.price.errors|first }}</div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.currency.id_for_label }}" class="form-label required-field">{{ form.currency.label }}</label>
+                  {{ form.currency }}
+                  {% if form.currency.errors %}
+                    <div class="invalid-feedback d-block">{{ form.currency.errors|first }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Section 2: Location -->
+            <div class="form-section">
+              <h3><i class="fas fa-map-marker-alt me-2"></i>Location</h3>
+              
+              <div class="mb-3 position-relative">
+                <label for="{{ form.city_suburb.id_for_label }}" class="form-label required-field">{{ form.city_suburb.label }}</label>
+                {{ form.city_suburb }}
+                <div id="location-suggestions" class="location-suggestions"></div>
+                {% if form.city_suburb.errors %}
+                  <div class="invalid-feedback d-block">{{ form.city_suburb.errors|first }}</div>
+                {% endif %}
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.street_address.id_for_label }}" class="form-label required-field">{{ form.street_address.label }}</label>
+                {{ form.street_address }}
+                {% if form.street_address.errors %}
+                  <div class="invalid-feedback d-block">{{ form.street_address.errors|first }}</div>
+                {% endif %}
+              </div>
+              
+              {{ form.latitude }}
+              {{ form.longitude }}
+              
+              <div id="map"></div>
+              <small class="form-text text-muted mt-2 d-block">
+                <i class="fas fa-info-circle"></i> Drag the marker to adjust the exact location on the map
+              </small>
+            </div>
+            
+            <!-- Section 3: Property Details -->
+            <div class="form-section">
+              <h3><i class="fas fa-building me-2"></i>Property Details</h3>
+              
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="{{ form.bedrooms.id_for_label }}" class="form-label required-field">{{ form.bedrooms.label }}</label>
+                  {{ form.bedrooms }}
+                  {% if form.bedrooms.errors %}
+                    <div class="invalid-feedback d-block">{{ form.bedrooms.errors|first }}</div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                  <label for="{{ form.bathrooms.id_for_label }}" class="form-label required-field">{{ form.bathrooms.label }}</label>
+                  {{ form.bathrooms }}
+                  {% if form.bathrooms.errors %}
+                    <div class="invalid-feedback d-block">{{ form.bathrooms.errors|first }}</div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                  <label for="{{ form.area.id_for_label }}" class="form-label required-field">{{ form.area.label }}</label>
+                  {{ form.area }}
+                  {% if form.area.errors %}
+                    <div class="invalid-feedback d-block">{{ form.area.errors|first }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Section 4: Images -->
+            <div class="form-section">
+              <h3><i class="fas fa-images me-2"></i>Property Images</h3>
+              
+              <div class="mb-3">
+                <label for="{{ form.main_image.id_for_label }}" class="form-label required-field">{{ form.main_image.label }}</label>
+                {{ form.main_image }}
+                <small class="form-text text-muted d-block">{{ form.main_image.help_text }}</small>
+                {% if form.main_image.errors %}
+                  <div class="invalid-feedback d-block">{{ form.main_image.errors|first }}</div>
+                {% endif %}
+                <div id="main-image-preview"></div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="{{ form.interior_images.id_for_label }}" class="form-label">{{ form.interior_images.label }}</label>
+                {{ form.interior_images }}
+                <small class="form-text text-muted d-block">{{ form.interior_images.help_text }}</small>
+                {% if form.interior_images.errors %}
+                  <div class="invalid-feedback d-block">{{ form.interior_images.errors|first }}</div>
+                {% endif %}
+                <div id="interior-images-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+              </div>
+            </div>
+            
+            <!-- Section 5: Amenities -->
+            <div class="form-section">
+              <h3><i class="fas fa-check-circle me-2"></i>Amenities (Optional)</h3>
+              
+              <div class="amenity-grid">
+                {% for amenity in form.amenities %}
+                  <div class="form-check">
+                    {{ amenity.tag }}
+                    <label class="form-check-label" for="{{ amenity.id_for_label }}">
+                      {{ amenity.choice_label }}
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+              
+              {% if form.amenities.errors %}
+                <div class="invalid-feedback d-block">{{ form.amenities.errors|first }}</div>
+              {% endif %}
+            </div>
+            
+            <!-- Section 6: Contact Information -->
+            <div class="form-section">
+              <h3><i class="fas fa-address-card me-2"></i>Contact Information</h3>
+              
+              <div class="mb-3">
+                <label for="{{ form.contact_name.id_for_label }}" class="form-label required-field">{{ form.contact_name.label }}</label>
+                {{ form.contact_name }}
+                {% if form.contact_name.errors %}
+                  <div class="invalid-feedback d-block">{{ form.contact_name.errors|first }}</div>
+                {% endif %}
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.contact_phone.id_for_label }}" class="form-label required-field">{{ form.contact_phone.label }}</label>
+                  {{ form.contact_phone }}
+                  {% if form.contact_phone.errors %}
+                    <div class="invalid-feedback d-block">{{ form.contact_phone.errors|first }}</div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.contact_email.id_for_label }}" class="form-label required-field">{{ form.contact_email.label }}</label>
+                  {{ form.contact_email }}
+                  {% if form.contact_email.errors %}
+                    <div class="invalid-feedback d-block">{{ form.contact_email.errors|first }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Submit Buttons -->
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{% url 'host_dashboard' %}" class="btn btn-outline-custom rounded-3">
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+              </a>
+              
+              <div>
+                <button type="button" id="save-draft-btn" class="btn btn-outline-custom rounded-3 me-2">
+                  <i class="fas fa-save me-1"></i> Save as Draft
+                </button>
+                <button type="submit" class="btn btn-primary-custom rounded-3">
+                  Continue to Payment <i class="fas fa-arrow-right ms-1"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'js/nominatim_autocomplete.js' %}"></script>
+
+<script>
+// Initialize Leaflet map
+let map, marker;
+const defaultLocation = [-17.8252, 31.0335]; // Harare coordinates
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize map
+  map = L.map('map').setView(defaultLocation, 12);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  
+  // Add draggable marker
+  marker = L.marker(defaultLocation, { draggable: true }).addTo(map);
+  
+  // Update coordinates when marker is dragged
+  marker.on('dragend', function(e) {
+    const latlng = e.target.getLatLng();
+    document.getElementById('latitude').value = latlng.lat;
+    document.getElementById('longitude').value = latlng.lng;
+  });
+  
+  // Initialize Nominatim autocomplete for location
+  const citySuburbInput = document.getElementById('city_suburb');
+  const suggestionsDiv = document.getElementById('location-suggestions');
+  
+  if (citySuburbInput && suggestionsDiv) {
+    const autocomplete = new NominatimAutocomplete(citySuburbInput, suggestionsDiv, {
+      countryCode: 'ZW',
+      limit: 5
+    });
+    
+    // Handle location selection
+    citySuburbInput.addEventListener('location-selected', function(e) {
+      const location = e.detail;
+      
+      // Update hidden coordinate fields
+      document.getElementById('latitude').value = location.lat;
+      document.getElementById('longitude').value = location.lon;
+      
+      // Update map
+      map.setView([location.lat, location.lon], 14);
+      marker.setLatLng([location.lat, location.lon]);
+      
+      // Update city/suburb field if address details available
+      if (location.address) {
+        let displayValue = '';
+        if (location.address.suburb) {
+          displayValue = location.address.suburb;
+        }
+        if (location.address.city) {
+          displayValue += (displayValue ? ', ' : '') + location.address.city;
+        }
+        if (displayValue) {
+          citySuburbInput.value = displayValue;
+        }
+      }
+    });
+  }
+  
+  // Image preview functionality
+  const mainImageInput = document.getElementById('{{ form.main_image.id_for_label }}');
+  const mainImagePreview = document.getElementById('main-image-preview');
+  
+  if (mainImageInput) {
+    mainImageInput.addEventListener('change', function(e) {
+      mainImagePreview.innerHTML = '';
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          img.className = 'image-preview';
+          mainImagePreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+  
+  // Interior images preview
+  const interiorImagesInput = document.getElementById('{{ form.interior_images.id_for_label }}');
+  const interiorImagesPreview = document.getElementById('interior-images-preview');
+  
+  if (interiorImagesInput) {
+    interiorImagesInput.addEventListener('change', function(e) {
+      interiorImagesPreview.innerHTML = '';
+      const files = e.target.files;
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          img.className = 'image-preview';
+          interiorImagesPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+  
+  // Save as draft button handler
+  const saveDraftBtn = document.getElementById('save-draft-btn');
+  const propertyForm = document.getElementById('property-form');
+  
+  if (saveDraftBtn && propertyForm) {
+    saveDraftBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Temporarily remove 'required' attribute from all fields
+      const requiredFields = propertyForm.querySelectorAll('[required]');
+      requiredFields.forEach(field => {
+        field.setAttribute('data-was-required', 'true');
+        field.removeAttribute('required');
+      });
+      
+      // Submit the form
+      propertyForm.submit();
+    });
+  }
+  
+  // Set initial marker position if editing
+  const initialLat = document.getElementById('latitude').value;
+  const initialLng = document.getElementById('longitude').value;
+  
+  if (initialLat && initialLng) {
+    const lat = parseFloat(initialLat);
+    const lng = parseFloat(initialLng);
+    map.setView([lat, lng], 14);
+    marker.setLatLng([lat, lng]);
+  }
+});
+</script>
+{% endblock %}

@@ -9,4 +9,4 @@ llama-index
 llama-index-llms-groq
 llama-index-embeddings-huggingface
 sqlalchemy
-python-dotenv
+dj-database-url>=2.0.0

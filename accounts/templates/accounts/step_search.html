@@ -354,263 +354,52 @@
     </div>
   </div>
 
-  <!-- Google Places API Script -->
-  <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places"></script>
+  <!-- Nominatim (Free OpenStreetMap) Location Search -->
+  <script src="{% static 'js/nominatim_autocomplete.js' %}"></script>
   <script>
-    class ZimbabweLocationAutocomplete {
-      constructor(inputElement, suggestionsElement) {
-        this.input = inputElement;
-        this.suggestions = suggestionsElement;
-        this.autocompleteService = null;
-        this.placesService = null;
-        this.currentPredictions = [];
-        this.selectedIndex = -1;
-        this.debounceTimer = null;
-        this.selectedPlace = null;
-
-        this.init();
-      }
-
-      init() {
-        // Initialize Google Services
-        this.autocompleteService = new google.maps.places.AutocompleteService();
-        this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
-
-        // Bind events
-        this.input.addEventListener('input', this.handleInput.bind(this));
-        this.input.addEventListener('keydown', this.handleKeydown.bind(this));
-        this.input.addEventListener('focus', this.handleFocus.bind(this));
-        this.input.addEventListener('blur', this.handleBlur.bind(this));
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-          if (!this.input.contains(e.target) && !this.suggestions.contains(e.target)) {
-            this.hideSuggestions();
-          }
-        });
-      }
-
-      handleInput(e) {
-        const query = e.target.value.trim();
-
-        // Clear previous timer
-        if (this.debounceTimer) {
-          clearTimeout(this.debounceTimer);
-        }
-
-        if (query.length < 2) {
-          this.hideSuggestions();
-          return;
-        }
-
-        // Debounce the search
-        this.debounceTimer = setTimeout(() => {
-          this.searchPlaces(query);
-        }, 300);
-      }
-
-      handleKeydown(e) {
-        if (!this.suggestions.classList.contains('show')) return;
-
-        switch (e.key) {
-          case 'ArrowDown':
-            e.preventDefault();
-            this.navigateSuggestions(1);
-            break;
-          case 'ArrowUp':
-            e.preventDefault();
-            this.navigateSuggestions(-1);
-            break;
-          case 'Enter':
-            e.preventDefault();
-            if (this.selectedIndex >= 0) {
-              this.selectPrediction(this.currentPredictions[this.selectedIndex]);
-            }
-            break;
-          case 'Escape':
-            this.hideSuggestions();
-            break;
-        }
-      }
-
-      handleFocus() {
-        if (this.currentPredictions.length > 0) {
-          this.showSuggestions();
-        }
-      }
-
-      handleBlur() {
-        // Delay hiding to allow click on suggestions
-        setTimeout(() => {
-          this.hideSuggestions();
-        }, 200);
-      }
-
-      searchPlaces(query) {
-        this.showLoading();
-
-        const request = {
-          input: query,
-          types: ['geocode'], // Broader than ['(cities)'] to include suburbs
-          componentRestrictions: { country: 'ZW' },
-          // Additional options for better Zimbabwe coverage
-          location: new google.maps.LatLng(-17.8252, 31.0335), // Harare coordinates
-          radius: 500000 // 500km radius to cover most of Zimbabwe
-        };
-
-        this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-            this.currentPredictions = predictions;
-            this.renderSuggestions(predictions);
-          } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            this.showNoResults();
-          } else {
-            console.warn('Places service error:', status);
-            this.hideSuggestions();
-          }
-        });
-      }
-
-      showLoading() {
-        this.suggestions.innerHTML = '<div class="loading-suggestion">Searching locations...</div>';
-        this.showSuggestions();
-      }
-
-      showNoResults() {
-        this.suggestions.innerHTML = '<div class="no-suggestions">No locations found. Try a different search term.</div>';
-        this.showSuggestions();
-      }
-
-      renderSuggestions(predictions) {
-        this.suggestions.innerHTML = '';
-        this.selectedIndex = -1;
-
-        predictions.forEach((prediction, index) => {
-          const item = document.createElement('div');
-          item.className = 'suggestion-item';
-          item.dataset.index = index;
-
-          // Parse the description to highlight main place and context
-          const parts = prediction.description.split(', ');
-          const mainPlace = parts[0];
-          const context = parts.slice(1).join(', ');
-
-          item.innerHTML = `
-            <div class="suggestion-main">${mainPlace}</div>
-            <div class="suggestion-secondary">${context}</div>
-          `;
-
-          item.addEventListener('click', () => {
-            this.selectPrediction(prediction);
-          });
-
-          this.suggestions.appendChild(item);
-        });
-
-        this.showSuggestions();
-      }
-
-      navigateSuggestions(direction) {
-        const suggestions = this.suggestions.querySelectorAll('.suggestion-item');
-        if (suggestions.length === 0) return;
-
-        // Remove current active state
-        if (this.selectedIndex >= 0) {
-          suggestions[this.selectedIndex].classList.remove('active');
-        }
-
-        // Update selected index
-        this.selectedIndex += direction;
-
-        // Handle bounds
-        if (this.selectedIndex < 0) {
-          this.selectedIndex = suggestions.length - 1;
-        } else if (this.selectedIndex >= suggestions.length) {
-          this.selectedIndex = 0;
-        }
-
-        // Add active state
-        suggestions[this.selectedIndex].classList.add('active');
-
-        // Scroll into view if needed
-        suggestions[this.selectedIndex].scrollIntoView({
-          block: 'nearest'
-        });
-      }
-
-      selectPrediction(prediction) {
-        // Get place details for more information
-        this.placesService.getDetails({
-          placeId: prediction.place_id,
-          fields: ['formatted_address', 'address_components', 'geometry', 'name']
-        }, (place, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK) {
-            this.selectedPlace = place;
-
-            // Extract street, suburb, city from address components
-            let street = '', suburb = '', city = '';
-            if (place.address_components) {
-              place.address_components.forEach(component => {
-                const types = component.types;
-                if (types.includes('route') || types.includes('premise')) {
-                  street = component.long_name;
-                }
-                if (types.includes('sublocality_level_1') || types.includes('neighborhood')) {
-                  suburb = component.long_name;
-                }
-                if (types.includes('locality')) {
-                  city = component.long_name;
-                }
-              });
-            }
-
-            // Use the formatted address or construct from components
-            let displayValue = place.formatted_address || prediction.description;
-
-            // Store additional data in hidden fields or data attributes if needed
-            this.input.value = displayValue;
-            document.getElementById('id_street_address').value = street;
-            document.getElementById('id_suburb').value = suburb;
-            document.getElementById('id_city').value = city;
-            this.input.dataset.placeId = prediction.place_id;
-            this.input.dataset.suburb = suburb;
-            this.input.dataset.city = city;
-
-            if (place.geometry && place.geometry.location) {
-              this.input.dataset.lat = place.geometry.location.lat();
-              this.input.dataset.lng = place.geometry.location.lng();
-            }
-
-            this.hideSuggestions();
-          } else {
-            // Fallback to prediction description
-            this.input.value = prediction.description;
-            this.hideSuggestions();
-          }
-        });
-      }
-
-      showSuggestions() {
-        this.suggestions.classList.add('show');
-      }
-
-      hideSuggestions() {
-        this.suggestions.classList.remove('show');
-        this.selectedIndex = -1;
-
-        // Remove active states
-        const suggestions = this.suggestions.querySelectorAll('.suggestion-item');
-        suggestions.forEach(item => item.classList.remove('active'));
-      }
-    }
-
-    // Initialize autocomplete when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
       const locationInput = document.getElementById('location');
       const suggestionsContainer = document.getElementById('location-suggestions');
 
-      if (locationInput && suggestionsContainer && typeof google !== 'undefined') {
-        new ZimbabweLocationAutocomplete(locationInput, suggestionsContainer);
+      if (locationInput && suggestionsContainer) {
+        // Initialize Nominatim autocomplete
+        const autocomplete = new NominatimAutocomplete(locationInput, suggestionsContainer, {
+          countryCode: 'ZW',  // Zimbabwe
+          limit: 6,
+          debounceMs: 300
+        });
+
+        // Handle location selection
+        locationInput.addEventListener('location-selected', function(e) {
+          const location = e.detail;
+          
+          // Extract address components
+          let street = '', suburb = '', city = '';
+          
+          if (location.address) {
+            street = location.address.road || location.address.street || '';
+            suburb = location.address.suburb || location.address.neighbourhood || '';
+            city = location.address.city || location.address.town || location.address.village || '';
+          }
+          
+          // Update form fields
+          const streetField = document.getElementById('id_street_address');
+          const suburbField = document.getElementById('id_suburb');
+          const cityField = document.getElementById('id_city');
+          
+          if (streetField) streetField.value = street;
+          if (suburbField) suburbField.value = suburb;
+          if (cityField) cityField.value = city;
+          
+          // Store coordinates and place data in dataset
+          locationInput.dataset.lat = location.lat;
+          locationInput.dataset.lng = location.lon;
+          locationInput.dataset.suburb = suburb;
+          locationInput.dataset.city = city;
+          
+          // Update input to show formatted address
+          locationInput.value = location.displayName;
+        });
       }
     });
   </script>

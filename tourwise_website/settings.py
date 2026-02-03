@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qsl
 
 # Load environment variables from .env file
 load_dotenv()
@@ -49,10 +51,10 @@ INSTALLED_APPS = [
     'accounts',
     'listings',
     'payments',
-    'behave_django',
+    # 'behave_django',  # Commented out - optional testing framework
     'widget_tweaks',
-    'currencies',
-    'chatbot',
+    # 'currencies',  # Commented out - not found/not needed
+    # 'chatbot',  # Removed - chatbot functionality deleted
     'django.contrib.gis',
     'rest_framework',
 ]
@@ -88,15 +90,21 @@ WSGI_APPLICATION = 'tourwise_website.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# Neon Database Configuration
+tmpPostgres = urlparse(os.getenv("DATABASE_URL") or "")
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        # 'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'tourwise_db'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5433'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Using PostGIS for geospatial features
+        'NAME': tmpPostgres.path.lstrip('/') if tmpPostgres.path else '',
+        'USER': tmpPostgres.username or '',
+        'PASSWORD': tmpPostgres.password or '',
+        'HOST': tmpPostgres.hostname or '',
+        'PORT': 5432,
+        'OPTIONS': dict(parse_qsl(tmpPostgres.query)) if tmpPostgres.query else {},
+        'CONN_MAX_AGE': 600,  # Connection pooling: keep connections open for 10 minutes
+        'CONN_HEALTH_CHECKS': True,  # Check connection health before reuse
     }
 }
 
@@ -146,13 +154,31 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # fallback
 ]
 
-#GDAL_LIBRARY
-CONDA_PREFIX = os.environ.get('CONDA_PREFIX', r'C:\ProgramData\anaconda3\envs\tourwise-env')
+# GDAL/GEOS Libraries - Required for Django GeoDjango
+# Even with Neon PostGIS, Django needs local GEOS for geometry object handling
+# Try tourwise-env first, then fall back to base anaconda
+env_paths = [
+    r'C:\ProgramData\anaconda3\envs\tourwise-env',
+    r'C:\ProgramData\anaconda3',
+]
+
+# Find the first path that has GEOS library
+CONDA_PREFIX = None
+for path in env_paths:
+    geos_path = os.path.join(path, 'Library', 'bin', 'geos_c.dll')
+    if os.path.exists(geos_path):
+        CONDA_PREFIX = path
+        break
+
+if CONDA_PREFIX is None:
+    # Default to env path even if file doesn't exist (will error later with clear message)
+    CONDA_PREFIX = env_paths[0]
+
 GEOS_LIBRARY_PATH = os.path.join(CONDA_PREFIX, 'Library', 'bin', 'geos_c.dll')
-GDAL_LIBRARY_PATH = r"C:\ProgramData\anaconda3\envs\tourwise-env\Library\bin\gdal.dll"
+GDAL_LIBRARY_PATH = os.path.join(CONDA_PREFIX, 'Library', 'bin', 'gdal.dll')
 
 # API Keys
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+# GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')  # Removed - using free Nominatim for location search
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 
 # Paynow Settings
@@ -187,9 +213,9 @@ if DEBUG:
 
     # Validation for required environment variables
     REQUIRED_ENV_VARS = [
-        'GOOGLE_API_KEY',
+        # 'GOOGLE_API_KEY',  # Removed - using free Nominatim
         'SECRET_KEY',
-        'DB_PASSWORD',
+        'DATABASE_URL',
         'PAYNOW_INTEGRATION_KEY',
         'GROQ_API_KEY'
     ]

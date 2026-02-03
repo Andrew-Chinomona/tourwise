@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PropertyStep1Form, PropertyStep2Form, PropertyStep3Form, PropertyStep4Form, PropertyStep5Form, PropertyStep6Form, PropertyStep7Form, EditPropertyForm, PropertyStep8Form,PropertyStep9Form, ChoosePaymentForm
+from .forms import ChoosePaymentForm, PropertyListingForm, EditPropertyForm
 from .models import Property, PropertyImage
 from payments.models import Payment
 from django.contrib.auth.decorators import login_required
@@ -10,256 +10,148 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.gis.geos import Point
+from django.db import transaction
+
+
+# ==================== UNIFIED SINGLE-PAGE FORM ====================
+
+@login_required
+def add_property_listing(request):
+    """
+    Unified single-page property listing form.
+    Replaces the 10-step wizard with a streamlined single-page experience.
+    """
+    if request.method == 'POST':
+        form = PropertyListingForm(request.POST, request.FILES, user=request.user)
+        
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Create property instance
+                    property_obj = form.save(commit=False)
+                    property_obj.owner = request.user
+                    property_obj.is_paid = False  # Draft until payment
+                    
+                    # Generate title based on property type and location
+                    if property_obj.property_type and form.cleaned_data.get('suburb'):
+                        property_obj.title = f"{property_obj.property_type.title()} in {form.cleaned_data['suburb'].title()}"
+                        if form.cleaned_data.get('city'):
+                            property_obj.title += f" ({form.cleaned_data['city'].title()})"
+                    
+                    property_obj.save()
+                    
+                    # Handle interior images
+                    interior_images = request.FILES.getlist('interior_images')
+                    for image_file in interior_images:
+                        PropertyImage.objects.create(
+                            property=property_obj,
+                            image=image_file
+                        )
+                    
+                    # Save many-to-many relationships
+                    form.save_m2m()
+                    
+                    # Store property ID in session for payment
+                    request.session['editing_property_id'] = property_obj.id
+                    
+                    messages.success(request, 'Property listing created successfully! Please choose your listing type.')
+                    return redirect('choose_payment')
+                    
+            except Exception as e:
+                messages.error(request, f'Error creating listing: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PropertyListingForm(user=request.user)
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'listings/add_property_listing.html', context)
+
+
+@login_required
+def edit_draft_listing(request, property_id):
+    """
+    Edit an unpaid draft listing.
+    Allows users to modify their draft properties before payment.
+    """
+    property_obj = get_object_or_404(
+        Property, 
+        id=property_id, 
+        owner=request.user,
+        is_paid=False  # Only allow editing unpaid drafts
+    )
+    
+    if request.method == 'POST':
+        form = PropertyListingForm(
+            request.POST, 
+            request.FILES, 
+            instance=property_obj,
+            user=request.user
+        )
+        
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    property_obj = form.save(commit=False)
+                    
+                    # Update title if needed
+                    if property_obj.property_type and form.cleaned_data.get('suburb'):
+                        property_obj.title = f"{property_obj.property_type.title()} in {form.cleaned_data['suburb'].title()}"
+                        if form.cleaned_data.get('city'):
+                            property_obj.title += f" ({form.cleaned_data['city'].title()})"
+                    
+                    property_obj.save()
+                    
+                    # Handle new interior images (don't delete old ones)
+                    interior_images = request.FILES.getlist('interior_images')
+                    for image_file in interior_images:
+                        PropertyImage.objects.create(
+                            property=property_obj,
+                            image=image_file
+                        )
+                    
+                    # Save many-to-many relationships
+                    form.save_m2m()
+                    
+                    # Store property ID in session for payment
+                    request.session['editing_property_id'] = property_obj.id
+                    
+                    messages.success(request, 'Draft updated successfully! Please choose your listing type.')
+                    return redirect('choose_payment')
+                    
+            except Exception as e:
+                messages.error(request, f'Error updating listing: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        # Pre-populate form with existing data
+        initial_data = {
+            'city_suburb': f"{property_obj.suburb}, {property_obj.city}" if property_obj.suburb and property_obj.city else property_obj.suburb or property_obj.city,
+            'latitude': property_obj.location.y if property_obj.location else None,
+            'longitude': property_obj.location.x if property_obj.location else None,
+        }
+        form = PropertyListingForm(
+            instance=property_obj,
+            initial=initial_data,
+            user=request.user
+        )
+    
+    context = {
+        'form': form,
+        'editing': True,
+        'property': property_obj,
+    }
+    return render(request, 'listings/add_property_listing.html', context)
+
+
+# ==================== LEGACY REDIRECT VIEW ====================
 
 @login_required()
 def start_property_listing(request):
-    # Always start fresh
-    property_obj = Property.objects.create(
-        owner=request.user,
-        title='Untitled',
-        is_paid=False,
-        current_step=1
-    )
-
-    request.session['editing_property_id'] = property_obj.id
-    return redirect('add_property_step1')
-
-
-
-@login_required
-def add_property_step1(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep1Form(request.POST)
-        if form.is_valid():
-            property_obj.property_type = form.cleaned_data['property_type']
-            property_obj.current_step = 1
-            property_obj.save()
-            return redirect('add_property_step2')
-    else:
-        form = PropertyStep1Form(initial={'property_type': property_obj.property_type})
-
-    return render(request, 'listings/add_property_step1.html', {
-        'form': form,
-        'property': property_obj
-    })
-
-@login_required()
-def add_property_step2(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep2Form(request.POST)
-        if form.is_valid():
-            property_obj.description = form.cleaned_data['description']
-            property_obj.current_step = 2
-            property_obj.save()
-            return redirect('add_property_step3')
-    else:
-        form = PropertyStep2Form(initial={'description': property_obj.description})
-
-    return render(request, 'listings/add_property_step2.html', {
-        'form': form,
-        'property': property_obj
-    })
-
-@login_required()
-def add_property_step3(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep3Form(request.POST)
-        if form.is_valid():
-            # Parse city and suburb from combined input
-            city_suburb = form.cleaned_data['city_suburb']
-            city = ''
-            suburb = ''
-            if ',' in city_suburb:
-                parts = [p.strip() for p in city_suburb.split(',')]
-                if len(parts) >= 2:
-                    suburb = parts[0]
-                    city = parts[1]
-                else:
-                    city = parts[0]
-            else:
-                city = city_suburb.strip()
-            property_obj.city = city
-            property_obj.suburb = suburb
-            property_obj.street_address = form.cleaned_data['street_address']
-            lat = form.cleaned_data.get('latitude')
-            lng = form.cleaned_data.get('longitude')
-            if lat is not None and lng is not None:
-                property_obj.location = Point(lng, lat)
-            property_obj.google_maps_url = form.cleaned_data.get('google_maps_url')
-            property_obj.generate_title()
-            property_obj.current_step = 3
-            property_obj.save()
-            return redirect('add_property_step4')
-    else:
-        # Combine city and suburb for initial value
-        city_suburb = ''
-        if property_obj.suburb and property_obj.city:
-            city_suburb = f"{property_obj.suburb}, {property_obj.city}"
-        elif property_obj.city:
-            city_suburb = property_obj.city
-        form = PropertyStep3Form(initial={
-            'city_suburb': city_suburb,
-            'street_address': property_obj.street_address,
-            'latitude': property_obj.latitude,
-            'longitude': property_obj.longitude,
-            'google_maps_url': property_obj.google_maps_url,
-        })
-
-    return render(request, 'listings/add_property_step3.html', {
-        'form': form,
-        'property': property_obj,
-        'GOOGLE_API_KEY': settings.GOOGLE_API_KEY
-    })
-
-
-@login_required()
-def add_property_step4(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep4Form(request.POST, request.FILES)
-        if form.is_valid():
-            property_obj.main_image = form.cleaned_data['main_image']
-            property_obj.current_step = 4
-            property_obj.save()
-            return redirect('add_property_step5')
-    else:
-        form = PropertyStep4Form()
-
-    return render(request, 'listings/add_property_step4.html', {
-        'form': form,
-        'property': property_obj
-    })
-@login_required()
-def add_property_step5(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep5Form(request.POST, request.FILES)
-        if form.is_valid():
-            images = request.FILES.getlist('images')
-
-            if not images:
-                form.add_error('images', 'Please upload at least one image.')
-            else:
-                for image in images:
-                    PropertyImage.objects.create(property=property_obj, image=image)
-                    property_obj.current_step = 5
-                return redirect('add_property_step6')
-    else:
-        form = PropertyStep5Form()
-
-    return render(request, 'listings/add_property_step5.html', {
-        'form': form,
-        'property': property_obj
-    })
-
-from listings.models import Currency  # Make sure you import this
-
-@login_required
-def add_property_step6(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep6Form(request.POST)
-        if form.is_valid():
-            property_obj.price = form.cleaned_data['price']
-            property_obj.currency = form.cleaned_data['currency']
-            property_obj.current_step = 6
-            property_obj.save()
-            return redirect('add_property_step7')
-    else:
-        form = PropertyStep6Form(initial={
-            'price': property_obj.price,
-            'currency': property_obj.currency
-        })
-
-    return render(request, 'listings/add_property_step6.html', {
-        'form': form,
-        'property': property_obj
-    })
-
-
-
-@login_required
-def add_property_step7(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep7Form(request.POST)
-        if form.is_valid():
-            amenities = form.cleaned_data['amenities']
-            property_obj.amenities.set(amenities)
-            property_obj.current_step = 7
-            return redirect('add_property_step8')
-    else:
-        form = PropertyStep7Form(initial={
-            'amenities': property_obj.amenities.all()
-        })
-
-    return render(request, 'listings/add_property_step7.html', {'form': form})
-
-@login_required
-def add_property_step8(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep8Form(request.POST, request.FILES, user=request.user, property_obj=property_obj)
-        if form.is_valid():
-            property_obj.contact_name = form.cleaned_data['contact_name']
-            property_obj.contact_phone = form.cleaned_data['contact_phone']
-            property_obj.contact_email = form.cleaned_data['contact_email']
-            property_obj.current_step = 8
-            property_obj.save()
-            return redirect('add_property_step9')
-    else:
-        form = PropertyStep8Form(user=request.user, property_obj=property_obj)
-
-    return render(request, 'listings/add_property_step8.html', {
-        'form': form,
-        'property': property_obj
-    })
-
-
-@login_required
-def add_property_step9(request):
-    property_id = request.session.get('editing_property_id')
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = PropertyStep9Form(request.POST)
-        if form.is_valid():
-            property_obj.bedrooms = form.cleaned_data['bedrooms']
-            property_obj.bathrooms = form.cleaned_data['bathrooms']
-            property_obj.area = form.cleaned_data['area']
-            property_obj.current_step = 9
-            property_obj.save()
-            return redirect('choose_payment')
-    else:
-        form = PropertyStep9Form(initial={
-            'bedrooms': property_obj.bedrooms,
-            'bathrooms': property_obj.bathrooms,
-            'area': property_obj.area
-        })
-
-    return render(request, 'listings/add_property_step9.html', {
-        'form': form,
-        'property': property_obj
-    })
+    """Redirect old multi-step form URL to new single-page form"""
+    return redirect('add_property_listing')
 
 @login_required
 def choose_payment(request):
@@ -393,28 +285,6 @@ def location_suggestions(request):
 
     return JsonResponse(sorted(suggestions), safe=False)
 
-
-@login_required
-def resume_listing(request, property_id):
-    property_obj = get_object_or_404(Property, id=property_id, owner=request.user, is_paid=False)
-
-    request.session['editing_property_id'] = property_id
-    step = property_obj.current_step
-
-    step_redirects = {
-        1: 'add_property_step1',
-        2: 'add_property_step2',
-        3: 'add_property_step3',
-        4: 'add_property_step4',
-        5: 'add_property_step5',
-        6: 'add_property_step6',
-        7: 'add_property_step7',
-        8: 'add_property_step8',
-        9: 'add_property_step9',
-        10: 'choose_payment',
-    }
-
-    return redirect(step_redirects.get(step, 'add_property_step1'))
 
 @login_required
 def delete_draft_listing(request, property_id):

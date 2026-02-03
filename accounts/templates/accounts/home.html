@@ -923,7 +923,7 @@
           Discover
         </button>
         <!-- Start Chat button (all devices, hidden on mobile) -->
-        <a href="{% url 'chat' %}" class="btn-hero btn-hero-outline ms-0 ms-md-2 position-relative start-chat-btn d-none d-md-inline-block d-flex align-items-center justify-content-center mb-0">
+        <a href="#" class="btn-hero btn-hero-outline ms-0 ms-md-2 position-relative start-chat-btn d-none d-md-inline-block d-flex align-items-center justify-content-center mb-0">
           Start Chat
           <span class="new-sticker">NEW</span>
         </a>
@@ -954,7 +954,7 @@
       <h2 class="mobile-hero-2-title">Not sure where to start?</h2>
       <p class="mobile-hero-2-msg">Chat with us and we'll help you find the perfect place!</p>
       <div class="mobile-hero-2-sub">Instant help. Real listings. Zero stress.</div>
-      <a href="{% url 'chat' %}" class="btn-hero btn-hero-primary position-relative mobile-btn-sm mobile-hero-2-chat">
+      <a href="#" class="btn-hero btn-hero-primary position-relative mobile-btn-sm mobile-hero-2-chat">
         Start Chat
         <span class="new-sticker">NEW</span>
       </a>
@@ -1108,109 +1108,30 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places"></script>
+<script src="{% static 'js/nominatim_autocomplete.js' %}"></script>
 <script>
 (function() {
   if (window.matchMedia('(min-width: 768px)').matches) {
-    let autocompleteService, placesService, mapForPlaces;
     document.addEventListener('DOMContentLoaded', function() {
       const input = document.getElementById('desktop-location-input');
       const suggestionsBox = document.getElementById('desktop-location-suggestions');
-      let predictions = [];
-      let selectedIndex = -1;
 
-      // Create a dummy map for PlacesService
-      mapForPlaces = new google.maps.Map(document.createElement('div'));
-      autocompleteService = new google.maps.places.AutocompleteService();
-      placesService = new google.maps.places.PlacesService(mapForPlaces);
-
-      function highlightMatch(text, query) {
-        const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
-        return text.replace(re, '<span class="highlight">$1</span>');
-      }
-
-      input.addEventListener('input', function() {
-        const query = input.value.trim();
-        suggestionsBox.innerHTML = '';
-        suggestionsBox.style.display = 'none';
-        predictions = [];
-        selectedIndex = -1;
-        if (query.length < 2) return;
-        autocompleteService.getPlacePredictions({
-          input: query,
-          types: ['geocode'],
-          componentRestrictions: { country: 'ZW' }
-        }, function(preds, status) {
-          if (status === google.maps.places.PlacesServiceStatus.OK && preds && preds.length) {
-            predictions = preds;
-            suggestionsBox.style.display = 'block';
-            suggestionsBox.innerHTML = '';
-            predictions.forEach((pred, idx) => {
-              const item = document.createElement('div');
-              item.classList.add('suggestion-item');
-              item.innerHTML = highlightMatch(pred.description, query);
-              item.addEventListener('mousedown', function(e) {
-                e.preventDefault();
-                selectPrediction(idx);
-              });
-              suggestionsBox.appendChild(item);
-            });
-          } else {
-            suggestionsBox.style.display = 'none';
-          }
+      // Initialize Nominatim autocomplete
+      if (input && suggestionsBox) {
+        const autocomplete = new NominatimAutocomplete(input, suggestionsBox, {
+          countryCode: 'ZW',  // Zimbabwe
+          limit: 5,
+          debounceMs: 300
         });
-      });
 
-      input.addEventListener('keydown', function(e) {
-        if (!predictions.length) return;
-        if (e.key === 'ArrowDown') {
-          selectedIndex = (selectedIndex + 1) % predictions.length;
-          updateSelection();
-          e.preventDefault();
-        } else if (e.key === 'ArrowUp') {
-          selectedIndex = (selectedIndex - 1 + predictions.length) % predictions.length;
-          updateSelection();
-          e.preventDefault();
-        } else if (e.key === 'Enter') {
-          if (selectedIndex >= 0 && selectedIndex < predictions.length) {
-            selectPrediction(selectedIndex);
-            e.preventDefault();
-          }
-        }
-      });
-
-      function updateSelection() {
-        const items = suggestionsBox.querySelectorAll('.suggestion-item');
-        items.forEach((item, idx) => {
-          if (idx === selectedIndex) {
-            item.classList.add('active');
-            item.scrollIntoView({ block: 'nearest' });
-          } else {
-            item.classList.remove('active');
-          }
+        // Handle location selection
+        input.addEventListener('location-selected', function(e) {
+          const location = e.detail;
+          // Location data is available in e.detail
+          // Contains: lat, lon, address, displayName
+          console.log('Location selected:', location);
         });
       }
-
-      function selectPrediction(idx) {
-        const pred = predictions[idx];
-        if (!pred) return;
-        input.value = pred.description;
-        suggestionsBox.style.display = 'none';
-        // Get place details
-        placesService.getDetails({ placeId: pred.place_id, fields: ['address_components', 'geometry', 'name'] }, function(place, status) {
-          if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-            // You can extract suburb, city, coordinates here if needed
-            // let suburb = '', city = '', lat = '', lng = '';
-            // ...
-          }
-        });
-      }
-
-      document.addEventListener('click', function(e) {
-        if (!suggestionsBox.contains(e.target) && e.target !== input) {
-          suggestionsBox.style.display = 'none';
-        }
-      });
     });
   }
 })();
