@@ -24,7 +24,7 @@
       color: var(--charcoal-text);
       font-size: 16px;
       line-height: 1.6;
-      padding-top: 70px; /* Prevent content from being hidden under fixed navbar */
+      padding-top: 120px; /* Prevent content from being hidden under fixed navbar */
     }
 
     /* Responsive Typography */
@@ -36,20 +36,31 @@
 
     /* Navigation Responsive Design */
     .navbar-custom {
-      background: linear-gradient(var(--muted-cream), rgba(255, 255, 255, 0.8));
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
       min-height: 70px;
-      padding: 0.5rem 0;
+      padding: 0.5rem 1rem;
       transition: all 0.3s ease;
       position: fixed;
-      top: 0;
-      width: 100%;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 95%;
+      max-width: 1400px;
       z-index: 1000;
+      border-radius: 50px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .navbar-custom.hidden {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateX(-50%) translateY(-10px);
       pointer-events: none;
+    }
+
+    .navbar-custom:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
     }
 
     .navbar-custom .navbar-brand {
@@ -233,12 +244,15 @@
     /* Mobile First Responsive Design */
     @media (max-width: 576px) {
       body {
-        padding-top: 60px; /* Adjusted for smaller navbar height */
+        padding-top: 100px; /* Adjusted for smaller navbar height */
       }
 
       .navbar-custom {
         min-height: 60px;
-        padding: 0.25rem 0;
+        padding: 0.25rem 0.75rem;
+        top: 15px;
+        width: 90%;
+        border-radius: 40px;
       }
 
       .navbar-custom .navbar-brand img {
@@ -276,8 +290,19 @@
     }
 
     @media (min-width: 577px) and (max-width: 768px) {
+      .navbar-custom {
+        top: 18px;
+        width: 92%;
+        padding: 0.3rem 1rem;
+        border-radius: 45px;
+      }
+
       .navbar-custom .navbar-brand img {
         max-height: 50px;
+      }
+
+      body {
+        padding-top: 105px;
       }
 
       .card-custom .card-img-top {
@@ -466,13 +491,16 @@
     }
     @media (min-width: 769px) {
       .navbar-custom {
-        background: #fff !important;
-        min-height: 40px;
-        padding: 0.1rem 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+        min-height: 60px;
+        padding: 0.4rem 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        border-radius: 50px;
+        top: 20px;
       }
       body {
-        padding-top: 40px !important;
+        padding-top: 110px !important;
       }
     }
     .mobile-user-dropdown-menu {

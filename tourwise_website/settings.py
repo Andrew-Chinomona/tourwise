@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     # 'behave_django',  # Commented out - optional testing framework
     'widget_tweaks',
     # 'currencies',  # Commented out - not found/not needed
-    # 'chatbot',  # Removed - chatbot functionality deleted
+    'chatbot',  # AI-powered chatbot for property search assistance
     'django.contrib.gis',
     'rest_framework',
 ]

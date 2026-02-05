@@ -13,6 +13,11 @@
       --text-muted: #7a6a5a;
     }
 
+    /* Remove body padding for homepage to allow full-screen hero */
+    body {
+      padding-top: 0 !important;
+    }
+
     /* Hero Section - Mobile First */
     .hero-section {
       position: relative;
@@ -23,12 +28,15 @@
         rgba(0, 0, 0, 0.3)
       ), url('{% static "images/zim-property-hero.png" %}') no-repeat center center;
       background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       padding: 1rem;
       text-align: center;
+      margin-top: 0;
     }
 
     .hero-content {
@@ -923,7 +931,7 @@
           Discover
         </button>
         <!-- Start Chat button (all devices, hidden on mobile) -->
-        <a href="#" class="btn-hero btn-hero-outline ms-0 ms-md-2 position-relative start-chat-btn d-none d-md-inline-block d-flex align-items-center justify-content-center mb-0">
+        <a href="{% url 'chatbot:chatbot' %}" class="btn-hero btn-hero-outline ms-0 ms-md-2 position-relative start-chat-btn d-none d-md-inline-block d-flex align-items-center justify-content-center mb-0">
           Start Chat
           <span class="new-sticker">NEW</span>
         </a>
@@ -954,7 +962,7 @@
       <h2 class="mobile-hero-2-title">Not sure where to start?</h2>
       <p class="mobile-hero-2-msg">Chat with us and we'll help you find the perfect place!</p>
       <div class="mobile-hero-2-sub">Instant help. Real listings. Zero stress.</div>
-      <a href="#" class="btn-hero btn-hero-primary position-relative mobile-btn-sm mobile-hero-2-chat">
+      <a href="{% url 'chatbot:chatbot' %}" class="btn-hero btn-hero-primary position-relative mobile-btn-sm mobile-hero-2-chat">
         Start Chat
         <span class="new-sticker">NEW</span>
       </a>
