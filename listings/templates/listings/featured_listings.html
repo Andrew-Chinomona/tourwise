@@ -114,21 +114,82 @@
   .property-grid {
     display: grid;
     gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
+    margin-bottom: 2rem;
   }
 
   .property-card {
-    height: 100%;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
+    display: flex !important;
+    flex-direction: column !important;
     transition: all 0.3s ease;
   }
 
   .property-card:hover {
     transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .property-card .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
   }
 
   .property-card .card-img-top {
-    height: clamp(160px, 25vw, 200px);
-    object-fit: cover;
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 180px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    flex-shrink: 0;
+    border-radius: 12px 12px 0 0;
+    display: block;
+  }
+
+  /* Override base.html card-custom styles */
+  .property-card .card-custom .card-img-top {
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 180px !important;
+  }
+
+  .property-card .card-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .property-card .card-title,
+  .property-card .card-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.92rem;
+    margin-bottom: 0.3rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .property-card .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
   }
 
   .price-text {
@@ -436,10 +497,33 @@
     }
   }
 
-  /* Desktop: hide carousel */
+  /* Desktop: hide carousel and enforce card sizing */
   @media (min-width: 769px) {
     .carousel-container {
       display: none !important;
+    }
+    
+    /* Force card dimensions on desktop */
+    .property-card {
+      width: 300px !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      height: 300px !important;
+      min-height: 300px !important;
+      max-height: 300px !important;
+    }
+    
+    .property-card .card {
+      height: 300px !important;
+      min-height: 300px !important;
+      max-height: 300px !important;
+    }
+    
+    .property-card .card-img-top,
+    .property-card .card-custom .card-img-top {
+      height: 180px !important;
+      min-height: 180px !important;
+      max-height: 180px !important;
     }
   }
 </style>

@@ -263,27 +263,51 @@ def featured_listings_view(request):
     return render(request, 'listings/featured_listings.html', {'properties': featured_properties, 'title': 'Featured Listings'})
 
 def location_suggestions(request):
+    """
+    Enhanced location autocomplete with Zimbabwe priority
+    Returns structured JSON with location details after minimum 2 characters
+    """
     query = request.GET.get('q', '').strip()
 
-    if not query:
-        return JsonResponse([], safe=False)
+    # Require minimum 2 characters
+    if len(query) < 2:
+        return JsonResponse({'suggestions': []})
 
-    matches = Property.objects.filter(
-        (Q(city__icontains=query) | Q(suburb__icontains=query) | Q(street_address__icontains=query)),
+    # Query database for Zimbabwe properties first (high priority)
+    zim_matches = Property.objects.filter(
+        Q(city__icontains=query) | Q(suburb__icontains=query),
+        country__iexact='Zimbabwe',
         is_paid=True
-    ).values_list('city', 'suburb', 'street_address')
+    ).values('city', 'suburb', 'country').distinct()
 
-    # Use a set to avoid duplicate strings
-    suggestions = set()
-    for city, suburb, street in matches:
-        if city and query.lower() in city.lower():
-            suggestions.add(city.strip())
-        if suburb and query.lower() in suburb.lower():
-            suggestions.add(suburb.strip())
-        if street and query.lower() in street.lower():
-            suggestions.add(street.strip())
+    # Build suggestions with Zimbabwe priority
+    suggestions = []
+    seen = set()
 
-    return JsonResponse(sorted(suggestions), safe=False)
+    for match in zim_matches:
+        city = match.get('city', '').strip()
+        suburb = match.get('suburb', '').strip()
+        
+        # Create unique location strings
+        if suburb and city:
+            display = f"{suburb}, {city}, Zimbabwe"
+        elif city:
+            display = f"{city}, Zimbabwe"
+        else:
+            continue
+        
+        if display not in seen:
+            suggestions.append({
+                'display_name': display,
+                'city': city,
+                'suburb': suburb if suburb else '',
+                'country': 'Zimbabwe',
+                'priority': 1
+            })
+            seen.add(display)
+
+    # Limit to top 10 suggestions
+    return JsonResponse({'suggestions': suggestions[:10]})
 
 
 @login_required

@@ -10,3 +10,4 @@ llama-index-llms-groq
 llama-index-embeddings-huggingface
 sqlalchemy
 dj-database-url>=2.0.0
+groq>=0.4.0

@@ -156,6 +156,7 @@
       min-height: 24px;
       max-height: 120px;
       line-height: 1.5;
+      overflow: hidden;
     }
 
     .chat-input::placeholder {
@@ -193,6 +194,202 @@
 
     .send-btn i {
       font-size: 18px;
+    }
+
+    .send-btn.processing {
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .send-btn.processing i {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Property cards – horizontal carousel */
+    .properties-carousel-wrap {
+      margin-top: 16px;
+      position: relative;
+      width: 100%;
+    }
+
+    .properties-carousel {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: var(--brick-orange) var(--warm-tan);
+      padding: 4px 0 12px 0;
+      margin: 0 -4px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .properties-carousel::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .properties-carousel::-webkit-scrollbar-track {
+      background: var(--warm-tan);
+      border-radius: 4px;
+    }
+
+    .properties-carousel::-webkit-scrollbar-thumb {
+      background: var(--brick-orange);
+      border-radius: 4px;
+    }
+
+    .properties-carousel::-webkit-scrollbar-thumb:hover {
+      background: #a14825;
+    }
+
+    .property-card {
+      flex: 0 0 auto;
+      width: 280px;
+      max-width: 280px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      border: 1px solid rgba(193, 90, 46, 0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .property-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(193, 90, 46, 0.15);
+    }
+
+    .property-card-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: var(--warm-tan);
+    }
+
+    .property-card-body {
+      padding: 14px;
+    }
+
+    .property-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--charcoal-text);
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .property-card-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .property-card-detail {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .property-card-price {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--brick-orange);
+      margin-bottom: 10px;
+    }
+
+    .property-card-link {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: var(--brick-orange);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .property-card-link:hover {
+      background-color: #a14825;
+    }
+
+    /* Loading Indicator */
+    .loading-message {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .loading-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--warm-tan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      animation: pulse 1.5s infinite;
+    }
+
+    .loading-avatar i {
+      color: var(--brick-orange);
+      font-size: 16px;
+    }
+
+    .loading-bubble {
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid rgba(193, 90, 46, 0.15);
+    }
+
+    .loading-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .loading-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--brick-orange);
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+
+    .loading-dots span:nth-child(1) { animation-delay: 0s; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+      30% { transform: translateY(-10px); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .loading-text {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      font-style: italic;
     }
 
     /* Messages Container */
@@ -293,6 +490,15 @@
       .chat-main {
         padding: 30px 16px;
       }
+
+      .property-card {
+        width: 260px;
+        max-width: 260px;
+      }
+
+      .properties-carousel {
+        gap: 12px;
+      }
     }
   </style>
 </head>
@@ -329,20 +535,186 @@
 
     <!-- Chat Input -->
     <div class="chat-input-container">
-      <div class="chat-input-wrapper">
+      <form id="chatForm" class="chat-input-wrapper">
         <textarea 
           class="chat-input" 
           id="chatInput"
           placeholder="Find a location"
           rows="1"
+          required
         ></textarea>
-        <button class="send-btn" id="sendBtn" title="Send message" disabled>
+        <button type="submit" class="send-btn" id="sendBtn" title="Send message" disabled>
           <i class="bi bi-arrow-up"></i>
         </button>
-      </div>
+      </form>
     </div>
   </main>
 
-  <script src="{% static 'js/chatbot.js' %}"></script>
+  <script>
+    const chatInput = document.getElementById('chatInput');
+    const chatForm = document.getElementById('chatForm');
+    const sendBtn = document.getElementById('sendBtn');
+    const messagesContainer = document.getElementById('messagesContainer');
+    const welcomeSection = document.getElementById('welcomeSection');
+    const chatMain = document.getElementById('chatMain');
+    const placeholderImg = "{% static 'images/placeholder.jpg' %}";
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    chatInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      sendBtn.disabled = this.value.trim() === '';
+    });
+
+    chatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    chatForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      sendBtn.disabled = true;
+      sendBtn.classList.add('processing');
+      chatInput.disabled = true;
+
+      addUserMessage(message);
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+
+      welcomeSection.style.display = 'none';
+      messagesContainer.classList.add('active');
+
+      const loadingId = addLoadingMessage();
+
+      try {
+        const response = await fetch('{% url "chatbot:chatbot_query" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+          },
+          body: JSON.stringify({ message: message })
+        });
+
+        const data = await response.json();
+        removeLoadingMessage(loadingId);
+
+        if (response.ok) {
+          addAssistantMessage(data.message, data.properties || []);
+        } else {
+          addAssistantMessage('Sorry, I encountered an error. Please try again.', []);
+          console.error('Server error:', data);
+        }
+      } catch (error) {
+        removeLoadingMessage(loadingId);
+        addAssistantMessage('Sorry, I couldn\'t connect to the server. Please try again.', []);
+        console.error('Fetch error:', error);
+      }
+
+      chatInput.disabled = false;
+      sendBtn.classList.remove('processing');
+      sendBtn.disabled = chatInput.value.trim() === '';
+      chatInput.focus();
+      scrollToBottom();
+    });
+
+    function addUserMessage(message) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message message-user';
+      messageDiv.innerHTML = '<div class="message-content">' + escapeHtml(message) + '</div>';
+      messagesContainer.appendChild(messageDiv);
+    }
+
+    function addAssistantMessage(message, properties) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message message-assistant';
+      let html = '<div class="message-content">' + escapeHtml(message) + '</div>';
+      if (properties && properties.length > 0) {
+        html += '<div class="properties-carousel-wrap"><div class="properties-carousel">';
+        properties.forEach(function(prop) {
+          html += createPropertyCard(prop);
+        });
+        html += '</div></div>';
+      }
+      messageDiv.innerHTML = html;
+      messagesContainer.appendChild(messageDiv);
+    }
+
+    function addLoadingMessage() {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message message-assistant';
+      messageDiv.id = 'loading-message';
+      messageDiv.innerHTML = [
+        '<div class="loading-message">',
+        '  <div class="loading-avatar"><i class="bi bi-robot"></i></div>',
+        '  <div class="loading-bubble">',
+        '    <div class="loading-dots"><span></span><span></span><span></span></div>',
+        '    <div class="loading-text">Thinking...</div>',
+        '  </div>',
+        '</div>'
+      ].join('');
+      messagesContainer.appendChild(messageDiv);
+      scrollToBottom();
+      return 'loading-message';
+    }
+
+    function removeLoadingMessage(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function createPropertyCard(property) {
+      const imageUrl = property.main_image || placeholderImg;
+      const detailUrl = '/listings/' + (property.id || '') + '/';
+      return [
+        '<div class="property-card">',
+        '  <img src="' + imageUrl + '" alt="' + escapeHtml(property.title || '') + '" class="property-card-image" onerror="this.src=\'' + placeholderImg + '\'">',
+        '  <div class="property-card-body">',
+        '    <h3 class="property-card-title">' + escapeHtml(property.title || '') + '</h3>',
+        '    <div class="property-card-details">',
+        '      <div class="property-card-detail"><i class="bi bi-door-open"></i> ' + (property.bedrooms || '') + ' bed</div>',
+        '      <div class="property-card-detail"><i class="bi bi-droplet"></i> ' + (property.bathrooms || '') + ' bath</div>',
+        '    </div>',
+        '    <div class="property-card-price">$' + (property.price || '') + '</div>',
+        '    <a href="' + detailUrl + '" class="property-card-link">View Details</a>',
+        '  </div>',
+        '</div>'
+      ].join('');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function scrollToBottom() {
+      setTimeout(function() {
+        chatMain.scrollTop = chatMain.scrollHeight;
+      }, 100);
+    }
+  </script>
 </body>
 </html>

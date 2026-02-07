@@ -448,7 +448,7 @@
       }
     }
 
-    /* Show More Button */
+    /* Show More Button - Desktop */
     .show-more-btn {
       background: var(--primary-color);
       color: white;
@@ -468,6 +468,11 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(193, 90, 46, 0.3);
       text-decoration: none;
+    }
+
+    /* Show More Button - Mobile specific styling */
+    .show-more-mobile {
+      display: none !important;
     }
 
     /* Empty State */
@@ -756,13 +761,17 @@
         text-overflow: ellipsis;
       }
       .show-more-btn.show-more-mobile {
+        display: inline-block !important;
         width: 120px;
         font-size: 1rem;
         padding: 0.5rem 0.5rem;
         border-radius: 20px;
         margin-top: 0.5rem !important;
         margin-bottom: 0.7rem !important;
-        display: inline-block;
+      }
+      /* Hide desktop show more button on mobile */
+      .show-more-btn:not(.show-more-mobile) {
+        display: none !important;
       }
       .mb-mobile-section-spacer {
         margin-bottom: 1.2rem;
@@ -910,6 +919,13 @@
         color: var(--primary-color);
         margin-bottom: 0;
       }
+      /* Desktop: show desktop button, hide mobile button */
+      .show-more-btn:not(.show-more-mobile) {
+        display: inline-block !important;
+      }
+      .show-more-mobile {
+        display: none !important;
+      }
     }
   </style>
 {% endblock %}
@@ -972,68 +988,6 @@
   <!-- Listings Section -->
   <div class="listings-section" id="recent-listings-section">
     <div class="container">
-      <!-- Recent Listings -->
-      <h3 class="section-title">Recent Listings</h3>
-
-      <!-- Desktop Grid -->
-      <div class="property-grid">
-        {% for property in recent_listings %}
-          <div class="property-card">
-            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
-              <div class="card">
-                {% if property.main_image %}
-                  <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
-                {% endif %}
-                <div class="card-body">
-                  <h5 class="card-title text-truncate">{{ property.title }}</h5>
-                  <p class="card-text">
-                    {{ property.street_address|title }}
-                  </p>
-                  <p class="price-text">
-                    {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
-                  </p>
-                </div>
-              </div>
-            </a>
-          </div>
-        {% empty %}
-          <div class="empty-state">
-            <h4>No Recent Listings</h4>
-            <p>Check back soon for new properties!</p>
-          </div>
-        {% endfor %}
-      </div>
-      <!-- Desktop Show More Button for Recent Listings -->
-      <div class="text-center d-none d-md-block" style="margin-top: 1.5rem;">
-        <a href="{% url 'recent_listings' %}" class="show-more-btn">Show More</a>
-      </div>
-
-      <!-- Mobile CSS Scroll Snap Carousel for Recent Listings -->
-      <div class="card-row d-md-none">
-        {% for property in recent_listings %}
-          <a href="{% url 'property_detail' property.id %}" class="card property-card property-link">
-            {% if property.main_image %}
-              <div class="card-img-mobile-container">
-                <img src="{{ property.main_image.url }}" alt="{{ property.title|title }}" class="card-img-top-mobile">
-              </div>
-            {% endif %}
-            <div class="card-content-mobile">
-              <h5 class="card-title card-title-mobile text-truncate">{{ property.property_type|title }} in {{ property.suburb|title }}</h5>
-              <p class="card-text card-text-mobile">
-                {{ property.street_address|cut:", Zimbabwe"|cut:"Zimbabwe,"|cut:"Zimbabwe"|title }}
-              </p>
-              <p class="price-text price-text-mobile">
-                {% if property.currency %}{{ property.currency.symbol }} {{ property.currency.code }}{% endif %} {{ property.price }}
-              </p>
-            </div>
-          </a>
-        {% endfor %}
-      </div>
-      <div class="text-center d-md-none">
-        <a href="{% url 'recent_listings' %}" class="show-more-btn show-more-mobile">Show More</a>
-      </div>
-      <div class="mb-mobile-section-spacer d-md-none"></div>
-
       <!-- Featured Listings -->
       <h3 class="section-title">Featured Listings</h3>
 
@@ -1095,6 +1049,68 @@
         <a href="{% url 'featured_listings' %}" class="show-more-btn show-more-mobile">Show More</a>
       </div>
       <div class="mb-mobile-section-spacer d-md-none"></div>
+
+      <!-- Recent Listings -->
+      <h3 class="section-title">Recent Listings</h3>
+
+      <!-- Desktop Grid -->
+      <div class="property-grid">
+        {% for property in recent_listings %}
+          <div class="property-card">
+            <a href="{% url 'property_detail' property.id %}" class="text-decoration-none">
+              <div class="card">
+                {% if property.main_image %}
+                  <img src="{{ property.main_image.url }}" alt="{{ property.title }}" class="card-img-top">
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title text-truncate">{{ property.title }}</h5>
+                  <p class="card-text">
+                    {{ property.street_address|title }}
+                  </p>
+                  <p class="price-text">
+                    {% if property.currency %}{{ property.currency.symbol }}{% endif %} {{ property.price }}
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="empty-state">
+            <h4>No Recent Listings</h4>
+            <p>Check back soon for new properties!</p>
+          </div>
+        {% endfor %}
+      </div>
+      <!-- Desktop Show More Button for Recent Listings -->
+      <div class="text-center d-none d-md-block" style="margin-top: 1.5rem;">
+        <a href="{% url 'recent_listings' %}" class="show-more-btn">Show More</a>
+      </div>
+
+      <!-- Mobile CSS Scroll Snap Carousel for Recent Listings -->
+      <div class="card-row d-md-none">
+        {% for property in recent_listings %}
+          <a href="{% url 'property_detail' property.id %}" class="card property-card property-link">
+            {% if property.main_image %}
+              <div class="card-img-mobile-container">
+                <img src="{{ property.main_image.url }}" alt="{{ property.title|title }}" class="card-img-top-mobile">
+              </div>
+            {% endif %}
+            <div class="card-content-mobile">
+              <h5 class="card-title card-title-mobile text-truncate">{{ property.property_type|title }} in {{ property.suburb|title }}</h5>
+              <p class="card-text card-text-mobile">
+                {{ property.street_address|cut:", Zimbabwe"|cut:"Zimbabwe,"|cut:"Zimbabwe"|title }}
+              </p>
+              <p class="price-text price-text-mobile">
+                {% if property.currency %}{{ property.currency.symbol }} {{ property.currency.code }}{% endif %} {{ property.price }}
+              </p>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+      <div class="text-center d-md-none">
+        <a href="{% url 'recent_listings' %}" class="show-more-btn show-more-mobile">Show More</a>
+      </div>
+      <div class="mb-mobile-section-spacer d-md-none"></div>
     </div>
   </div>
 
@@ -1116,32 +1132,90 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/nominatim_autocomplete.js' %}"></script>
 <script>
 (function() {
-  if (window.matchMedia('(min-width: 768px)').matches) {
-    document.addEventListener('DOMContentLoaded', function() {
-      const input = document.getElementById('desktop-location-input');
-      const suggestionsBox = document.getElementById('desktop-location-suggestions');
-
-      // Initialize Nominatim autocomplete
-      if (input && suggestionsBox) {
-        const autocomplete = new NominatimAutocomplete(input, suggestionsBox, {
-          countryCode: 'ZW',  // Zimbabwe
-          limit: 5,
-          debounceMs: 300
+  // Autocomplete functionality for location input
+  document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('desktop-location-input');
+    const suggestionsBox = document.getElementById('desktop-location-suggestions');
+    
+    if (!input || !suggestionsBox) return;
+    
+    let debounceTimer;
+    
+    // Debounced fetch function
+    function fetchSuggestions(query) {
+      clearTimeout(debounceTimer);
+      
+      if (query.length < 2) {
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.classList.remove('show');
+        return;
+      }
+      
+      debounceTimer = setTimeout(async () => {
+        try {
+          const response = await fetch(`/listings/api/locations/?q=${encodeURIComponent(query)}`);
+          const data = await response.json();
+          
+          if (data.suggestions && data.suggestions.length > 0) {
+            displaySuggestions(data.suggestions, query);
+          } else {
+            suggestionsBox.innerHTML = '<div class="suggestion-item" style="pointer-events: none;">No locations found</div>';
+            suggestionsBox.classList.add('show');
+          }
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+          suggestionsBox.innerHTML = '';
+          suggestionsBox.classList.remove('show');
+        }
+      }, 300);
+    }
+    
+    // Display suggestions
+    function displaySuggestions(suggestions, query) {
+      suggestionsBox.innerHTML = suggestions.map(suggestion => {
+        const displayName = suggestion.display_name;
+        // Highlight matching text
+        const highlighted = highlightMatch(displayName, query);
+        return `<div class="suggestion-item" data-value="${displayName}">${highlighted}</div>`;
+      }).join('');
+      
+      suggestionsBox.classList.add('show');
+      
+      // Add click handlers
+      suggestionsBox.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const value = this.dataset.value;
+          input.value = value;
+          suggestionsBox.innerHTML = '';
+          suggestionsBox.classList.remove('show');
         });
-
-        // Handle location selection
-        input.addEventListener('location-selected', function(e) {
-          const location = e.detail;
-          // Location data is available in e.detail
-          // Contains: lat, lon, address, displayName
-          console.log('Location selected:', location);
-        });
+      });
+    }
+    
+    // Highlight matching text
+    function highlightMatch(text, query) {
+      const regex = new RegExp(`(${query})`, 'gi');
+      return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+    
+    // Event listeners
+    input.addEventListener('input', (e) => fetchSuggestions(e.target.value));
+    input.addEventListener('focus', (e) => {
+      if (e.target.value.length >= 2) {
+        fetchSuggestions(e.target.value);
       }
     });
-  }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !suggestionsBox.contains(e.target)) {
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.classList.remove('show');
+      }
+    });
+  });
 })();
 </script>
 <style>
